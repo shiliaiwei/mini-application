@@ -123,7 +123,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           icon={<Cloud className="w-5 h-5" />}
           iconBgClass="squircle-blue"
           title="Serverless Engine"
-          subtitle="Next.js 16 + Neon Autoscaling DB"
+          subtitle="High-Performance Cloud Ledger"
           badge={
             <span className="text-[10px] font-bold bg-blue-500 text-white px-2 py-0.5 rounded-md shadow-sm">
               NEW

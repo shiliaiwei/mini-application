@@ -61,7 +61,7 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
           </h1>
           <p className="text-xs text-slate-500">
             {synced
-              ? "Live connection with Telegram & Neon Database established."
+              ? "Live connection established. Vault ledger synchronized."
               : "Synchronizing Web3 keys and ledger balances..."}
           </p>
         </div>

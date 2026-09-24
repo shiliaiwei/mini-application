@@ -177,8 +177,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <TelegramListItem
           icon={<Database className="w-5 h-5" />}
           iconBgClass="squircle-sky"
-          title="Neon Serverless PostgreSQL"
-          subtitle="WEB_kesararamwithdigital"
+          title="Encrypted Cloud Database"
+          subtitle="SHILIAIWEI Secure Vault"
           badge={
             <span
               className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${

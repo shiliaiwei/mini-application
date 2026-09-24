@@ -338,7 +338,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-1">
                 <div className="font-semibold text-slate-800">Real-Time Data Guarantee:</div>
                 <p className="text-[11px] text-slate-500">
-                  This mini-app reflects your genuine live Telegram session parameters, synchronized in real time with the Neon PostgreSQL database.
+                  This mini-app reflects your genuine live Telegram session parameters, synchronized in real time with the secure cloud ledger.
                 </p>
               </div>
             </div>

@@ -14,7 +14,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass
       <div className="flex items-center justify-between text-xs text-slate-500 border-b border-slate-200 pb-3">
         <span className="text-[#0098ea] font-bold uppercase tracking-wider">@srievibot</span>
         <span className="text-[10px] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-600 font-semibold">
-          TELEGRAM REQUIRED
+          TELEGRAM VERIFICATION
         </span>
       </div>
 
@@ -29,20 +29,19 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass
             Telegram Vault Sync Required
           </h1>
           <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
-            Only accounts synchronized with Telegram can mint simulated dollars and record assets on the global wealth leaderboard.
+            Connect via official @srievibot on Telegram to mint simulated assets and record your standing on the global wealth leaderboard.
           </p>
         </div>
 
         <div className="p-3.5 rounded-xl liquid-glass border border-slate-200/90 text-left text-xs text-slate-700 space-y-1.5 shadow-sm">
           <div className="flex items-center gap-2 text-[#0098ea] font-bold">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>HOW TO ACCESS VAULT:</span>
+            <span>ACCESS INSTRUCTIONS:</span>
           </div>
           <p className="text-[11px] text-slate-500 leading-normal">
-            1. Open Telegram on your device.<br />
-            2. Search for <strong className="text-slate-900">@srievibot</strong>.<br />
-            3. Tap the bottom-left <strong className="text-slate-900">Open App</strong> button.<br />
-            4. Your Telegram wallet will sync automatically.
+            1. Open Telegram on your mobile or desktop device.<br />
+            2. Launch <strong className="text-slate-900">@srievibot</strong> and tap the <strong className="text-slate-900">Open App</strong> button.<br />
+            3. Your wallet identity and ledger balances sync automatically.
           </p>
         </div>
 
@@ -70,9 +69,9 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass
         </div>
       </div>
 
-      {/* Footer Disclaimer */}
+      {/* Footer System Brand */}
       <div className="text-center text-[10px] text-slate-400 font-semibold uppercase tracking-widest border-t border-slate-200 pt-3">
-        POWERED BY TELEGRAM WEB APPS & NEON POSTGRESQL
+        SHILIAIWEI PROTOCOL • END-TO-END ENCRYPTED
       </div>
     </div>
   );
