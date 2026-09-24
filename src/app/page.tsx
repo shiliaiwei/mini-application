@@ -121,11 +121,6 @@ export default function MiniAppPage() {
     );
   }
 
-  // Telegram Mobile Gate: Enforces Telegram Mobile
-  if (!isTelegramMobile && !bypassGate) {
-    return <TelegramGateScreen onBypass={() => setBypassGate(true)} />;
-  }
-
   // Welcome Screen with Auto-Sync & Auto-Open
   if (showWelcome) {
     return (
