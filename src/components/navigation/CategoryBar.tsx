@@ -56,7 +56,7 @@ export const CategoryBar: React.FC<CategoryBarProps> = ({
 
   return (
     <nav aria-label="Feature categories" className="relative flex flex-col font-body">
-      <div className="bg-white/95 backdrop-blur-xl px-2.5 py-1.5 select-none flex items-center gap-1 border-b border-slate-100">
+      <div className="bg-white/95 backdrop-blur-xl px-2.5 py-1.5 select-none flex items-center gap-1 border-b border-slate-200/80">
         <div
           ref={scrollRef}
           role="tablist"
@@ -95,9 +95,6 @@ export const CategoryBar: React.FC<CategoryBarProps> = ({
           <ChevronRight size={18} />
         </button>
       </div>
-
-      {/* Flower Banknote Security Guilloche Divider Strip (1033454350116.webp) */}
-      <div className="w-full h-2.5 border-strip-flower opacity-75 border-b border-slate-200/60" />
     </nav>
   );
 };
