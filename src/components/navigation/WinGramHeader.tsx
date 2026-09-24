@@ -3,8 +3,10 @@
 import React from "react";
 import Image from "next/image";
 import { TelegramUser } from "@/types/telegram";
-import { Search, Gem, User } from "lucide-react";
+import { Search, User } from "lucide-react";
 import { getUserLevelInfo } from "@/lib/games/levels";
+import { VLogo } from "@/components/brand/VLogo";
+import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 
 interface WinGramHeaderProps {
   score: number;
@@ -30,13 +32,13 @@ export const WinGramHeader: React.FC<WinGramHeaderProps> = ({
     <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-3 py-2.5 flex items-center justify-between gap-2 select-none font-body shadow-xs">
       {/* Left: Brand Logo & Mode Switcher Pills */}
       <div className="flex items-center gap-2.5 min-w-0">
-        {/* SHILIAIWEI Brand Logo */}
+        {/* SHILIAIWEI Brand Logo with V Letter Emblem */}
         <div
           onClick={() => onSelectMode("lobby")}
           className="flex items-center gap-1.5 cursor-pointer flex-shrink-0"
         >
           <div className="w-6 h-6 rounded-md bg-[#0098ea] flex items-center justify-center text-white shadow-xs">
-            <Gem className="w-4 h-4 fill-white" />
+            <VLogo size={16} variant="white" />
           </div>
           <span className="text-sm font-black tracking-wider text-slate-900 font-sans uppercase">
             SHILIAIWEI
@@ -142,6 +144,9 @@ export const WinGramHeader: React.FC<WinGramHeaderProps> = ({
           >
             L{levelInfo.level}
           </span>
+          {user && (
+            <TelegramVerifiedBadge size={13} className="absolute -top-1 -right-1 z-30 drop-shadow-xs" />
+          )}
         </button>
       </div>
     </header>

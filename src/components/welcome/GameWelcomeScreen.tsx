@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
-import { Wallet } from "lucide-react";
+import { VLogo } from "@/components/brand/VLogo";
 
 interface GameWelcomeScreenProps {
   user: TelegramUser | null;
@@ -58,10 +58,10 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
 
       {/* Center Welcome */}
       <div className="my-auto text-center space-y-4 relative z-10">
-        <div className="w-20 h-20 rounded-full bg-white border-2 border-[#0098ea] mx-auto flex items-center justify-center text-[#0098ea] shadow-lg relative overflow-hidden">
+        <div className="w-20 h-20 rounded-full bg-white border-2 border-[#0098ea] mx-auto flex items-center justify-center shadow-lg relative overflow-hidden">
           {/* Radial Rosette Watermark (7168912.webp) */}
           <div className="absolute inset-0 bg-security-sunburst opacity-30 pointer-events-none" />
-          <Wallet className="w-10 h-10 relative z-10" />
+          <VLogo size={44} variant="solid-blue" className="relative z-10" />
         </div>
 
         <div className="space-y-1">
@@ -83,11 +83,6 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
             }`}
           />
         </div>
-      </div>
-
-      {/* Footer System Brand */}
-      <div className="text-center text-[10px] text-slate-400 font-semibold uppercase tracking-widest border-t border-slate-200 pt-3">
-        SHILIAIWEI PROTOCOL • ALL SESSIONS ENCRYPTED
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Smartphone, Send, AlertCircle } from "lucide-react";
+import { Send, AlertCircle } from "lucide-react";
+import { VLogo } from "@/components/brand/VLogo";
 
 interface TelegramGateScreenProps {
   onBypass?: () => void;
@@ -27,10 +28,10 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass
 
       {/* Center Notice */}
       <div className="my-auto text-center space-y-4 relative z-10">
-        <div className="w-20 h-20 rounded-full bg-white border-2 border-[#0098ea] mx-auto flex items-center justify-center text-[#0098ea] shadow-lg relative overflow-hidden">
+        <div className="w-20 h-20 rounded-full bg-white border-2 border-[#0098ea] mx-auto flex items-center justify-center shadow-lg relative overflow-hidden">
           {/* Radial Rosette Watermark (7168912.webp) */}
           <div className="absolute inset-0 bg-security-sunburst opacity-30 pointer-events-none" />
-          <Smartphone className="w-10 h-10 relative z-10" />
+          <VLogo size={44} variant="solid-blue" className="relative z-10" />
         </div>
 
         <div className="space-y-1.5">
@@ -38,7 +39,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass
             Telegram Vault Sync Required
           </h1>
           <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
-            Connect via official @srievibot on Telegram to mint simulated assets and record your standing on the global wealth leaderboard.
+            Connect via official @srievibot on Telegram to claim points and record your standing on the global wealth leaderboard.
           </p>
         </div>
 
@@ -76,11 +77,6 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass
             </button>
           )}
         </div>
-      </div>
-
-      {/* Footer System Brand */}
-      <div className="text-center text-[10px] text-slate-400 font-semibold uppercase tracking-widest border-t border-slate-200 pt-3">
-        SHILIAIWEI PROTOCOL • END-TO-END ENCRYPTED
       </div>
     </div>
   );

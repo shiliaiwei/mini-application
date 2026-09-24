@@ -11,6 +11,7 @@ import {
   Sparkles,
   ExternalLink,
   Award,
+  Coins,
 } from "lucide-react";
 
 interface EarnTasksViewProps {
@@ -28,9 +29,7 @@ interface Quest {
   id: string;
   title: string;
   desc: string;
-  rewardUSD: number;
-  rewardSHI: number;
-  rewardKHR: number;
+  rewardPoints: number;
   url?: string;
   claimed: boolean;
 }
@@ -64,44 +63,36 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
     return false;
   });
 
-  // Quests State
+  // Quests State with Real Points Rewards
   const [quests, setQuests] = useState<Quest[]>(() => {
     const defaultQuests: Quest[] = [
       {
         id: "tg_channel",
         title: "Join SHILIAIWEI Official Channel",
-        desc: "Stay updated with SHILIAIWEI announcements and vault releases",
-        rewardUSD: 50,
-        rewardSHI: 500,
-        rewardKHR: 205000,
+        desc: "Stay updated with official game announcements and community updates",
+        rewardPoints: 250,
         url: "https://t.me/srievibot",
         claimed: false,
       },
       {
         id: "daily_share",
-        title: "Share SHILIAIWEI Wallet Invite",
-        desc: "Invite friends to mint simulated USD, KHR, and $SHI",
-        rewardUSD: 100,
-        rewardSHI: 1000,
-        rewardKHR: 410000,
+        title: "Share Mini App with Friends",
+        desc: "Invite colleagues and friends to compete on the wealth leaderboard",
+        rewardPoints: 500,
         claimed: false,
       },
       {
         id: "safety_quiz",
-        title: "Road Knowledge Verification",
-        desc: "Complete the Kesararam Road Safety Knowledge verification",
-        rewardUSD: 75,
-        rewardSHI: 750,
-        rewardKHR: 307500,
+        title: "Road Knowledge Quiz Challenge",
+        desc: "Complete the Kesararam Road Safety verification questions",
+        rewardPoints: 350,
         claimed: false,
       },
       {
         id: "daily_claim",
-        title: "Daily Web3 Check-in",
-        desc: "Sign daily simulated vault block transaction",
-        rewardUSD: 25,
-        rewardSHI: 250,
-        rewardKHR: 102500,
+        title: "Daily Vault Check-in",
+        desc: "Check into the central ledger to claim daily active points",
+        rewardPoints: 100,
         claimed: false,
       },
     ];
@@ -121,12 +112,12 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
     return defaultQuests;
   });
 
-  const handleClaimQuest = (questId: string, rewardUSD: number) => {
+  const handleClaimQuest = (questId: string, rewardPoints: number) => {
     try {
       tgApp?.HapticFeedback?.notificationOccurred("success");
     } catch {}
 
-    onAddScore(rewardUSD);
+    onAddScore(rewardPoints);
 
     setQuests((prev) => {
       const updated = prev.map((q) => (q.id === questId ? { ...q, claimed: true } : q));
@@ -136,12 +127,26 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
       }
       return updated;
     });
+
+    // Record audit log into Neon DB
+    if (user?.id) {
+      fetch("/api/audit/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          telegram_id: user.id,
+          action: "MISSION_CLAIMED",
+          details: `Completed mission ${questId} (+${rewardPoints} PTS)`,
+          platform: tgApp?.platform || "TELEGRAM_WEB",
+        }),
+      }).catch(() => {});
+    }
   };
 
   const handleClaimStreak = () => {
     if (streakClaimedToday) return;
 
-    const streakRewards = [20, 40, 80, 150, 300, 500, 1000];
+    const streakRewards = [50, 100, 200, 350, 600, 1000, 2500];
     const reward = streakRewards[(currentStreak - 1) % streakRewards.length];
 
     try {
@@ -158,6 +163,20 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
       localStorage.setItem("shi_streak_day", String(nextDay));
       setCurrentStreak(nextDay);
     }
+
+    // Record audit log into Neon DB
+    if (user?.id) {
+      fetch("/api/audit/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          telegram_id: user.id,
+          action: "DAILY_STREAK_CLAIMED",
+          details: `Claimed Day ${currentStreak} streak reward (+${reward} PTS)`,
+          platform: tgApp?.platform || "TELEGRAM_WEB",
+        }),
+      }).catch(() => {});
+    }
   };
 
   const tapUpgradeCost = tapPower * 150;
@@ -173,31 +192,35 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
-              AVAILABLE VAULT BALANCE
+              TOTAL EARNED POINTS (PTS)
             </span>
-          <div className="text-2xl font-black text-slate-900 font-display mt-0.5">
-            <span className="text-[#16a34a] mr-1">$</span>
-            {score.toLocaleString()}
-            <span className="text-slate-400 text-sm ml-1">.00 USD</span>
+            <div className="text-2xl font-black text-slate-900 font-display mt-0.5">
+              <span>{score.toLocaleString()}</span>
+              <span className="text-slate-400 text-sm ml-1">PTS</span>
+            </div>
+            <div className="text-[11px] text-slate-500 font-semibold mt-0.5">
+              <span>≈ ${(score / 100).toFixed(2)} USD</span>
+              <span className="mx-1">•</span>
+              <span>{Math.floor(score * 41).toLocaleString()} KHR</span>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+              EARNING RATE
+            </span>
+            <span className="text-xs font-bold text-[#0098ea] block mt-1">
+              +{tapPower} PTS / Tap • +{passiveRate} PTS/s
+            </span>
           </div>
         </div>
-        <div className="text-right">
-          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
-            MINT CAPABILITY
-          </span>
-          <span className="text-xs font-bold text-[#0098ea] block mt-1">
-            +${tapPower} / Tap • +${passiveRate}/s
-          </span>
-        </div>
       </div>
-    </div>
 
       {/* Sub Tabs Selector */}
       <div className="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold border border-slate-200 shadow-sm">
         <button
           type="button"
           onClick={() => setActiveSubTab("quests")}
-          className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+          className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeSubTab === "quests"
               ? "bg-[#0098ea] text-white shadow-sm shadow-[#0098ea]/20"
               : "text-slate-600 hover:text-slate-900"
@@ -210,7 +233,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveSubTab("boosts")}
-          className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+          className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeSubTab === "boosts"
               ? "bg-[#0098ea] text-white shadow-sm shadow-[#0098ea]/20"
               : "text-slate-600 hover:text-slate-900"
@@ -223,7 +246,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveSubTab("streak")}
-          className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+          className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeSubTab === "streak"
               ? "bg-[#0098ea] text-white shadow-sm shadow-[#0098ea]/20"
               : "text-slate-600 hover:text-slate-900"
@@ -262,9 +285,10 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
                   {quest.desc}
                 </p>
                 <div className="flex items-center gap-2 mt-1.5 text-[10px] font-bold">
-                  <span className="text-[#16a34a]">+${quest.rewardUSD}.00 USD</span>
-                  <span className="text-slate-300">•</span>
-                  <span className="text-[#0098ea]">+{quest.rewardSHI} $SHI</span>
+                  <span className="text-[#16a34a]">+{quest.rewardPoints} PTS</span>
+                  <span className="text-slate-400">
+                    (≈ ${(quest.rewardPoints / 100).toFixed(2)} USD • {Math.floor(quest.rewardPoints * 41).toLocaleString()} KHR)
+                  </span>
                 </div>
               </div>
 
@@ -277,8 +301,8 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
                 ) : (
                   <button
                     type="button"
-                    onClick={() => handleClaimQuest(quest.id, quest.rewardUSD)}
-                    className="px-3.5 py-1.5 rounded-lg bg-[#0098ea] hover:bg-[#0088cc] text-white text-xs font-bold active:scale-95 transition-all shadow-sm"
+                    onClick={() => handleClaimQuest(quest.id, quest.rewardPoints)}
+                    className="px-3.5 py-1.5 rounded-lg bg-[#0098ea] hover:bg-[#0088cc] text-white text-xs font-bold active:scale-95 transition-all shadow-sm cursor-pointer"
                   >
                     Claim
                   </button>
@@ -302,12 +326,12 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
                     Mint Power (Lvl {tapPower})
                   </span>
                   <span className="text-[11px] text-slate-500 block">
-                    Earns +${tapPower} per tap
+                    Earns +{tapPower} PTS per tap
                   </span>
                 </div>
               </div>
               <span className="text-xs font-bold text-[#16a34a]">
-                +${tapPower + 1} Next Lvl
+                +{tapPower + 1} PTS / Tap Next Lvl
               </span>
             </div>
 
@@ -317,32 +341,30 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
               disabled={score < tapUpgradeCost}
               className={`w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-sm ${
                 score >= tapUpgradeCost
-                  ? "bg-[#0098ea] hover:bg-[#0088cc] text-white active:scale-98"
+                  ? "bg-[#0098ea] hover:bg-[#0088cc] text-white active:scale-98 cursor-pointer"
                   : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
               }`}
             >
-              <span>Upgrade Tap Power</span>
-              <span>•</span>
-              <span>${tapUpgradeCost}.00 USD</span>
+              <span>Upgrade for {tapUpgradeCost.toLocaleString()} PTS</span>
             </button>
           </div>
 
-          {/* Passive Yield Auto-Miner - Unboxed Icon */}
+          {/* Passive Mining Yield Upgrade - Unboxed Icon */}
           <div className="liquid-glass p-4 space-y-3 border border-slate-200/90 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <BatteryCharging className="w-6 h-6 text-[#16a34a] flex-shrink-0" />
                 <div>
                   <span className="text-xs font-bold text-slate-900 block font-display">
-                    Auto-Miner Vault (Lvl {passiveRate})
+                    Passive Point Generator (Lvl {passiveRate})
                   </span>
                   <span className="text-[11px] text-slate-500 block">
-                    Yields +${passiveRate}/sec automatically
+                    Generates +{passiveRate} PTS every second
                   </span>
                 </div>
               </div>
               <span className="text-xs font-bold text-[#16a34a]">
-                +${passiveRate + 1}/s Next Lvl
+                +{passiveRate + 1} PTS/s Next Lvl
               </span>
             </div>
 
@@ -352,59 +374,56 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
               disabled={score < passiveUpgradeCost}
               className={`w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-sm ${
                 score >= passiveUpgradeCost
-                  ? "bg-[#0098ea] hover:bg-[#0088cc] text-white active:scale-98"
+                  ? "bg-[#16a34a] hover:bg-[#15803d] text-white active:scale-98 cursor-pointer"
                   : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
               }`}
             >
-              <span>Upgrade Auto-Miner</span>
-              <span>•</span>
-              <span>${passiveUpgradeCost}.00 USD</span>
+              <span>Upgrade for {passiveUpgradeCost.toLocaleString()} PTS</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* 3. DAILY STREAK */}
+      {/* 3. DAILY CHECK-IN STREAK */}
       {activeSubTab === "streak" && (
         <div className="liquid-glass p-4 space-y-4 border border-slate-200/90 shadow-sm">
-          <div className="text-center space-y-1">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block">
-              7-DAY VAULT LOGIN STREAK
-            </span>
-            <h3 className="text-lg font-black text-slate-900 font-display">
-              Day {currentStreak} of 7
-            </h3>
-            <p className="text-[11px] text-slate-500">
-              Claim consecutive daily blocks to unlock major simulated dollar rewards.
-            </p>
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+            <div>
+              <span className="text-xs font-bold text-slate-900 uppercase tracking-wider block font-display">
+                Daily Check-in Streak
+              </span>
+              <span className="text-[11px] text-slate-500 block mt-0.5">
+                Check in continuously for 7 days to unlock maximum point bonuses.
+              </span>
+            </div>
+            <div className="px-2 py-1 rounded-lg bg-sky-50 border border-sky-200 text-[#0098ea] font-black text-xs">
+              Day {currentStreak} / 7
+            </div>
           </div>
 
-          <div className="grid grid-cols-7 gap-1.5">
-            {[20, 40, 80, 150, 300, 500, 1000].map((rew, idx) => {
+          <div className="grid grid-cols-7 gap-1">
+            {[50, 100, 200, 350, 600, 1000, 2500].map((pts, idx) => {
               const dayNum = idx + 1;
               const isPast = dayNum < currentStreak;
-              const isCurrent = dayNum === currentStreak;
+              const isToday = dayNum === currentStreak;
 
               return (
                 <div
                   key={dayNum}
-                  className={`p-2 rounded-xl text-center border flex flex-col items-center justify-between min-h-[70px] ${
-                    isCurrent
-                      ? "bg-sky-50 border-[#0098ea] text-[#0098ea] shadow-sm font-bold"
+                  className={`p-2 rounded-xl text-center border transition-all ${
+                    isToday
+                      ? "bg-sky-50 border-[#0098ea] shadow-xs"
                       : isPast
-                      ? "bg-slate-50 border-slate-200 text-slate-500"
-                      : "bg-white border-slate-100 text-slate-400"
+                      ? "bg-slate-50 border-slate-200 text-slate-400"
+                      : "bg-white border-slate-200 text-slate-600"
                   }`}
                 >
-                  <span className="text-[9px] font-bold uppercase">D{dayNum}</span>
-                  <span className="text-xs font-black my-1 font-display">
-                    +${rew}
+                  <span className="text-[9px] font-bold block uppercase text-slate-400">
+                    D{dayNum}
                   </span>
-                  {isPast ? (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#16a34a]" />
-                  ) : (
-                    <Sparkles className={`w-3.5 h-3.5 ${isCurrent ? "text-[#0098ea]" : "text-slate-300"}`} />
-                  )}
+                  <span className={`text-[10px] font-black block mt-0.5 ${isToday ? "text-[#0098ea]" : ""}`}>
+                    +{pts}
+                  </span>
                 </div>
               );
             })}
@@ -415,12 +434,13 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
             onClick={handleClaimStreak}
             disabled={streakClaimedToday}
             className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-sm ${
-              !streakClaimedToday
-                ? "bg-[#0098ea] hover:bg-[#0088cc] text-white active:scale-98"
-                : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
+              streakClaimedToday
+                ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
+                : "bg-[#0098ea] hover:bg-[#0088cc] text-white active:scale-98 cursor-pointer"
             }`}
           >
-            {streakClaimedToday ? "Streak Claimed Today" : "Claim Today's Bonus"}
+            <Sparkles className="w-4 h-4" />
+            <span>{streakClaimedToday ? "Claimed for Today" : `Claim Day ${currentStreak} Bonus`}</span>
           </button>
         </div>
       )}

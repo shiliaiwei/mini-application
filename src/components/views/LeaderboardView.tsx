@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { TelegramUser } from "@/types/telegram";
 import { Trophy, RefreshCw, Crown } from "lucide-react";
+import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 
 interface LeaderboardViewProps {
   userScore: number;
@@ -71,9 +72,12 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
               YOUR GLOBAL RANK
             </span>
-            <span className="text-sm font-black text-slate-900 font-display block">
-              {currentUserName}
-            </span>
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-black text-slate-900 font-display block">
+                {currentUserName}
+              </span>
+              {user && <TelegramVerifiedBadge size={14} />}
+            </div>
             <span className="text-[11px] text-slate-500 font-semibold block">
               Active: {formatTime(userSpendSeconds)}
             </span>
@@ -85,8 +89,11 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
             VAULT VALUE
           </span>
           <div className="text-lg font-black text-[#16a34a] font-display">
-            ${userScore.toLocaleString()}.00
+            ${(userScore / 100).toFixed(2)} USD
           </div>
+          <span className="text-[10px] text-slate-400 font-bold block">
+            {userScore.toLocaleString()} PTS
+          </span>
         </div>
       </div>
 
@@ -107,7 +114,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
             type="button"
             onClick={fetchLeaderboard}
             disabled={loading}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#0098ea]" : ""}`} />
           </button>
@@ -152,9 +159,12 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                   </div>
 
                   <div className="min-w-0">
-                    <span className="text-xs font-bold text-slate-900 block truncate">
-                      {[p.first_name, p.last_name].filter(Boolean).join(" ") || `@${p.username}`}
-                    </span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs font-bold text-slate-900 truncate">
+                        {[p.first_name, p.last_name].filter(Boolean).join(" ") || `@${p.username}`}
+                      </span>
+                      <TelegramVerifiedBadge size={13} />
+                    </div>
                     <span className="text-[10px] text-slate-500 block">
                       Active: {formatTime(p.spend_seconds)}
                     </span>
@@ -163,10 +173,10 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
 
                 <div className="text-right flex-shrink-0 ml-2">
                   <span className="text-xs font-black text-[#16a34a] font-display block">
-                    ${Number(p.score).toLocaleString()}.00
+                    ${(Number(p.score) / 100).toFixed(2)}
                   </span>
-                  <span className="text-[9px] text-slate-400 font-bold uppercase block">
-                    USD VAULT
+                  <span className="text-[9px] text-slate-400 font-bold block">
+                    {Number(p.score).toLocaleString()} PTS
                   </span>
                 </div>
               </div>

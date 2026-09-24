@@ -4,7 +4,6 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
 import { WinGramHeader } from "@/components/navigation/WinGramHeader";
 import { CategoryBar, NavCategory } from "@/components/navigation/CategoryBar";
-import { WinGramFooter } from "@/components/navigation/WinGramFooter";
 import { GameDock, GameTab } from "@/components/dock/GameDock";
 import { TapGameView } from "@/components/views/TapGameView";
 import { EarnTasksView } from "@/components/views/EarnTasksView";
@@ -126,6 +125,30 @@ export default function MiniAppPage() {
     }, 4000);
     return () => clearInterval(interval);
   }, [user, syncWithDatabase]);
+
+  // Audit Log: Record login event into Neon PostgreSQL
+  useEffect(() => {
+    if (!user?.id) return;
+    const recordedKey = `audit_login_${user.id}_${new Date().toDateString()}`;
+    if (typeof window !== "undefined" && sessionStorage.getItem(recordedKey)) return;
+
+    fetch("/api/audit/log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        telegram_id: user.id,
+        action: "LOGIN",
+        details: `User @${user.username || user.first_name} authenticated session`,
+        platform: tgApp?.platform || "TELEGRAM_WEB",
+      }),
+    })
+      .then(() => {
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem(recordedKey, "true");
+        }
+      })
+      .catch(() => {});
+  }, [user?.id, user?.username, user?.first_name, tgApp?.platform]);
 
   // Save to localStorage
   useEffect(() => {
@@ -408,17 +431,7 @@ export default function MiniAppPage() {
         <Headphones className="w-5 h-5" />
       </button>
 
-      {/* 5. WinGram Style Official Footer */}
-      <WinGramFooter
-        onOpenSupport={() => setShowSupportModal(true)}
-        onScrollToTop={() => {
-          if (typeof window !== "undefined") {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }
-        }}
-      />
-
-      {/* 6. Floating Bottom Dock for Easy Mobile Navigation */}
+      {/* 5. Floating Bottom Dock for Easy Mobile Navigation */}
       <GameDock
         activeTab={activeTab}
         onChangeTab={handleTabChange}

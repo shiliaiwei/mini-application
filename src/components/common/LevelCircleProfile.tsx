@@ -5,6 +5,7 @@ import Image from "next/image";
 import { TelegramUser } from "@/types/telegram";
 import { getUserLevelInfo } from "@/lib/games/levels";
 import { Shield, Sparkles } from "lucide-react";
+import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 
 interface LevelCircleProfileProps {
   score: number;
@@ -115,6 +116,7 @@ export const LevelCircleProfile: React.FC<LevelCircleProfileProps> = ({
             <span className="text-xs font-bold text-slate-900 truncate block">
               {displayName}
             </span>
+            {user && <TelegramVerifiedBadge size={14} className="ml-0.5" />}
             <span
               className="text-[10px] font-bold px-1.5 py-0.2 rounded flex items-center gap-1 bg-slate-100 border border-slate-200 text-slate-800"
             >

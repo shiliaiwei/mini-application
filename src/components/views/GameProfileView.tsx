@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
 import { LevelCircleProfile } from "@/components/common/LevelCircleProfile";
+import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 import {
   ArrowLeft,
   Copy,
@@ -18,7 +19,22 @@ import {
   Smartphone,
   Send,
   ShieldCheck,
+  History,
+  RefreshCw,
+  Globe,
+  Activity,
 } from "lucide-react";
+
+interface AuditLogEntry {
+  id: number;
+  telegram_id: number | string;
+  action: string;
+  ip_address: string;
+  platform: string;
+  city_country: string;
+  details: string;
+  created_at: string;
+}
 
 interface GameProfileViewProps {
   user: TelegramUser | null;
@@ -37,7 +53,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
   spendSeconds,
   onBack,
 }) => {
-  const [subTab, setSubTab] = useState<"profile" | "security">("profile");
+  const [subTab, setSubTab] = useState<"profile" | "security" | "audit">("profile");
   const [copiedId, setCopiedId] = useState(false);
 
   // Form State
@@ -46,6 +62,10 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
   const [dob, setDob] = useState("2000-01-01");
   const [gender, setGender] = useState("Male");
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  // Audit Logs State
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
+  const [loadingAudit, setLoadingAudit] = useState(false);
 
   const telegramUsername = user?.username ? `@${user.username}` : user?.first_name || "shiliaiwei";
   const playerId = user?.id ? String(user.id) : "a50caa57";
@@ -85,6 +105,45 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
     setTimeout(() => setSavedSuccess(false), 2500);
   };
 
+  // Fetch Login Audit from Neon Database
+  const fetchAuditLogs = async () => {
+    if (!user?.id) {
+      // Provide a default local session audit entry if no id
+      setAuditLogs([
+        {
+          id: 1,
+          telegram_id: "preview_user",
+          action: "LOGIN",
+          ip_address: "127.0.0.1",
+          platform: realPlatform,
+          city_country: "Phnom Penh, Cambodia",
+          details: "Authenticated via Telegram WebApp Client Session",
+          created_at: new Date().toISOString(),
+        },
+      ]);
+      return;
+    }
+
+    setLoadingAudit(true);
+    try {
+      const res = await fetch(`/api/audit/list?telegram_id=${user.id}`);
+      const data = await res.json();
+      if (data && data.logs) {
+        setAuditLogs(data.logs);
+      }
+    } catch (err) {
+      console.error("Failed to load audit logs:", err);
+    } finally {
+      setLoadingAudit(false);
+    }
+  };
+
+  useEffect(() => {
+    if (subTab === "audit") {
+      fetchAuditLogs();
+    }
+  }, [subTab]);
+
   return (
     <div className="space-y-4 pb-24 select-none font-body text-slate-900 max-w-xl mx-auto">
       {/* Top Header with Back Arrow */}
@@ -92,23 +151,23 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         <button
           type="button"
           onClick={onBack}
-          className="w-8 h-8 rounded-full bg-white hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors shadow-sm"
+          className="w-8 h-8 rounded-full bg-white hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors shadow-sm cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
         <h1 className="text-xl font-bold tracking-tight text-slate-900 font-sans">
-          Personal Profile
+          Personal Profile & Settings
         </h1>
       </div>
 
-      {/* WinGram Player Header Card with Standard Level Circle Profile */}
+      {/* Player Header Card with Standard Level Circle Profile */}
       <div className="liquid-glass p-4 flex items-center justify-between gap-3 border border-slate-200/90 shadow-sm">
         <LevelCircleProfile score={score} user={user} size="md" showDetails={true} />
 
         <button
           type="button"
           onClick={handleCopyId}
-          className="flex flex-col items-end text-right flex-shrink-0"
+          className="flex flex-col items-end text-right flex-shrink-0 cursor-pointer"
         >
           <span className="text-[10px] text-slate-500 font-bold uppercase block">
             ID {playerId.slice(0, 8)}
@@ -129,12 +188,12 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         </button>
       </div>
 
-      {/* WinGram Sub-Tab Toggle Pill (Profile / Security) */}
-      <div className="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold shadow-sm">
+      {/* Sub-Tab Toggle Pills (Profile / Security / Login Audit) */}
+      <div className="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold shadow-sm">
         <button
           type="button"
           onClick={() => setSubTab("profile")}
-          className={`px-4 py-1.5 rounded-lg transition-all ${
+          className={`py-1.5 rounded-lg transition-all text-center ${
             subTab === "profile"
               ? "bg-white text-slate-900 shadow-sm"
               : "text-slate-600 hover:text-slate-900"
@@ -145,7 +204,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         <button
           type="button"
           onClick={() => setSubTab("security")}
-          className={`px-4 py-1.5 rounded-lg transition-all ${
+          className={`py-1.5 rounded-lg transition-all text-center ${
             subTab === "security"
               ? "bg-white text-slate-900 shadow-sm"
               : "text-slate-600 hover:text-slate-900"
@@ -153,9 +212,21 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         >
           Security
         </button>
+        <button
+          type="button"
+          onClick={() => setSubTab("audit")}
+          className={`py-1.5 rounded-lg transition-all text-center flex items-center justify-center gap-1 ${
+            subTab === "audit"
+              ? "bg-white text-slate-900 shadow-sm"
+              : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <History className="w-3.5 h-3.5 text-[#0098ea]" />
+          <span>Login Audit</span>
+        </button>
       </div>
 
-      {/* PROFILE TAB CONTENT */}
+      {/* 1. PROFILE TAB CONTENT */}
       {subTab === "profile" && (
         <div className="space-y-4">
           {/* Section 1: Personal Data */}
@@ -189,9 +260,8 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
                     type="date"
                     value={dob}
                     onChange={(e) => setDob(e.target.value)}
-                    className="wingram-input w-full px-3 py-2 text-xs appearance-none pr-8"
+                    className="wingram-input w-full px-3 py-2 text-xs"
                   />
-                  <Calendar className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
                 <div className="relative">
                   <select
@@ -210,7 +280,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
               <button
                 type="button"
                 onClick={handleSaveProfile}
-                className="w-full py-2.5 rounded-xl bg-[#0098ea] hover:bg-[#0088cc] text-white text-xs font-bold transition-all shadow-sm active:scale-98"
+                className="w-full py-2.5 rounded-xl bg-[#0098ea] hover:bg-[#0088cc] text-white text-xs font-bold transition-all shadow-sm active:scale-98 cursor-pointer"
               >
                 {savedSuccess ? "Saved Successfully!" : "Save"}
               </button>
@@ -226,7 +296,6 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
           <div className="space-y-2">
             <h2 className="text-sm font-bold text-slate-900 tracking-wide">Contact info</h2>
             <div className="liquid-glass p-4 space-y-3 border border-slate-200/90 shadow-sm">
-              {/* Email */}
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="flex items-center gap-2.5">
                   <Mail className="w-4 h-4 text-slate-500 flex-shrink-0" />
@@ -237,13 +306,12 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
                 </div>
                 <button
                   type="button"
-                  className="px-3 py-1 rounded-lg bg-[#0098ea] hover:bg-[#0088cc] text-white text-xs font-bold transition-colors"
+                  className="px-3 py-1 rounded-lg bg-[#0098ea] hover:bg-[#0088cc] text-white text-xs font-bold transition-colors cursor-pointer"
                 >
                   Add
                 </button>
               </div>
 
-              {/* Phone */}
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="flex items-center gap-2.5">
                   <Phone className="w-4 h-4 text-slate-500 flex-shrink-0" />
@@ -254,7 +322,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
                 </div>
                 <button
                   type="button"
-                  className="px-3 py-1 rounded-lg bg-[#0098ea] hover:bg-[#0088cc] text-white text-xs font-bold transition-colors"
+                  className="px-3 py-1 rounded-lg bg-[#0098ea] hover:bg-[#0088cc] text-white text-xs font-bold transition-colors cursor-pointer"
                 >
                   Add
                 </button>
@@ -262,22 +330,24 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
             </div>
           </div>
 
-          {/* Section 3: Connected Accounts */}
+          {/* Section 3: Connected Accounts with Telegram Official Verified Badge */}
           <div className="space-y-2">
             <h2 className="text-sm font-bold text-slate-900 tracking-wide">Connected accounts</h2>
             <div className="liquid-glass p-4 space-y-2.5 border border-slate-200/90 shadow-sm">
-              {/* Telegram Official Account */}
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="flex items-center gap-2.5">
                   <Send className="w-4 h-4 text-[#0098ea] flex-shrink-0" />
                   <div>
                     <span className="text-[10px] text-slate-500 block">Telegram</span>
-                    <span className="text-xs font-bold text-slate-900 block">{telegramUsername}</span>
+                    <span className="text-xs font-bold text-slate-900 flex items-center gap-1">
+                      {telegramUsername}
+                      {user && <TelegramVerifiedBadge size={13} />}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 text-xs text-[#16a34a] font-bold">
                   <Check className="w-3.5 h-3.5" />
-                  <span>Connected</span>
+                  <span>Verified</span>
                 </div>
               </div>
             </div>
@@ -285,7 +355,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         </div>
       )}
 
-      {/* SECURITY TAB CONTENT */}
+      {/* 2. SECURITY TAB CONTENT */}
       {subTab === "security" && (
         <div className="space-y-4">
           {/* Security Status Card */}
@@ -298,7 +368,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
                   <div>
                     <span className="text-[10px] text-slate-500 block">Authentication Protocol</span>
                     <span className="text-xs font-bold text-slate-900 block">
-                      Telegram End-to-End Cryptographic Handshake
+                      Telegram Cryptographic Signature Verification
                     </span>
                   </div>
                 </div>
@@ -313,7 +383,6 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
           <div className="space-y-2">
             <h2 className="text-sm font-bold text-slate-900 tracking-wide">Active Device Session</h2>
             <div className="liquid-glass p-4 space-y-3 border border-slate-200/90 shadow-sm">
-              {/* Real Active Device from Telegram WebApp */}
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="flex items-center gap-2.5">
                   {realPlatform.includes("IOS") || realPlatform.includes("ANDROID") ? (
@@ -336,12 +405,74 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
               </div>
 
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-1">
-                <div className="font-semibold text-slate-800">Real-Time Data Guarantee:</div>
+                <div className="font-semibold text-slate-800">Session Audit Guarantee:</div>
                 <p className="text-[11px] text-slate-500">
-                  This mini-app reflects your genuine live Telegram session parameters, synchronized in real time with the secure cloud ledger.
+                  Every sign-in, session handover, and exchange transaction is recorded into the database audit trail for complete security transparency.
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. LOGIN & ACTIVITY AUDIT TAB CONTENT */}
+      {subTab === "audit" && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-sm font-bold text-slate-900 tracking-wide flex items-center gap-1.5">
+              <Activity className="w-4 h-4 text-[#0098ea]" />
+              <span>Database Login & Session Audit Trail</span>
+            </h2>
+            <button
+              type="button"
+              onClick={fetchAuditLogs}
+              disabled={loadingAudit}
+              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1 text-[11px] font-bold cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loadingAudit ? "animate-spin text-[#0098ea]" : ""}`} />
+              <span>Refresh</span>
+            </button>
+          </div>
+
+          <div className="liquid-glass p-3 space-y-2 border border-slate-200/90 shadow-sm">
+            {auditLogs.length === 0 ? (
+              <div className="py-8 text-center text-xs text-slate-400">
+                {loadingAudit ? "Loading audit logs from database..." : "No recent activity recorded."}
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {auditLogs.map((log) => {
+                  const dateStr = log.created_at
+                    ? new Date(log.created_at).toLocaleString()
+                    : "Recent";
+
+                  return (
+                    <div key={log.id} className="py-2.5 first:pt-0 last:pb-0 space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-sky-50 text-[#0098ea] border border-sky-200">
+                            {log.action}
+                          </span>
+                          <span className="font-mono text-[11px] text-slate-700 font-semibold">
+                            {log.ip_address || "127.0.0.1"}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-400 font-medium">{dateStr}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-slate-500">
+                        <span className="truncate max-w-[280px]">
+                          {log.details || `Platform: ${log.platform}`}
+                        </span>
+                        <span className="text-[10px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-1.5 py-0.2 rounded">
+                          {log.city_country || "Cambodia"}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}

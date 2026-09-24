@@ -16,7 +16,10 @@ import {
   X,
   QrCode,
   ShieldCheck,
+  Coins,
 } from "lucide-react";
+import { VLogo } from "@/components/brand/VLogo";
+import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 
 interface FloatingPoint {
   id: number;
@@ -25,7 +28,7 @@ interface FloatingPoint {
   text: string;
 }
 
-export type DisplayCurrency = "USD" | "KHR" | "SHI";
+export type DisplayCurrency = "USD" | "KHR";
 
 interface TapGameViewProps {
   score: number;
@@ -95,12 +98,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
       const x = clientX ? clientX - rect.left : rect.width / 2;
       const y = clientY ? clientY - rect.top : rect.height / 2;
 
-      let floatingText = `+$${tapPower}.00`;
-      if (activeCurrency === "KHR") {
-        floatingText = `+${(tapPower * 4100).toLocaleString()} KHR`;
-      } else if (activeCurrency === "SHI") {
-        floatingText = `+${tapPower * 10} SHI`;
-      }
+      let floatingText = `+${tapPower} PTS`;
 
       const newPoint: FloatingPoint = {
         id: Date.now() + Math.random(),
@@ -130,6 +128,10 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
 
   const energyPercent = Math.round((energy / maxEnergy) * 100);
 
+  // Conversion calculations: 100 PTS = $1.00 USD = 4,100 KHR
+  const usdValue = (score / 100).toFixed(2);
+  const khrValue = Math.floor(score * 41).toLocaleString();
+
   return (
     <div className="flex flex-col items-center justify-between min-h-[calc(100dvh-170px)] pb-24 select-none font-body text-slate-900 max-w-xl mx-auto w-full px-1">
       {/* SHILIAIWEI Wallet Header & Currency Switcher */}
@@ -142,9 +144,12 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
               SHILIAIWEI VAULT
             </span>
             <span className="text-[10px] text-slate-400">•</span>
-            <span className="text-slate-600 font-medium truncate max-w-[130px]">
-              {user?.username ? `@${user.username}` : user?.first_name || "WEB3 HOLDER"}
-            </span>
+            <div className="flex items-center gap-1 text-slate-600 font-medium truncate max-w-[150px]">
+              <span className="truncate">
+                {user?.username ? `@${user.username}` : user?.first_name || "WEB3 HOLDER"}
+              </span>
+              {user && <TelegramVerifiedBadge size={13} />}
+            </div>
           </div>
 
           <button
@@ -157,12 +162,12 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           </button>
         </div>
 
-        {/* Currency Switcher Tabs (USD, KHR, SHI) */}
-        <div className="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold border border-slate-200 shadow-sm">
+        {/* 2 Official Currencies Switcher Tabs (USD, KHR) */}
+        <div className="grid grid-cols-2 gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold border border-slate-200 shadow-sm">
           <button
             type="button"
             onClick={() => setActiveCurrency("USD")}
-            className={`py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 ${
+            className={`py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
               activeCurrency === "USD"
                 ? "bg-[#0098ea] text-white shadow-sm shadow-[#0098ea]/20"
                 : "text-slate-600 hover:text-slate-900"
@@ -174,25 +179,13 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <button
             type="button"
             onClick={() => setActiveCurrency("KHR")}
-            className={`py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 ${
+            className={`py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
               activeCurrency === "KHR"
                 ? "bg-[#0098ea] text-white shadow-sm shadow-[#0098ea]/20"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
             <span>KHR (Riel)</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveCurrency("SHI")}
-            className={`py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 ${
-              activeCurrency === "SHI"
-                ? "bg-[#0098ea] text-white shadow-sm shadow-[#0098ea]/20"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            <span>$SHI COIN</span>
           </button>
         </div>
 
@@ -201,47 +194,34 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           {/* Banknote Security Waves Strip (10350112346.webp) */}
           <div className="w-full h-3 border-strip-waves opacity-60 mb-2.5" />
           <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-            {activeCurrency === "USD" && "ESTIMATED USD VAULT NET WORTH"}
-            {activeCurrency === "KHR" && "CAMBODIAN KHMER RIEL BALANCE"}
-            {activeCurrency === "SHI" && "SHILIAIWEI NATIVE TOKEN BALANCE"}
+            {activeCurrency === "USD" ? "ESTIMATED USD VAULT VALUE" : "CAMBODIAN KHMER RIEL VAULT VALUE"}
           </div>
 
           {/* Large Balance Display */}
           <div className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight mt-1 font-display flex items-baseline justify-center">
-            {activeCurrency === "USD" && (
+            {activeCurrency === "USD" ? (
               <>
                 <span className="text-[#16a34a] text-3xl sm:text-4xl mr-1 font-bold">$</span>
-                <span>{score.toLocaleString()}</span>
-                <span className="text-slate-400 text-xl sm:text-2xl ml-1 font-semibold">.00</span>
+                <span>{usdValue}</span>
+                <span className="text-slate-400 text-xl sm:text-2xl ml-1 font-semibold">USD</span>
               </>
-            )}
-
-            {activeCurrency === "KHR" && (
+            ) : (
               <>
-                <span>{khrBalance.toLocaleString()}</span>
+                <span>{khrValue}</span>
                 <span className="text-[#0098ea] text-xl sm:text-2xl ml-1.5 font-bold font-display">
                   KHR
                 </span>
               </>
             )}
-
-            {activeCurrency === "SHI" && (
-              <>
-                <span>{shiBalance.toLocaleString()}</span>
-                <span className="text-[#0098ea] text-xl sm:text-2xl ml-1.5 font-bold font-display">
-                  $SHI
-                </span>
-              </>
-            )}
           </div>
 
-          {/* Subtitle Rates & Secondary Assets Overview */}
+          {/* Subtitle Rates & Points Standing */}
           <div className="flex items-center justify-center gap-2 mt-2 pt-2.5 border-t border-slate-200 text-[11px] text-slate-500 font-semibold">
-            <span>≈ ${score.toLocaleString()}.00 USD</span>
+            <span className="text-slate-900 font-bold">{score.toLocaleString()} PTS Available</span>
             <span>•</span>
-            <span>{khrBalance.toLocaleString()} KHR</span>
+            <span>Rate: 100 PTS = $1.00 USD</span>
             <span>•</span>
-            <span className="text-[#0098ea] font-bold">{shiBalance.toLocaleString()} $SHI</span>
+            <span>4,100 KHR</span>
           </div>
 
           {/* Action Buttons (Receive, Send, Swap, Missions) - Unboxed Icons */}
@@ -270,7 +250,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
               className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 active:scale-95 transition-all shadow-sm"
             >
               <Repeat className="w-4 h-4 text-amber-500 mb-1" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Swap</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">Exchange</span>
             </button>
 
             <button
@@ -305,16 +285,14 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
                 MINT POWER
               </span>
               <span className="text-xs font-bold text-slate-900 block mt-1">
-                {activeCurrency === "USD" && `+$${tapPower}.00 / TAP`}
-                {activeCurrency === "KHR" && `+${(tapPower * 4100).toLocaleString()} KHR`}
-                {activeCurrency === "SHI" && `+${tapPower * 10} $SHI / TAP`}
+                +{tapPower} PTS / TAP
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Center Luxury WinGram Tap Medallion Button - White Liquid Glass */}
+      {/* Center Luxury WinGram Tap Medallion Button - White Liquid Glass with VLogo */}
       <div className="relative my-auto flex items-center justify-center py-4">
         <button
           ref={buttonRef}
@@ -328,21 +306,18 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
             {/* Guilloche Radial Sunburst Rosette Watermark (7168912.webp) */}
             <div className="absolute inset-0 bg-security-sunburst opacity-30 pointer-events-none" />
 
-            {/* Inner Ring with Micro-print border */}
+            {/* Inner Ring with Micro-print border and Centered Geometric V Logo */}
             <div className="w-48 h-48 rounded-full border border-dashed border-[#0098ea]/40 flex flex-col items-center justify-center relative bg-white/70 backdrop-blur-xs">
-              <span className="text-[9px] font-bold text-[#0098ea] tracking-widest uppercase mb-1">
+              <span className="text-[9px] font-bold text-[#0098ea] tracking-widest uppercase mb-0.5">
                 SHILIAIWEI
               </span>
-              <span className="text-5xl font-black text-slate-900 font-display tracking-tight leading-none my-1">
-                {activeCurrency === "USD" && "$"}
-                {activeCurrency === "KHR" && "KHR"}
-                {activeCurrency === "SHI" && "SHI"}
-              </span>
-              <span className="text-[10px] font-black text-[#16a34a] tracking-wider uppercase mt-1">
-                TAP TO MINT
+              {/* Centered Geometric V Letter Logo */}
+              <VLogo size={52} variant="solid-blue" className="my-1" />
+              <span className="text-[10px] font-black text-[#16a34a] tracking-wider uppercase mt-0.5">
+                TAP FOR POINTS
               </span>
               <span className="text-[8px] font-semibold text-slate-400 tracking-widest uppercase mt-0.5">
-                CENTRAL VAULT
+                +{tapPower} PTS / TAP
               </span>
             </div>
           </div>
