@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { TelegramUser } from "@/types/telegram";
 import { getUserLevelInfo } from "@/lib/games/levels";
-import { Shield, Sparkles } from "lucide-react";
+import { Shield } from "@/components/icons/KeylineIcons";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 
 interface LevelCircleProfileProps {
@@ -120,7 +120,7 @@ export const LevelCircleProfile: React.FC<LevelCircleProfileProps> = ({
             <span
               className="text-[10px] font-bold px-1.5 py-0.2 rounded flex items-center gap-1 bg-slate-100 border border-slate-200 text-slate-800"
             >
-              <Shield className="w-2.5 h-2.5" style={{ color: levelInfo.color }} />
+              <Shield size={10} className="w-2.5 h-2.5" style={{ color: levelInfo.color }} />
               <span>{levelInfo.title}</span>
             </span>
           </div>

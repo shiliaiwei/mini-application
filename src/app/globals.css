@@ -301,3 +301,50 @@ html, body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Mobile Safe Area & Touch Ergonomics */
+.pb-safe {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5.5rem);
+}
+
+.pt-safe {
+  padding-top: max(0.25rem, env(safe-area-inset-top, 0px));
+}
+
+.touch-pan-x {
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+}
+
+.touch-pan-y {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Accessible minimum touch target helper (WCAG 2.5.5 / 2.5.8) */
+.touch-target-44 {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* High Contrast Banknote Card Accents (WCAG 2.1 AA Compliant) */
+.text-khr-deep {
+  color: #4a154b;
+}
+
+.text-usd-deep {
+  color: #14532d;
+}
+
+.badge-khr {
+  background-color: #f3e8ff;
+  color: #581c87;
+  border: 1px solid #d8b4fe;
+}
+
+.badge-usd {
+  background-color: #dcfce7;
+  color: #14532d;
+  border: 1px solid #86efac;
+}
+

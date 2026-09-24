@@ -12,7 +12,13 @@ import { LeaderboardView } from "@/components/views/LeaderboardView";
 import { GameProfileView } from "@/components/views/GameProfileView";
 import { GameWelcomeScreen } from "@/components/welcome/GameWelcomeScreen";
 import { TelegramGateScreen } from "@/components/common/TelegramGateScreen";
-import { Headphones, X, Check, Wallet, ArrowUpRight, DollarSign } from "lucide-react";
+import {
+  Headphones,
+  X,
+  Check,
+  Wallet,
+  DollarSign,
+} from "@/components/icons/KeylineIcons";
 
 import { GameCards3DView } from "@/components/views/GameCards3DView";
 
@@ -351,7 +357,7 @@ export default function MiniAppPage() {
       />
 
       {/* 3. Main SPA View Switcher */}
-      <main className="flex-1 w-full max-w-4xl mx-auto px-3 pt-3">
+      <main className="flex-1 w-full max-w-4xl mx-auto px-3 pt-2 pb-safe">
         {activeTab === "wallet" && (
           <TapGameView
             score={score}
@@ -422,14 +428,15 @@ export default function MiniAppPage() {
         )}
       </main>
 
-      {/* 4. WinGram Floating Headphone Support Button */}
+      {/* 4. WinGram Floating Headphone Support Button - elevated safely above mobile dock */}
       <button
         type="button"
         onClick={() => setShowSupportModal(true)}
-        className="fixed bottom-20 right-4 z-40 w-12 h-12 rounded-full bg-[#0098ea] hover:bg-[#0087d1] text-white flex items-center justify-center shadow-2xl shadow-[#0098ea]/40 border border-white/20 active:scale-90 transition-all cursor-pointer"
-        title="24/7 Support"
+        className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+4.75rem)] right-3.5 z-40 w-12 h-12 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white flex items-center justify-center shadow-lg shadow-[#0098ea]/30 border-2 border-white/60 active:scale-95 transition-all cursor-pointer touch-target-44"
+        title="24/7 Customer Support"
+        aria-label="24/7 Customer Support"
       >
-        <Headphones className="w-5 h-5" />
+        <Headphones size={24} className="w-6 h-6 text-white" />
       </button>
 
       {/* 5. Floating Bottom Dock for Easy Mobile Navigation */}
@@ -445,7 +452,7 @@ export default function MiniAppPage() {
           <div className="liquid-glass-modal p-5 max-w-sm w-full space-y-4 animate-in fade-in zoom-in-95 duration-150 border border-slate-200/95 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
               <div className="flex items-center gap-2">
-                <Headphones className="w-4 h-4 text-[#0098ea]" />
+                <Headphones size={20} className="w-5 h-5 text-[#0098ea]" />
                 <span className="text-sm font-bold text-slate-900 uppercase font-display">
                   SHILIAIWEI Support 24/7
                 </span>
@@ -453,14 +460,15 @@ export default function MiniAppPage() {
               <button
                 type="button"
                 onClick={() => setShowSupportModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 touch-target-44 flex items-center justify-center"
+                aria-label="Close modal"
               >
-                <X className="w-4 h-4" />
+                <X size={20} className="w-5 h-5" />
               </button>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-center">
-              <Headphones className="w-8 h-8 text-[#0098ea] mx-auto" />
+              <Headphones size={32} className="w-8 h-8 text-[#0098ea] mx-auto" />
               <h4 className="text-sm font-bold text-slate-900">Live Customer Assistance</h4>
               <p className="text-xs text-slate-500">
                 Contact our official Telegram concierge desk for instant deposit, account verification, and transaction support.
@@ -471,7 +479,7 @@ export default function MiniAppPage() {
               href="https://t.me/srievibot"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-3 rounded-xl bg-[#0098ea] hover:bg-[#0088cc] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all"
+              className="w-full py-3 rounded-xl bg-[#0098ea] hover:bg-[#0088cc] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all touch-target-44"
             >
               <span>Message Support on Telegram</span>
             </a>
@@ -479,7 +487,7 @@ export default function MiniAppPage() {
             <button
               type="button"
               onClick={() => setShowSupportModal(false)}
-              className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider shadow-sm"
+              className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider shadow-sm touch-target-44 flex items-center justify-center"
             >
               Close
             </button>
@@ -493,7 +501,7 @@ export default function MiniAppPage() {
           <div className="liquid-glass-modal p-5 max-w-sm w-full space-y-4 animate-in fade-in zoom-in-95 duration-150 border border-slate-200/95 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
               <div className="flex items-center gap-2">
-                <Wallet className="w-4 h-4 text-[#16a34a]" />
+                <Wallet size={20} className="w-5 h-5 text-[#16a34a]" />
                 <span className="text-sm font-bold text-slate-900 uppercase font-display">
                   Top Up Vault
                 </span>
@@ -501,9 +509,10 @@ export default function MiniAppPage() {
               <button
                 type="button"
                 onClick={() => setShowTopUpModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 touch-target-44 flex items-center justify-center"
+                aria-label="Close modal"
               >
-                <X className="w-4 h-4" />
+                <X size={20} className="w-5 h-5" />
               </button>
             </div>
 
@@ -518,7 +527,7 @@ export default function MiniAppPage() {
                   key={amt}
                   type="button"
                   onClick={() => setTopUpAmount(amt)}
-                  className={`py-2.5 rounded-xl border text-xs font-black transition-all ${
+                  className={`py-2.5 rounded-xl border text-xs font-black transition-all touch-target-44 flex items-center justify-center ${
                     topUpAmount === amt
                       ? "bg-[#0098ea] border-[#0098ea] text-white shadow-sm shadow-[#0098ea]/20"
                       : "bg-white border-slate-200 text-slate-700 hover:border-slate-300 shadow-sm"
@@ -531,7 +540,7 @@ export default function MiniAppPage() {
 
             {topUpSuccess && (
               <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-[#16a34a] text-xs font-bold flex items-center justify-center gap-2">
-                <Check className="w-4 h-4" />
+                <Check size={18} className="w-4 h-4" />
                 <span>Successfully added +${topUpAmount}.00 to Vault!</span>
               </div>
             )}
@@ -540,9 +549,9 @@ export default function MiniAppPage() {
               type="button"
               onClick={handleExecuteTopUp}
               disabled={topUpSuccess}
-              className="w-full py-3.5 rounded-xl bg-[#0098ea] hover:bg-[#0088cc] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all"
+              className="w-full py-3.5 rounded-xl bg-[#0098ea] hover:bg-[#0088cc] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all touch-target-44"
             >
-              <DollarSign className="w-4 h-4" />
+              <DollarSign size={20} className="w-5 h-5" />
               <span>Confirm Top Up (${topUpAmount}.00)</span>
             </button>
           </div>

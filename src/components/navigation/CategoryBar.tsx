@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import {
-  Grid2X2,
+  Grid2x2,
   Star,
   Flame,
   Zap,
@@ -11,9 +11,8 @@ import {
   Trophy,
   ShieldCheck,
   ChevronRight,
-  TrendingUp,
-  Gamepad2,
-} from "lucide-react";
+  KeylineGamepad,
+} from "@/components/icons/KeylineIcons";
 
 export type NavCategory =
   | "lobby"
@@ -38,41 +37,44 @@ export const CategoryBar: React.FC<CategoryBarProps> = ({
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const categories: Array<{ id: NavCategory; label: string; icon: React.ReactNode }> = [
-    { id: "lobby", label: "Lobby", icon: <Grid2X2 className="w-3.5 h-3.5" /> },
-    { id: "vault", label: "Tap Vault", icon: <Zap className="w-3.5 h-3.5 text-cyan-400" /> },
-    { id: "games", label: "3D Games", icon: <Gamepad2 className="w-3.5 h-3.5 text-[#0098ea]" /> },
-    { id: "earn", label: "Missions", icon: <Gift className="w-3.5 h-3.5 text-amber-400" /> },
-    { id: "swap", label: "DEX Swap", icon: <Repeat className="w-3.5 h-3.5 text-emerald-400" /> },
-    { id: "tournaments", label: "Tournaments", icon: <Trophy className="w-3.5 h-3.5 text-yellow-400" /> },
-    { id: "popular", label: "Popular", icon: <Flame className="w-3.5 h-3.5 text-red-400" /> },
-    { id: "favorites", label: "Favorites", icon: <Star className="w-3.5 h-3.5" /> },
-    { id: "security", label: "Security", icon: <ShieldCheck className="w-3.5 h-3.5 text-blue-400" /> },
+    { id: "lobby", label: "Lobby", icon: <Grid2x2 size={16} /> },
+    { id: "vault", label: "Tap Vault", icon: <Zap size={16} className="text-cyan-600" /> },
+    { id: "games", label: "3D Games", icon: <KeylineGamepad size={16} className="text-[#0098ea]" /> },
+    { id: "earn", label: "Missions", icon: <Gift size={16} className="text-amber-600" /> },
+    { id: "swap", label: "DEX Swap", icon: <Repeat size={16} className="text-emerald-600" /> },
+    { id: "tournaments", label: "Tournaments", icon: <Trophy size={16} className="text-yellow-600" /> },
+    { id: "popular", label: "Popular", icon: <Flame size={16} className="text-red-500" /> },
+    { id: "favorites", label: "Favorites", icon: <Star size={16} className="text-amber-500" /> },
+    { id: "security", label: "Security", icon: <ShieldCheck size={16} className="text-blue-600" /> },
   ];
 
   const handleScrollRight = () => {
     if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: 160, behavior: "smooth" });
+      scrollRef.current.scrollBy({ left: 180, behavior: "smooth" });
     }
   };
 
   return (
-    <div className="relative flex flex-col font-body">
-      <div className="bg-white/80 backdrop-blur-xl px-3 py-2 select-none flex items-center gap-1">
+    <nav aria-label="Feature categories" className="relative flex flex-col font-body">
+      <div className="bg-white/95 backdrop-blur-xl px-2.5 py-1.5 select-none flex items-center gap-1 border-b border-slate-100">
         <div
           ref={scrollRef}
-          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth flex-1"
+          role="tablist"
+          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar touch-pan-x scroll-smooth flex-1 py-0.5"
         >
           {categories.map((cat) => {
             const isActive = activeCategory === cat.id;
             return (
               <button
                 key={cat.id}
+                role="tab"
+                aria-selected={isActive}
                 type="button"
                 onClick={() => onSelectCategory(cat.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all min-h-[38px] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] ${
                   isActive
-                    ? "bg-[#0098ea] text-white shadow-sm shadow-[#0098ea]/20"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+                    ? "bg-[#0098ea] text-white shadow-xs"
+                    : "text-slate-700 hover:text-slate-900 bg-slate-100/70 hover:bg-slate-200/80"
                 }`}
               >
                 {cat.icon}
@@ -86,15 +88,17 @@ export const CategoryBar: React.FC<CategoryBarProps> = ({
         <button
           type="button"
           onClick={handleScrollRight}
-          className="w-7 h-7 rounded-full bg-white/90 hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center flex-shrink-0 transition-colors shadow-sm ml-1"
+          className="w-9 h-9 rounded-full bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 flex items-center justify-center flex-shrink-0 transition-colors shadow-xs ml-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
+          aria-label="Scroll category bar right"
           title="Scroll Next"
         >
-          <ChevronRight className="w-3.5 h-3.5" />
+          <ChevronRight size={18} />
         </button>
       </div>
 
       {/* Flower Banknote Security Guilloche Divider Strip (1033454350116.webp) */}
       <div className="w-full h-2.5 border-strip-flower opacity-75 border-b border-slate-200/60" />
-    </div>
+    </nav>
   );
 };
+

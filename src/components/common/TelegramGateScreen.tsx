@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import { Send, AlertCircle } from "lucide-react";
+import { Send, CircleAlert } from "@/components/icons/KeylineIcons";
 import { VLogo } from "@/components/brand/VLogo";
 
 interface TelegramGateScreenProps {
@@ -45,7 +44,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass
 
         <div className="p-3.5 rounded-xl liquid-glass border border-slate-200/90 text-left text-xs text-slate-700 space-y-1.5 shadow-sm">
           <div className="flex items-center gap-2 text-[#0098ea] font-bold">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <CircleAlert size={16} className="w-4 h-4 flex-shrink-0" />
             <span>ACCESS INSTRUCTIONS:</span>
           </div>
           <p className="text-[11px] text-slate-500 leading-normal">

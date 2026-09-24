@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { TelegramUser } from "@/types/telegram";
-import { Trophy, RefreshCw, Crown } from "lucide-react";
+import { Trophy, RefreshCw, Crown } from "@/components/icons/KeylineIcons";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 
 interface LeaderboardViewProps {
@@ -42,7 +42,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
     ? [user.first_name, user.last_name].filter(Boolean).join(" ")
     : "You";
 
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/leaderboard");
@@ -52,24 +52,39 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
       }
     } catch {}
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
-    fetchLeaderboard();
+    let ignore = false;
+    async function load() {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/leaderboard");
+        const data = await res.json();
+        if (!ignore && data?.players) {
+          setPlayers(data.players);
+        }
+      } catch {}
+      if (!ignore) setLoading(false);
+    }
+    load();
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   return (
-    <div className="space-y-4 pb-24 font-body select-none text-slate-900 max-w-xl mx-auto w-full px-1">
+    <div className="space-y-3.5 pb-28 font-body select-none text-slate-900 max-w-xl mx-auto w-full px-1">
       {/* Current User Standings Card */}
-      <div className="liquid-glass p-4 flex items-center justify-between border border-slate-200/90 shadow-sm">
+      <div className="liquid-glass p-3.5 flex items-center justify-between border border-slate-200 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-[#0098ea] font-black text-lg shadow-sm relative overflow-hidden">
+          <div className="w-11 h-11 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-[#0098ea] font-black text-lg shadow-xs relative overflow-hidden flex-shrink-0">
             {/* Banknote Sunburst Rosette Watermark (7168912.webp) */}
             <div className="absolute inset-0 bg-security-sunburst opacity-25 pointer-events-none" />
             <span className="relative z-10">#{userRank}</span>
           </div>
           <div>
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+            <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider block">
               YOUR GLOBAL RANK
             </span>
             <div className="flex items-center gap-1">
@@ -78,33 +93,33 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
               </span>
               {user && <TelegramVerifiedBadge size={14} />}
             </div>
-            <span className="text-[11px] text-slate-500 font-semibold block">
+            <span className="text-[11px] text-slate-600 font-semibold block">
               Active: {formatTime(userSpendSeconds)}
             </span>
           </div>
         </div>
 
         <div className="text-right">
-          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+          <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider block">
             VAULT VALUE
           </span>
-          <div className="text-lg font-black text-[#16a34a] font-display">
+          <div className="text-base sm:text-lg font-black text-[#14532d] font-display">
             ${(userScore / 100).toFixed(2)} USD
           </div>
-          <span className="text-[10px] text-slate-400 font-bold block">
+          <span className="text-[10px] text-slate-600 font-bold block">
             {userScore.toLocaleString()} PTS
           </span>
         </div>
       </div>
 
       {/* Leaderboard Table Card */}
-      <div className="liquid-glass p-4 space-y-3 border border-slate-200/90 shadow-sm relative overflow-hidden">
+      <div className="liquid-glass p-3.5 space-y-3 border border-slate-200 shadow-xs relative overflow-hidden">
         {/* Flower Banknote Security Strip (1033454350116.webp) */}
-        <div className="w-full h-2.5 border-strip-flower opacity-70 mb-2" />
+        <div className="w-full h-2.5 border-strip-flower opacity-70 mb-1" />
 
-        <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
           <div className="flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-amber-500" />
+            <Trophy size={18} className="text-amber-500" />
             <span className="text-xs font-black text-slate-900 uppercase tracking-wider font-display">
               SHILIAIWEI Global Wealth Leaderboard
             </span>
@@ -114,16 +129,17 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
             type="button"
             onClick={fetchLeaderboard}
             disabled={loading}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+            aria-label="Refresh Leaderboard"
+            className="w-9 h-9 rounded-lg text-slate-600 hover:text-slate-900 flex items-center justify-center transition-colors cursor-pointer border border-slate-200 bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#0098ea]" : ""}`} />
+            <RefreshCw size={16} className={loading ? "animate-spin text-[#0098ea]" : ""} />
           </button>
         </div>
 
         {/* Players List */}
         <div className="space-y-1.5">
           {players.length === 0 && !loading && (
-            <div className="text-center py-8 text-xs text-slate-500">
+            <div className="text-center py-8 text-xs text-slate-600">
               No ranked holders yet. Be the first to mint!
             </div>
           )}
@@ -139,7 +155,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                 key={p.telegram_id}
                 className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${
                   isMe
-                    ? "bg-sky-50/80 border-[#0098ea]/40 text-slate-900 shadow-sm"
+                    ? "bg-sky-50 border-[#0098ea]/60 text-slate-900 shadow-xs"
                     : "bg-slate-50 border-slate-200 text-slate-800 hover:border-slate-300"
                 }`}
               >
@@ -147,15 +163,15 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                   <div
                     className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0 ${
                       isTop1
-                        ? "bg-amber-400 text-slate-900 shadow-sm"
+                        ? "bg-amber-400 text-slate-950 shadow-xs"
                         : isTop2
-                        ? "bg-slate-200 text-slate-800"
+                        ? "bg-slate-300 text-slate-900"
                         : isTop3
                         ? "bg-amber-700 text-white"
-                        : "bg-white border border-slate-200 text-slate-600"
+                        : "bg-white border border-slate-200 text-slate-700"
                     }`}
                   >
-                    {isTop1 ? <Crown className="w-3.5 h-3.5" /> : `#${p.rank}`}
+                    {isTop1 ? <Crown size={16} className="text-slate-950" /> : `#${p.rank}`}
                   </div>
 
                   <div className="min-w-0">
@@ -165,17 +181,17 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                       </span>
                       <TelegramVerifiedBadge size={13} />
                     </div>
-                    <span className="text-[10px] text-slate-500 block">
+                    <span className="text-[10px] text-slate-600 block">
                       Active: {formatTime(p.spend_seconds)}
                     </span>
                   </div>
                 </div>
 
                 <div className="text-right flex-shrink-0 ml-2">
-                  <span className="text-xs font-black text-[#16a34a] font-display block">
+                  <span className="text-xs font-black text-[#14532d] font-display block">
                     ${(Number(p.score) / 100).toFixed(2)}
                   </span>
-                  <span className="text-[9px] text-slate-400 font-bold block">
+                  <span className="text-[9px] text-slate-600 font-bold block">
                     {Number(p.score).toLocaleString()} PTS
                   </span>
                 </div>

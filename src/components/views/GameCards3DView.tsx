@@ -24,14 +24,14 @@ import {
   TicTacState,
 } from "@/lib/games/tictac";
 import {
-  Gamepad2,
-  Grid2X2,
+  KeylineGamepad,
+  Grid2x2,
   Crown,
   Sparkles,
-  RotateCcw,
-  CheckCircle2,
-  ArrowRight,
-} from "lucide-react";
+  RefreshCw,
+  Check,
+  ChevronRight,
+} from "@/components/icons/KeylineIcons";
 
 export type GameModeId = "fill" | "chess" | "tictac" | null;
 
@@ -200,10 +200,10 @@ export const GameCards3DView: React.FC<GameCards3DViewProps> = ({
         <div className="perspective-1000 space-y-3 pt-1">
           <div className="flex items-center justify-between px-1">
             <span className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center gap-1.5 font-display">
-              <Gamepad2 className="w-4 h-4 text-[#0098ea]" />
+              <KeylineGamepad size={18} className="text-[#0098ea]" />
               <span>3D Arcade Game Modes</span>
             </span>
-            <span className="text-[11px] text-[#16a34a] font-bold">
+            <span className="text-[11px] text-[#14532d] font-bold">
               Level Multiplier: {levelInfo.multiplier}x
             </span>
           </div>
@@ -214,24 +214,24 @@ export const GameCards3DView: React.FC<GameCards3DViewProps> = ({
               triggerHaptic("medium");
               setActiveMode("fill");
             }}
-            className="card-3d-item liquid-glass p-4 border border-slate-200/90 hover:border-[#0098ea] cursor-pointer relative overflow-hidden group shadow-sm transition-all"
+            className="card-3d-item liquid-glass p-3.5 sm:p-4 border border-slate-200 hover:border-[#0098ea] cursor-pointer relative overflow-hidden group shadow-xs transition-all"
           >
             {/* Banknote Half-Circles Security Strip (10350116.webp) */}
             <div className="w-full h-2.5 border-strip-halfcircles opacity-70 mb-3 rounded-t-lg" />
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Grid2X2 className="w-8 h-8 text-[#0098ea] flex-shrink-0" />
+                <Grid2x2 size={24} className="text-[#0098ea] flex-shrink-0" />
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-black text-slate-900 font-display uppercase tracking-wide">
                       Fill Mission
                     </h3>
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-sky-50 text-[#0098ea] font-bold border border-sky-200">
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-sky-50 text-[#0077b5] font-bold border border-sky-200">
                       PUZZLE
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-600 mt-0.5">
                     Fill the highlighted matrix targets before moves run out.
                   </p>
                 </div>
@@ -239,14 +239,14 @@ export const GameCards3DView: React.FC<GameCards3DViewProps> = ({
 
               <div className="text-right flex items-center gap-2">
                 <div>
-                  <span className="text-xs font-black text-[#16a34a] font-display block">
+                  <span className="text-xs font-black text-[#14532d] font-display block">
                     +75 – 150 PTS
                   </span>
-                  <span className="text-[9px] text-slate-400 uppercase font-bold block">
+                  <span className="text-[9px] text-slate-500 uppercase font-bold block">
                     WIN REWARD
                   </span>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
+                <ChevronRight size={18} className="text-slate-400 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
               </div>
             </div>
           </div>
@@ -257,24 +257,24 @@ export const GameCards3DView: React.FC<GameCards3DViewProps> = ({
               triggerHaptic("medium");
               setActiveMode("chess");
             }}
-            className="card-3d-item liquid-glass p-4 border border-slate-200/90 hover:border-amber-500 cursor-pointer relative overflow-hidden group shadow-sm transition-all"
+            className="card-3d-item liquid-glass p-3.5 sm:p-4 border border-slate-200 hover:border-amber-500 cursor-pointer relative overflow-hidden group shadow-xs transition-all"
           >
             {/* Banknote Half-Circles Security Strip (10350116.webp) */}
             <div className="w-full h-2.5 border-strip-halfcircles opacity-70 mb-3 rounded-t-lg" />
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Crown className="w-8 h-8 text-amber-500 flex-shrink-0" />
+                <Crown size={24} className="text-amber-500 flex-shrink-0" />
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-black text-slate-900 font-display uppercase tracking-wide">
                       Chess Tactical
                     </h3>
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 font-bold border border-amber-200">
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-bold border border-amber-200">
                       STRATEGY
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-600 mt-0.5">
                     Capture the opponent King in a 5x5 tactical endgame.
                   </p>
                 </div>
@@ -282,14 +282,14 @@ export const GameCards3DView: React.FC<GameCards3DViewProps> = ({
 
               <div className="text-right flex items-center gap-2">
                 <div>
-                  <span className="text-xs font-black text-[#16a34a] font-display block">
+                  <span className="text-xs font-black text-[#14532d] font-display block">
                     +120 – 360 PTS
                   </span>
-                  <span className="text-[9px] text-slate-400 uppercase font-bold block">
+                  <span className="text-[9px] text-slate-500 uppercase font-bold block">
                     WIN REWARD
                   </span>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
+                <ChevronRight size={18} className="text-slate-400 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
               </div>
             </div>
           </div>
@@ -300,24 +300,24 @@ export const GameCards3DView: React.FC<GameCards3DViewProps> = ({
               triggerHaptic("medium");
               setActiveMode("tictac");
             }}
-            className="card-3d-item liquid-glass p-4 border border-slate-200/90 hover:border-[#16a34a] cursor-pointer relative overflow-hidden group shadow-sm transition-all"
+            className="card-3d-item liquid-glass p-3.5 sm:p-4 border border-slate-200 hover:border-[#16a34a] cursor-pointer relative overflow-hidden group shadow-xs transition-all"
           >
             {/* Banknote Half-Circles Security Strip (10350116.webp) */}
             <div className="w-full h-2.5 border-strip-halfcircles opacity-70 mb-3 rounded-t-lg" />
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Sparkles className="w-8 h-8 text-[#16a34a] flex-shrink-0" />
+                <Sparkles size={24} className="text-[#16a34a] flex-shrink-0" />
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-black text-slate-900 font-display uppercase tracking-wide">
                       TicTac Arena
                     </h3>
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-50 text-[#16a34a] font-bold border border-emerald-200">
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
                       SPEED
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-600 mt-0.5">
                     Fast 3x3 Tic Tac Toe vs Bot with win streaks.
                   </p>
                 </div>
@@ -325,17 +325,18 @@ export const GameCards3DView: React.FC<GameCards3DViewProps> = ({
 
               <div className="text-right flex items-center gap-2">
                 <div>
-                  <span className="text-xs font-black text-[#16a34a] font-display block">
+                  <span className="text-xs font-black text-[#14532d] font-display block">
                     +40 – 90 PTS
                   </span>
-                  <span className="text-[9px] text-slate-400 uppercase font-bold block">
+                  <span className="text-[9px] text-slate-500 uppercase font-bold block">
                     WIN REWARD
                   </span>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
+                <ChevronRight size={18} className="text-slate-400 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
               </div>
             </div>
           </div>
+
         </div>
       )}
 
@@ -357,16 +358,17 @@ export const GameCards3DView: React.FC<GameCards3DViewProps> = ({
               <button
                 type="button"
                 onClick={handleResetMission}
-                className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-sm"
+                className="w-9 h-9 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-slate-900 transition-colors shadow-xs flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
+                aria-label="Restart Mission"
                 title="Restart Mission"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RefreshCw size={16} />
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveMode(null)}
-                className="px-3 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:text-slate-900 transition-colors shadow-sm"
+                className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:text-slate-900 transition-colors shadow-xs min-h-[36px]"
               >
                 Back
               </button>
@@ -395,7 +397,7 @@ export const GameCards3DView: React.FC<GameCards3DViewProps> = ({
                   }`}
                 >
                   {isFilled && isTarget ? (
-                    <CheckCircle2 className="w-5 h-5 text-white" />
+                    <Check size={20} className="text-white" />
                   ) : isTarget ? (
                     <span className="w-3 h-3 rounded-full bg-[#0098ea]" />
                   ) : (
@@ -459,16 +461,17 @@ export const GameCards3DView: React.FC<GameCards3DViewProps> = ({
               <button
                 type="button"
                 onClick={handleResetChess}
-                className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-sm"
+                className="w-9 h-9 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-slate-900 transition-colors shadow-xs flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
+                aria-label="Reset Chess"
                 title="Reset Chess"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RefreshCw size={16} />
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveMode(null)}
-                className="px-3 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:text-slate-900 transition-colors shadow-sm"
+                className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:text-slate-900 transition-colors shadow-xs min-h-[36px]"
               >
                 Back
               </button>
@@ -573,16 +576,17 @@ export const GameCards3DView: React.FC<GameCards3DViewProps> = ({
               <button
                 type="button"
                 onClick={handleResetTicTac}
-                className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-sm"
+                className="w-9 h-9 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-slate-900 transition-colors shadow-xs flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
+                aria-label="Reset TicTac"
                 title="Reset TicTac"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RefreshCw size={16} />
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveMode(null)}
-                className="px-3 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:text-slate-900 transition-colors shadow-sm"
+                className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:text-slate-900 transition-colors shadow-xs min-h-[36px]"
               >
                 Back
               </button>
