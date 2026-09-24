@@ -4,13 +4,11 @@ import { TelegramUser } from "@/types/telegram";
 import {
   Wallet,
   Gift,
-  Repeat,
   Trophy,
   User,
-  KeylineGamepad,
 } from "@/components/icons/KeylineIcons";
 
-export type GameTab = "wallet" | "games" | "earn" | "swap" | "leaderboard" | "profile";
+export type GameTab = "wallet" | "earn" | "leaderboard" | "profile";
 
 interface GameDockProps {
   activeTab: GameTab;
@@ -26,9 +24,9 @@ export const GameDock: React.FC<GameDockProps> = ({
   return (
     <nav
       aria-label="Bottom Navigation Dock"
-      className="fixed bottom-[max(0.6rem,env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-40 w-[96%] max-w-[460px] select-none font-body"
+      className="fixed bottom-[max(0.6rem,env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-40 w-[96%] max-w-[440px] select-none font-body"
     >
-      <div className="rounded-2xl px-1.5 py-1.5 flex items-center justify-between border border-slate-200 shadow-2xl bg-white/95 backdrop-blur-xl">
+      <div className="rounded-2xl px-2 py-1.5 flex items-center justify-between border border-slate-200 shadow-2xl bg-white/95 backdrop-blur-xl">
         {/* Wallet / Vault Tab */}
         <button
           type="button"
@@ -45,23 +43,7 @@ export const GameDock: React.FC<GameDockProps> = ({
           <span className="text-[10px] mt-0.5 tracking-wider uppercase font-bold">Vault</span>
         </button>
 
-        {/* 3D Games Tab */}
-        <button
-          type="button"
-          onClick={() => onChangeTab("games")}
-          aria-label="3D Games"
-          aria-current={activeTab === "games" ? "page" : undefined}
-          className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all min-h-[48px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] active:scale-95 ${
-            activeTab === "games"
-              ? "text-[#0098ea] font-black bg-blue-50/80"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
-        >
-          <KeylineGamepad size={22} className={activeTab === "games" ? "text-[#0098ea]" : "text-slate-600"} />
-          <span className="text-[10px] mt-0.5 tracking-wider uppercase font-bold">3D Game</span>
-        </button>
-
-        {/* Earn Tab */}
+        {/* Earn / Missions Tab */}
         <button
           type="button"
           onClick={() => onChangeTab("earn")}
@@ -74,23 +56,7 @@ export const GameDock: React.FC<GameDockProps> = ({
           }`}
         >
           <Gift size={22} className={activeTab === "earn" ? "text-[#0098ea]" : "text-slate-600"} />
-          <span className="text-[10px] mt-0.5 tracking-wider uppercase font-bold">Earn</span>
-        </button>
-
-        {/* Swap Tab */}
-        <button
-          type="button"
-          onClick={() => onChangeTab("swap")}
-          aria-label="Swap & Exchange"
-          aria-current={activeTab === "swap" ? "page" : undefined}
-          className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all min-h-[48px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] active:scale-95 ${
-            activeTab === "swap"
-              ? "text-[#0098ea] font-black bg-blue-50/80"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
-        >
-          <Repeat size={22} className={activeTab === "swap" ? "text-[#0098ea]" : "text-slate-600"} />
-          <span className="text-[10px] mt-0.5 tracking-wider uppercase font-bold">Swap</span>
+          <span className="text-[10px] mt-0.5 tracking-wider uppercase font-bold">Missions</span>
         </button>
 
         {/* Leaderboard Tab */}
@@ -109,11 +75,11 @@ export const GameDock: React.FC<GameDockProps> = ({
           <span className="text-[10px] mt-0.5 tracking-wider uppercase font-bold">Rank</span>
         </button>
 
-        {/* Profile Tab */}
+        {/* Profile / Settings Tab */}
         <button
           type="button"
           onClick={() => onChangeTab("profile")}
-          aria-label="User Profile"
+          aria-label="Settings & Profile"
           aria-current={activeTab === "profile" ? "page" : undefined}
           className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all min-h-[48px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] active:scale-95 ${
             activeTab === "profile"
@@ -139,7 +105,7 @@ export const GameDock: React.FC<GameDockProps> = ({
           ) : (
             <User size={22} className={activeTab === "profile" ? "text-[#0098ea]" : "text-slate-600"} />
           )}
-          <span className="text-[10px] mt-0.5 tracking-wider uppercase font-bold">Profile</span>
+          <span className="text-[10px] mt-0.5 tracking-wider uppercase font-bold">Settings</span>
         </button>
       </div>
     </nav>

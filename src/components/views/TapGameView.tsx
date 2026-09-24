@@ -21,9 +21,9 @@ import {
   EyeOff,
   Bell,
   ChevronRight,
+  ChevronLeft,
   ScanLine,
   Send,
-  KeylineGamepad,
 } from "@/components/icons/KeylineIcons";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
@@ -45,7 +45,7 @@ interface TapGameViewProps {
   passiveRate: number;
   onGoToSwap?: () => void;
   onGoToEarn?: () => void;
-  onGoToGames?: () => void;
+  onGoToSettings?: () => void;
   user: TelegramUser | null;
   tgApp: TelegramWebApp | null;
 }
@@ -60,7 +60,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
   passiveRate,
   onGoToSwap,
   onGoToEarn,
-  onGoToGames,
+  onGoToSettings,
   user,
   tgApp,
 }) => {
@@ -81,9 +81,38 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
     ? `shi_0x${Number(user.id).toString(16).padStart(8, "0")}...${String(user.id).slice(-4)}`
     : "shi_0x78a19bc3...82f1";
 
-  // Conversion rates: 100 PTS = $1.00 USD = 4,100 KHR
+  // Conversion rates: 100 PTS = $1.00 USD = 4,100 KHR (~500 PTS = 1 TON)
   const usdValue = (score / 100).toFixed(2);
   const khrValue = Math.floor(score * 41).toLocaleString();
+  const tonValue = (score / 500).toFixed(3);
+
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const cardsScrollRef = useRef<HTMLDivElement | null>(null);
+
+  const handleCardsScroll = () => {
+    if (cardsScrollRef.current) {
+      const { scrollLeft, clientWidth } = cardsScrollRef.current;
+      const cardWidth = Math.min(clientWidth * 0.86, 340);
+      const newIndex = Math.round(scrollLeft / cardWidth);
+      if (newIndex >= 0 && newIndex <= 2 && newIndex !== activeCardIndex) {
+        setActiveCardIndex(newIndex);
+      }
+    }
+  };
+
+  const scrollToCard = (index: number) => {
+    setActiveCardIndex(index);
+    if (cardsScrollRef.current) {
+      const cardWidth = Math.min(cardsScrollRef.current.clientWidth * 0.86, 340);
+      cardsScrollRef.current.scrollTo({
+        left: index * cardWidth,
+        behavior: "smooth",
+      });
+    }
+    try {
+      tgApp?.HapticFeedback?.selectionChanged();
+    } catch {}
+  };
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
@@ -214,114 +243,191 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           </div>
         </div>
 
-        {/* 2. DUAL BANKNOTE CURRENCY CARDS (Mobile-Optimized Compact Design) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {/* Card 1: Cambodian Khmer Riel (គណនីប្រាក់រៀល) - Pure Code Banknote Design */}
+        {/* 2. DUAL/TRI-CURRENCY BANKNOTE CARDS (Scrollable Snap-Carousel with Better Mobile View) */}
+        <div className="relative">
           <div
-            role="button"
-            tabIndex={0}
-            onClick={onGoToSwap}
-            onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onGoToSwap?.()}
-            className="banknote-khr-card rounded-2xl p-3.5 shadow-xs relative overflow-hidden transition-all hover:shadow-sm active:scale-[0.99] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-600"
-            aria-label="KHR Account. Tap to exchange."
+            ref={cardsScrollRef}
+            onScroll={handleCardsScroll}
+            className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory py-1 px-0.5 -mx-0.5 touch-pan-x scroll-smooth"
           >
-            {/* Background Banknote Watermark Currency Glyph */}
-            <div className="absolute -right-3 -bottom-5 select-none pointer-events-none opacity-[0.06] text-purple-950 font-serif font-black text-8xl leading-none">
-              ៛
-            </div>
+            {/* Card 1: Cambodian Khmer Riel (គណនីប្រាក់រៀល) - Pure Code Banknote Design */}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={onGoToSwap}
+              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onGoToSwap?.()}
+              className="banknote-khr-card w-[86vw] max-w-[340px] sm:w-auto min-w-[270px] sm:min-w-0 snap-center shrink-0 rounded-2xl p-3.5 shadow-xs relative overflow-hidden transition-all hover:shadow-sm active:scale-[0.99] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 border border-purple-200"
+              aria-label="KHR Account. Tap to exchange."
+            >
+              {/* Background Banknote Watermark Currency Glyph */}
+              <div className="absolute -right-3 -bottom-5 select-none pointer-events-none opacity-[0.07] text-purple-950 font-serif font-black text-8xl leading-none">
+                ៛
+              </div>
 
-            {/* Top Serial & Security Tag */}
-            <div className="flex items-center justify-between text-[9px] font-mono text-purple-900/60 pb-1 mb-1 border-b border-purple-100">
-              <span className="tracking-widest">№ KHR-08492</span>
-              <span className="font-bold text-[8px] tracking-wider uppercase bg-purple-50 text-purple-800 px-1.5 py-0.2 rounded border border-purple-200">
-                OFFICIAL NOTE
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between relative z-10">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-sm font-bold text-purple-950 font-sans">
-                  គណនីប្រាក់រៀល
-                </span>
-                <span className="text-[10px] text-purple-900 font-bold uppercase tracking-wider">
-                  (KHR)
+              {/* Top Serial & Security Tag */}
+              <div className="flex items-center justify-between text-[9px] font-mono text-purple-900/70 pb-1 mb-1 border-b border-purple-100">
+                <span className="tracking-widest">№ KHR-0849201</span>
+                <span className="font-bold text-[8px] tracking-wider uppercase bg-purple-100/80 text-purple-900 px-1.5 py-0.2 rounded border border-purple-300">
+                  NBC OFFICIAL NOTE
                 </span>
               </div>
-              <span className="text-[9px] font-black text-purple-900 bg-purple-100/80 px-2 py-0.5 rounded-full border border-purple-300">
-                Reserve
-              </span>
+
+              <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-sm font-bold text-purple-950 font-sans">
+                    គណនីប្រាក់រៀល
+                  </span>
+                  <span className="text-[10px] text-purple-900 font-bold uppercase tracking-wider">
+                    (KHR)
+                  </span>
+                </div>
+                <span className="text-[9px] font-black text-purple-900 bg-purple-100/90 px-2 py-0.5 rounded-full border border-purple-300">
+                  National Reserve
+                </span>
+              </div>
+
+              <div className="mt-1 flex items-baseline relative z-10">
+                <span className="text-xl font-black text-purple-950 mr-1.5 font-sans">
+                  ៛
+                </span>
+                <span className="text-2xl font-black text-purple-950 tracking-tight font-sans">
+                  {showBalances ? khrValue : "••••••"}
+                </span>
+              </div>
+
+              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-700 font-semibold pt-1.5 border-t border-purple-200/80 relative z-10">
+                <span className="text-[10px] text-purple-950/70 font-medium truncate">100 PTS = 4,100 KHR</span>
+                <span className="text-[#0077b5] font-black flex items-center gap-0.5 text-xs flex-shrink-0">
+                  <span>Exchange</span>
+                  <ChevronRight size={14} />
+                </span>
+              </div>
             </div>
 
-            <div className="mt-1 flex items-baseline relative z-10">
-              <span className="text-xl font-black text-purple-950 mr-1.5 font-sans">
-                ៛
-              </span>
-              <span className="text-2xl font-black text-purple-950 tracking-tight font-sans">
-                {showBalances ? khrValue : "••••••"}
-              </span>
+            {/* Card 2: US Dollar Account (គណនីប្រាក់ដុល្លារ) - Pure Code Banknote Design */}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={onGoToSwap}
+              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onGoToSwap?.()}
+              className="banknote-usd-card w-[86vw] max-w-[340px] sm:w-auto min-w-[270px] sm:min-w-0 snap-center shrink-0 rounded-2xl p-3.5 shadow-xs relative overflow-hidden transition-all hover:shadow-sm active:scale-[0.99] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 border border-emerald-200"
+              aria-label="USD Account. Tap to exchange."
+            >
+              {/* Background Banknote Watermark Currency Glyph */}
+              <div className="absolute -right-2 -bottom-5 select-none pointer-events-none opacity-[0.07] text-emerald-950 font-serif font-black text-8xl leading-none">
+                $
+              </div>
+
+              {/* Top Serial & Security Tag */}
+              <div className="flex items-center justify-between text-[9px] font-mono text-emerald-900/70 pb-1 mb-1 border-b border-emerald-100">
+                <span className="tracking-widest">№ USD-7729104</span>
+                <span className="font-bold text-[8px] tracking-wider uppercase bg-emerald-100/80 text-emerald-900 px-1.5 py-0.2 rounded border border-emerald-300">
+                  US FEDERAL NOTE
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-sm font-bold text-emerald-950 font-sans">
+                    គណនីប្រាក់ដុល្លារ
+                  </span>
+                  <span className="text-[10px] text-emerald-900 font-bold uppercase tracking-wider">
+                    (USD)
+                  </span>
+                </div>
+                <span className="text-[9px] font-black text-emerald-900 bg-emerald-100/90 px-2 py-0.5 rounded-full border border-emerald-300">
+                  Federal Reserve
+                </span>
+              </div>
+
+              <div className="mt-1 flex items-baseline relative z-10">
+                <span className="text-xl font-black text-emerald-950 mr-1.5 font-sans">
+                  $
+                </span>
+                <span className="text-2xl font-black text-emerald-950 tracking-tight font-sans">
+                  {showBalances ? usdValue : "••••••"}
+                </span>
+              </div>
+
+              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-700 font-semibold pt-1.5 border-t border-emerald-200/80 relative z-10">
+                <span className="text-[10px] text-emerald-950/70 font-medium truncate">100 PTS = $1.00 USD</span>
+                <span className="text-[#0077b5] font-black flex items-center gap-0.5 text-xs flex-shrink-0">
+                  <span>Exchange</span>
+                  <ChevronRight size={14} />
+                </span>
+              </div>
             </div>
 
-            <div className="mt-2 flex items-center justify-between text-[11px] text-slate-700 font-semibold pt-1.5 border-t border-purple-200/80 relative z-10">
-              <span className="text-[10px] text-purple-950/70 font-medium truncate">100 PTS = 4,100 KHR</span>
-              <span className="text-[#0077b5] font-black flex items-center gap-0.5 text-xs flex-shrink-0">
-                <span>Exchange</span>
-                <ChevronRight size={14} />
-              </span>
+            {/* Card 3: TON & Points Web3 Vault (គណនីគ្រីបតូ TON) - Pure Code Banknote Design */}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={onGoToSwap}
+              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onGoToSwap?.()}
+              className="banknote-ton-card w-[86vw] max-w-[340px] sm:w-auto min-w-[270px] sm:min-w-0 snap-center shrink-0 rounded-2xl p-3.5 shadow-xs relative overflow-hidden transition-all hover:shadow-sm active:scale-[0.99] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 border border-sky-200"
+              aria-label="TON Web3 Vault Account. Tap to exchange."
+            >
+              {/* Background Banknote Watermark Currency Glyph */}
+              <div className="absolute -right-2 -bottom-5 select-none pointer-events-none opacity-[0.08] text-sky-950 font-serif font-black text-7xl leading-none">
+                TON
+              </div>
+
+              {/* Top Serial & Security Tag */}
+              <div className="flex items-center justify-between text-[9px] font-mono text-sky-900/70 pb-1 mb-1 border-b border-sky-100">
+                <span className="tracking-widest">№ TON-0082914</span>
+                <span className="font-bold text-[8px] tracking-wider uppercase bg-sky-100/80 text-sky-900 px-1.5 py-0.2 rounded border border-sky-300">
+                  TELEGRAM VAULT
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-sm font-bold text-sky-950 font-sans">
+                    គណនីគ្រីបតូ TON
+                  </span>
+                  <span className="text-[10px] text-sky-900 font-bold uppercase tracking-wider">
+                    (TON / PTS)
+                  </span>
+                </div>
+                <span className="text-[9px] font-black text-sky-900 bg-sky-100/90 px-2 py-0.5 rounded-full border border-sky-300">
+                  Web3 Secure
+                </span>
+              </div>
+
+              <div className="mt-1 flex items-baseline relative z-10">
+                <span className="text-xl font-black text-sky-950 mr-1.5 font-sans">
+                  💎
+                </span>
+                <span className="text-2xl font-black text-sky-950 tracking-tight font-sans">
+                  {showBalances ? `${tonValue} TON` : "••••••"}
+                </span>
+              </div>
+
+              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-700 font-semibold pt-1.5 border-t border-sky-200/80 relative z-10">
+                <span className="text-[10px] text-sky-950/70 font-medium truncate">500 PTS ≈ 1.00 TON</span>
+                <span className="text-[#0077b5] font-black flex items-center gap-0.5 text-xs flex-shrink-0">
+                  <span>Exchange</span>
+                  <ChevronRight size={14} />
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Card 2: US Dollar Account (គណនីប្រាក់ដុល្លារ) - Pure Code Banknote Design */}
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={onGoToSwap}
-            onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onGoToSwap?.()}
-            className="banknote-usd-card rounded-2xl p-3.5 shadow-xs relative overflow-hidden transition-all hover:shadow-sm active:scale-[0.99] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
-            aria-label="USD Account. Tap to exchange."
-          >
-            {/* Background Banknote Watermark Currency Glyph */}
-            <div className="absolute -right-2 -bottom-5 select-none pointer-events-none opacity-[0.06] text-emerald-950 font-serif font-black text-8xl leading-none">
-              $
-            </div>
-
-            {/* Top Serial & Security Tag */}
-            <div className="flex items-center justify-between text-[9px] font-mono text-emerald-900/60 pb-1 mb-1 border-b border-emerald-100">
-              <span className="tracking-widest">№ USD-88492</span>
-              <span className="font-bold text-[8px] tracking-wider uppercase bg-emerald-50 text-emerald-800 px-1.5 py-0.2 rounded border border-emerald-200">
-                FEDERAL NOTE
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between relative z-10">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-sm font-bold text-emerald-950 font-sans">
-                  គណនីប្រាក់ដុល្លារ
-                </span>
-                <span className="text-[10px] text-emerald-900 font-bold uppercase tracking-wider">
-                  (USD)
-                </span>
-              </div>
-              <span className="text-[9px] font-black text-emerald-900 bg-emerald-100/80 px-2 py-0.5 rounded-full border border-emerald-300">
-                Reserve
-              </span>
-            </div>
-
-            <div className="mt-1 flex items-baseline relative z-10">
-              <span className="text-xl font-black text-emerald-950 mr-1.5 font-sans">
-                $
-              </span>
-              <span className="text-2xl font-black text-emerald-950 tracking-tight font-sans">
-                {showBalances ? usdValue : "••••••"}
-              </span>
-            </div>
-
-            <div className="mt-2 flex items-center justify-between text-[11px] text-slate-700 font-semibold pt-1.5 border-t border-emerald-200/80 relative z-10">
-              <span className="text-[10px] text-emerald-950/70 font-medium truncate">100 PTS = $1.00 USD</span>
-              <span className="text-[#0077b5] font-black flex items-center gap-0.5 text-xs flex-shrink-0">
-                <span>Exchange</span>
-                <ChevronRight size={14} />
-              </span>
-            </div>
+          {/* Mobile Snap Carousel Indicator Dots */}
+          <div className="flex sm:hidden items-center justify-center gap-1.5 pt-1.5 pb-0.5">
+            {[0, 1, 2].map((idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => scrollToCard(idx)}
+                className={`h-1.5 rounded-full transition-all ${
+                  activeCardIndex === idx
+                    ? "w-6 bg-[#0098ea]"
+                    : "w-2 bg-slate-300 hover:bg-slate-400"
+                }`}
+                aria-label={`Scroll to card ${idx + 1}`}
+              />
+            ))}
           </div>
         </div>
 
@@ -431,10 +537,10 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
             </div>
             <button
               type="button"
-              onClick={onGoToGames}
+              onClick={onGoToSettings}
               className="text-xs text-[#0077b5] font-bold flex items-center gap-0.5 hover:underline min-h-[36px] px-1"
             >
-              <span>មើលទាំងអស់</span>
+              <span>ការកំណត់ (Settings)</span>
               <ChevronRight size={16} />
             </button>
           </div>
@@ -443,13 +549,13 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <div className="grid grid-cols-3 gap-2 mt-1.5">
             <button
               type="button"
-              onClick={onGoToGames}
+              onClick={onGoToSettings}
               className="p-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 flex flex-col items-center justify-center shadow-xs active:scale-95 transition-all min-h-[60px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
-              aria-label="Play 3D Games"
+              aria-label="Telegram Settings and Profile Config"
             >
-              <KeylineGamepad size={22} className="text-[#0098ea] mb-1" />
-              <span className="text-xs font-bold text-slate-900">3D Game</span>
-              <span className="text-[9px] text-slate-500 font-medium">Play & Earn</span>
+              <ShieldCheck size={22} className="text-[#0098ea] mb-1" />
+              <span className="text-xs font-bold text-slate-900">ការកំណត់</span>
+              <span className="text-[9px] text-slate-500 font-medium">Settings</span>
             </button>
 
             <button
@@ -834,12 +940,12 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
                 type="button"
                 onClick={() => {
                   setShowDepositModal(false);
-                  onGoToGames?.();
+                  onGoToSwap?.();
                 }}
                 className="w-full py-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 min-h-[44px]"
               >
-                <KeylineGamepad size={20} className="text-[#0098ea]" />
-                <span>Play 3D Games (+500 PTS)</span>
+                <Repeat size={20} className="text-emerald-600" />
+                <span>Exchange Currency (DEX Swap)</span>
               </button>
             </div>
 

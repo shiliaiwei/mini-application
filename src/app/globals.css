@@ -121,6 +121,16 @@ html, body {
   background-size: 100% 100%, 14px 14px;
 }
 
+.banknote-ton-card {
+  background-color: #ffffff;
+  position: relative;
+  border: 1.5px solid #bae6fd;
+  background-image: 
+    radial-gradient(circle at 100% 100%, rgba(2, 132, 199, 0.04) 0%, transparent 60%),
+    radial-gradient(#0284c70d 1px, transparent 1px);
+  background-size: 100% 100%, 14px 14px;
+}
+
 /* Telegram Liquid Glass Effect */
 .liquid-glass {
   background: rgba(255, 255, 255, 0.85);

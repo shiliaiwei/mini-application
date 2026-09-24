@@ -7,9 +7,8 @@ import { CategoryBar, NavCategory } from "@/components/navigation/CategoryBar";
 import { GameDock, GameTab } from "@/components/dock/GameDock";
 import { TapGameView } from "@/components/views/TapGameView";
 import { EarnTasksView } from "@/components/views/EarnTasksView";
-import { SwapView } from "@/components/views/SwapView";
 import { LeaderboardView } from "@/components/views/LeaderboardView";
-import { GameProfileView } from "@/components/views/GameProfileView";
+import { GameProfileView, ProfileSubTab } from "@/components/views/GameProfileView";
 import { GameWelcomeScreen } from "@/components/welcome/GameWelcomeScreen";
 import { TelegramGateScreen } from "@/components/common/TelegramGateScreen";
 import {
@@ -20,8 +19,6 @@ import {
   DollarSign,
 } from "@/components/icons/KeylineIcons";
 
-import { GameCards3DView } from "@/components/views/GameCards3DView";
-
 export default function MiniAppPage() {
   const [tgApp, setTgApp] = useState<TelegramWebApp | null>(null);
   const [user, setUser] = useState<TelegramUser | null>(null);
@@ -29,6 +26,7 @@ export default function MiniAppPage() {
   const [showWelcome, setShowWelcome] = useState(true);
   const [activeTab, setActiveTab] = useState<GameTab>("wallet");
   const [activeCategory, setActiveCategory] = useState<NavCategory>("lobby");
+  const [profileSubTab, setProfileSubTab] = useState<ProfileSubTab>("profile");
 
   // Modals
   const [showSupportModal, setShowSupportModal] = useState(false);
@@ -255,11 +253,9 @@ export default function MiniAppPage() {
 
     // Sync category bar state
     if (tab === "wallet") setActiveCategory("lobby");
-    else if (tab === "games") setActiveCategory("games");
     else if (tab === "earn") setActiveCategory("earn");
-    else if (tab === "swap") setActiveCategory("swap");
     else if (tab === "leaderboard") setActiveCategory("tournaments");
-    else if (tab === "profile") setActiveCategory("security");
+    else if (tab === "profile") setActiveCategory("settings");
   };
 
   const handleCategorySelect = (cat: NavCategory) => {
@@ -270,15 +266,12 @@ export default function MiniAppPage() {
 
     if (cat === "lobby" || cat === "vault" || cat === "popular" || cat === "favorites") {
       setActiveTab("wallet");
-    } else if (cat === "games") {
-      setActiveTab("games");
     } else if (cat === "earn") {
       setActiveTab("earn");
-    } else if (cat === "swap") {
-      setActiveTab("swap");
     } else if (cat === "tournaments") {
       setActiveTab("leaderboard");
-    } else if (cat === "security") {
+    } else if (cat === "settings") {
+      setProfileSubTab("profile");
       setActiveTab("profile");
     }
   };
@@ -340,13 +333,14 @@ export default function MiniAppPage() {
       <WinGramHeader
         score={score}
         user={user}
-        activeMode={activeTab === "wallet" ? "lobby" : activeTab}
         onSelectMode={(mode) => {
           if (mode === "lobby") handleTabChange("wallet");
           else if (mode === "earn") handleTabChange("earn");
-          else if (mode === "bonuses") handleTabChange("games");
         }}
-        onOpenProfile={() => handleTabChange("profile")}
+        onOpenProfile={() => {
+          setProfileSubTab("profile");
+          handleTabChange("profile");
+        }}
         onOpenTopUp={() => setShowTopUpModal(true)}
       />
 
@@ -367,18 +361,15 @@ export default function MiniAppPage() {
             spendSeconds={spendSeconds}
             tapPower={tapPower}
             passiveRate={passiveRate}
-            onGoToSwap={() => handleTabChange("swap")}
+            onGoToSwap={() => {
+              setProfileSubTab("swap");
+              handleTabChange("profile");
+            }}
             onGoToEarn={() => handleTabChange("earn")}
-            onGoToGames={() => handleTabChange("games")}
-            user={user}
-            tgApp={tgApp}
-          />
-        )}
-
-        {activeTab === "games" && (
-          <GameCards3DView
-            score={score}
-            onAddScore={handleAddScore}
+            onGoToSettings={() => {
+              setProfileSubTab("profile");
+              handleTabChange("profile");
+            }}
             user={user}
             tgApp={tgApp}
           />
@@ -392,15 +383,6 @@ export default function MiniAppPage() {
             onUpgradeTapPower={handleUpgradeTapPower}
             passiveRate={passiveRate}
             onUpgradePassiveRate={handleUpgradePassiveRate}
-            user={user}
-            tgApp={tgApp}
-          />
-        )}
-
-        {activeTab === "swap" && (
-          <SwapView
-            score={score}
-            onSetScore={(newScore) => setScore(newScore)}
             user={user}
             tgApp={tgApp}
           />
@@ -423,6 +405,8 @@ export default function MiniAppPage() {
             spendSeconds={spendSeconds}
             tapPower={tapPower}
             passiveRate={passiveRate}
+            initialSubTab={profileSubTab}
+            onSetScore={(newScore) => setScore(newScore)}
             onBack={() => handleTabChange("wallet")}
           />
         )}

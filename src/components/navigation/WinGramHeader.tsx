@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { TelegramUser } from "@/types/telegram";
-import { Search, User } from "@/components/icons/KeylineIcons";
+import { User } from "@/components/icons/KeylineIcons";
 import { getUserLevelInfo } from "@/lib/games/levels";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
@@ -11,8 +11,8 @@ import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge
 interface WinGramHeaderProps {
   score: number;
   user: TelegramUser | null;
-  activeMode: string;
-  onSelectMode: (mode: string) => void;
+  activeMode?: string;
+  onSelectMode?: (mode: string) => void;
   onOpenProfile: () => void;
   onOpenTopUp: () => void;
 }
@@ -20,7 +20,6 @@ interface WinGramHeaderProps {
 export const WinGramHeader: React.FC<WinGramHeaderProps> = ({
   score,
   user,
-  activeMode,
   onSelectMode,
   onOpenProfile,
   onOpenTopUp,
@@ -30,68 +29,21 @@ export const WinGramHeader: React.FC<WinGramHeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200/90 px-3 py-2 flex items-center justify-between gap-2 select-none font-body shadow-xs">
-      {/* Left: Brand Logo & Mode Switcher Pills */}
+      {/* Left: Brand Logo */}
       <div className="flex items-center gap-2 min-w-0">
         {/* SHILIAIWEI Brand: Standalone Wordmark (Zero Logo Icon per rule) */}
         <button
           type="button"
-          onClick={() => onSelectMode("lobby")}
+          onClick={() => onSelectMode?.("lobby")}
           className="flex items-center cursor-pointer flex-shrink-0 text-left min-h-[44px] px-1 -ml-1 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
           aria-label="SHILIAIWEI Vault"
         >
           <ShiliaiweiBrand variant="wordmark" height={22} colorScheme="blue" />
         </button>
-
-        {/* Mode Switcher Pills */}
-        <div className="hidden sm:flex items-center bg-slate-100/90 p-0.5 rounded-full border border-slate-200 text-xs font-bold">
-          <button
-            type="button"
-            onClick={() => onSelectMode("lobby")}
-            className={`px-3 py-1.5 rounded-full transition-all ${
-              activeMode === "lobby"
-                ? "bg-[#0098ea] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            Vault
-          </button>
-          <button
-            type="button"
-            onClick={() => onSelectMode("games")}
-            className={`px-3 py-1.5 rounded-full transition-all ${
-              activeMode === "games"
-                ? "bg-[#0098ea] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            3D Game
-          </button>
-          <button
-            type="button"
-            onClick={() => onSelectMode("earn")}
-            className={`px-3 py-1.5 rounded-full transition-all ${
-              activeMode === "earn"
-                ? "bg-[#0098ea] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            Missions
-          </button>
-        </div>
       </div>
 
-      {/* Right: Search, Real Balance, Top Up, Profile */}
+      {/* Right: Real Balance, Top Up, Profile */}
       <div className="flex items-center gap-1.5 flex-shrink-0">
-        {/* Search */}
-        <button
-          type="button"
-          onClick={() => onSelectMode("games")}
-          className="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 flex items-center justify-center transition-colors min-w-[40px] min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
-          aria-label="Search 3D games and features"
-          title="Search"
-        >
-          <Search size={20} />
-        </button>
 
         {/* Real Balance Pill */}
         <div

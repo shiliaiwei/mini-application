@@ -7,23 +7,19 @@ import {
   Flame,
   Zap,
   Gift,
-  Repeat,
   Trophy,
   ShieldCheck,
   ChevronRight,
-  KeylineGamepad,
 } from "@/components/icons/KeylineIcons";
 
 export type NavCategory =
   | "lobby"
   | "vault"
-  | "games"
   | "earn"
-  | "swap"
   | "tournaments"
   | "favorites"
   | "popular"
-  | "security";
+  | "settings";
 
 interface CategoryBarProps {
   activeCategory: NavCategory;
@@ -39,13 +35,11 @@ export const CategoryBar: React.FC<CategoryBarProps> = ({
   const categories: Array<{ id: NavCategory; label: string; icon: React.ReactNode }> = [
     { id: "lobby", label: "Lobby", icon: <Grid2x2 size={16} /> },
     { id: "vault", label: "Tap Vault", icon: <Zap size={16} className="text-cyan-600" /> },
-    { id: "games", label: "3D Games", icon: <KeylineGamepad size={16} className="text-[#0098ea]" /> },
     { id: "earn", label: "Missions", icon: <Gift size={16} className="text-amber-600" /> },
-    { id: "swap", label: "DEX Swap", icon: <Repeat size={16} className="text-emerald-600" /> },
     { id: "tournaments", label: "Tournaments", icon: <Trophy size={16} className="text-yellow-600" /> },
     { id: "popular", label: "Popular", icon: <Flame size={16} className="text-red-500" /> },
     { id: "favorites", label: "Favorites", icon: <Star size={16} className="text-amber-500" /> },
-    { id: "security", label: "Security", icon: <ShieldCheck size={16} className="text-blue-600" /> },
+    { id: "settings", label: "Settings", icon: <ShieldCheck size={16} className="text-blue-600" /> },
   ];
 
   const handleScrollRight = () => {
