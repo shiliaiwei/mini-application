@@ -363,6 +363,7 @@ export default function MiniAppPage() {
             passiveRate={passiveRate}
             onGoToSwap={() => handleTabChange("swap")}
             onGoToEarn={() => handleTabChange("earn")}
+            onGoToGames={() => handleTabChange("games")}
             user={user}
             tgApp={tgApp}
           />

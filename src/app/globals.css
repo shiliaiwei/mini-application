@@ -1,8 +1,38 @@
 @import "tailwindcss";
 
-:root {
-  --font-sans: var(--font-google-sans), "Google Sans", system-ui, -apple-system, sans-serif;
+@theme {
+  --font-sans: var(--font-google-sans), "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Khmer OS", "Kantumruy Pro", sans-serif;
   --font-display: var(--font-faculty-glyphic), "Faculty Glyphic", Georgia, serif;
+  --font-body: var(--font-google-sans), "Google Sans", sans-serif;
+}
+
+@font-face {
+  font-family: "Google Sans";
+  src: url("/fonts/GoogleSans-VariableFont_GRAD,opsz,wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans";
+  src: url("/fonts/GoogleSans-Italic-VariableFont_GRAD,opsz,wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Faculty Glyphic";
+  src: url("/fonts/FacultyGlyphic-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-sans: "Google Sans", var(--font-google-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Khmer OS", "Kantumruy Pro", sans-serif;
+  --font-display: "Faculty Glyphic", var(--font-faculty-glyphic), Georgia, serif;
 
   /* Telegram Official White & Liquid Glass Theme Palette */
   --bg-app: #ffffff;
@@ -26,7 +56,8 @@
   --text-muted: #64748b;
 }
 
-* {
+*, ::before, ::after {
+  font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;
@@ -34,7 +65,7 @@
 }
 
 html, body {
-  background-color: #ffffff;
+  background-color: #f8fafc;
   color: #0f172a;
   font-family: var(--font-sans);
   overscroll-behavior-y: none;
@@ -46,6 +77,14 @@ html, body {
   overflow-x: hidden;
 }
 
+.font-sans, .font-body {
+  font-family: var(--font-sans) !important;
+}
+
+.font-display {
+  font-family: var(--font-display) !important;
+}
+
 /* Telegram White App Canvas with Guilloche Texture */
 .app-bg-white {
   background-color: #ffffff;
@@ -54,6 +93,23 @@ html, body {
   background-size: 380px 380px;
   background-blend-mode: soft-light;
   min-height: 100vh;
+}
+
+/* Authentic Banknote Currency Card Backgrounds */
+.banknote-khr-card {
+  background-color: #ffffff;
+  background-image: url("/backgrounds/banknote_khr_card.webp");
+  background-size: cover;
+  background-position: right center;
+  background-repeat: no-repeat;
+}
+
+.banknote-usd-card {
+  background-color: #ffffff;
+  background-image: url("/backgrounds/banknote_usd_card.webp");
+  background-size: cover;
+  background-position: right center;
+  background-repeat: no-repeat;
 }
 
 /* Banknote & Security Guilloche Background Styles */
