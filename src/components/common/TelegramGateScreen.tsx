@@ -1,7 +1,7 @@
 "use client";
 
 import { Send, CircleAlert } from "@/components/icons/KeylineIcons";
-import { VLogo } from "@/components/brand/VLogo";
+import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 
 interface TelegramGateScreenProps {
   onBypass?: () => void;
@@ -30,7 +30,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass
         <div className="w-20 h-20 rounded-full bg-white border-2 border-[#0098ea] mx-auto flex items-center justify-center shadow-lg relative overflow-hidden">
           {/* Radial Rosette Watermark (7168912.webp) */}
           <div className="absolute inset-0 bg-security-sunburst opacity-30 pointer-events-none" />
-          <VLogo size={44} variant="solid-blue" className="relative z-10" />
+          <ShiliaiweiBrand variant="mark" height={44} className="relative z-10" />
         </div>
 
         <div className="space-y-1.5">

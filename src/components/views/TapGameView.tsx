@@ -25,7 +25,7 @@ import {
   Send,
   KeylineGamepad,
 } from "@/components/icons/KeylineIcons";
-import { VLogo } from "@/components/brand/VLogo";
+import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 
 interface FloatingPoint {
@@ -174,19 +174,9 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
       {/* 1. Top Brand & Visibility Status Bar */}
       <div className="w-full space-y-2.5 pt-0.5">
         <div className="flex items-center justify-between px-1">
-          {/* Brand Logo & Title */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-[#0098ea] flex items-center justify-center text-white shadow-xs">
-              <VLogo size={20} variant="white" />
-            </div>
-            <div>
-              <span className="font-black text-sm tracking-wider uppercase text-slate-900 font-sans block leading-tight">
-                SHILIAIWEI
-              </span>
-              <span className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">
-                VAULT & CURRENCY
-              </span>
-            </div>
+          {/* Brand Wordmark (Zero Logo Icon per rule) */}
+          <div className="flex items-center">
+            <ShiliaiweiBrand variant="wordmark" height={22} colorScheme="blue" />
           </div>
 
           {/* Top Actions: Eye Toggle, Notifications, User Avatar */}
@@ -503,13 +493,10 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
             {/* Guilloche Radial Sunburst Rosette Watermark */}
             <div className="absolute inset-0 bg-security-sunburst opacity-25 pointer-events-none" />
 
-            {/* Inner Ring with Micro-print border and Centered Geometric V Logo */}
+            {/* Inner Ring with Micro-print border and Centered Brand Mark (Zero text per rule) */}
             <div className="w-34 h-34 sm:w-40 sm:h-40 rounded-full border border-dashed border-[#0098ea]/40 flex flex-col items-center justify-center relative bg-white/80 backdrop-blur-xs">
-              <span className="text-[9px] font-bold text-[#0098ea] tracking-widest uppercase mb-0.5">
-                SHILIAIWEI
-              </span>
-              {/* Centered Geometric V Letter Logo */}
-              <VLogo size={42} variant="solid-blue" className="my-0.5" />
+              {/* Centered Brand Mark */}
+              <ShiliaiweiBrand variant="mark" height={42} className="my-1" />
               <span className="text-[10px] font-black text-[#16a34a] tracking-wider uppercase mt-0.5">
                 TAP FOR POINTS
               </span>

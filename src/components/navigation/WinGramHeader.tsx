@@ -5,7 +5,7 @@ import Image from "next/image";
 import { TelegramUser } from "@/types/telegram";
 import { Search, User } from "@/components/icons/KeylineIcons";
 import { getUserLevelInfo } from "@/lib/games/levels";
-import { VLogo } from "@/components/brand/VLogo";
+import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 
 interface WinGramHeaderProps {
@@ -32,24 +32,14 @@ export const WinGramHeader: React.FC<WinGramHeaderProps> = ({
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200/90 px-3 py-2 flex items-center justify-between gap-2 select-none font-body shadow-xs">
       {/* Left: Brand Logo & Mode Switcher Pills */}
       <div className="flex items-center gap-2 min-w-0">
-        {/* SHILIAIWEI Brand Logo with V Letter Emblem */}
+        {/* SHILIAIWEI Brand: Standalone Wordmark (Zero Logo Icon per rule) */}
         <button
           type="button"
           onClick={() => onSelectMode("lobby")}
-          className="flex items-center gap-1.5 cursor-pointer flex-shrink-0 text-left min-h-[44px] px-1 -ml-1 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
-          aria-label="Go to Vault lobby"
+          className="flex items-center cursor-pointer flex-shrink-0 text-left min-h-[44px] px-1 -ml-1 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
+          aria-label="SHILIAIWEI Vault"
         >
-          <div className="w-7 h-7 rounded-lg bg-[#0098ea] flex items-center justify-center text-white shadow-xs">
-            <VLogo size={18} variant="white" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-black tracking-wider text-slate-900 font-sans uppercase leading-tight">
-              SHILIAIWEI
-            </span>
-            <span className="text-[9px] font-semibold text-slate-500 uppercase tracking-widest leading-none">
-              Vault
-            </span>
-          </div>
+          <ShiliaiweiBrand variant="wordmark" height={22} colorScheme="blue" />
         </button>
 
         {/* Mode Switcher Pills */}
