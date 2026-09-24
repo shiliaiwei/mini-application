@@ -40,19 +40,28 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
     : "Telegram Holder";
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-between p-6 app-bg-white text-slate-900 max-w-md mx-auto w-full select-none font-body">
+    <div className="fixed inset-0 z-50 flex flex-col justify-between p-6 app-bg-white text-slate-900 max-w-md mx-auto w-full select-none font-body relative overflow-hidden">
+      {/* Flowing Vertical Banknote Security Ribbon (ca18d734-2fb8-483c-8a5a-a4ea71fcb4cf.webp) */}
+      <div className="absolute inset-0 bg-security-ribbon opacity-[0.05] pointer-events-none z-0" />
+
       {/* Top Tag */}
-      <div className="flex items-center justify-between text-xs text-slate-500 border-b border-slate-200 pb-3">
-        <span className="text-[#0098ea] font-bold uppercase tracking-wider">@srievibot</span>
-        <span className="text-[10px] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-700 font-semibold uppercase tracking-wider">
-          SHILIAIWEI
-        </span>
+      <div className="relative z-10">
+        <div className="flex items-center justify-between text-xs text-slate-500 pb-2">
+          <span className="text-[#0098ea] font-bold uppercase tracking-wider">@srievibot</span>
+          <span className="text-[10px] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-700 font-semibold uppercase tracking-wider">
+            SHILIAIWEI
+          </span>
+        </div>
+        {/* Rings Banknote Security Strip (103345550116.webp) */}
+        <div className="w-full h-2 border-strip-rings opacity-70 border-b border-slate-200/80" />
       </div>
 
       {/* Center Welcome */}
-      <div className="my-auto text-center space-y-4">
-        <div className="w-20 h-20 rounded-full bg-white border-2 border-[#0098ea] mx-auto flex items-center justify-center text-[#0098ea] shadow-lg">
-          <Wallet className="w-10 h-10" />
+      <div className="my-auto text-center space-y-4 relative z-10">
+        <div className="w-20 h-20 rounded-full bg-white border-2 border-[#0098ea] mx-auto flex items-center justify-center text-[#0098ea] shadow-lg relative overflow-hidden">
+          {/* Radial Rosette Watermark (7168912.webp) */}
+          <div className="absolute inset-0 bg-security-sunburst opacity-30 pointer-events-none" />
+          <Wallet className="w-10 h-10 relative z-10" />
         </div>
 
         <div className="space-y-1">

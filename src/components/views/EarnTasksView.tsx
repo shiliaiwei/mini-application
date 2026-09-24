@@ -166,11 +166,15 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
   return (
     <div className="space-y-4 pb-24 font-body select-none text-slate-900 max-w-xl mx-auto w-full px-1">
       {/* Top Banner Overview */}
-      <div className="liquid-glass p-4 flex items-center justify-between border border-slate-200/90 shadow-sm">
-        <div>
-          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
-            AVAILABLE VAULT BALANCE
-          </span>
+      <div className="liquid-glass p-4 border border-slate-200/90 shadow-sm relative overflow-hidden">
+        {/* Banknote Waves Security Strip (10350112346.webp) */}
+        <div className="w-full h-2.5 border-strip-waves opacity-60 mb-2.5" />
+
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+              AVAILABLE VAULT BALANCE
+            </span>
           <div className="text-2xl font-black text-slate-900 font-display mt-0.5">
             <span className="text-[#16a34a] mr-1">$</span>
             {score.toLocaleString()}
@@ -186,6 +190,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
           </span>
         </div>
       </div>
+    </div>
 
       {/* Sub Tabs Selector */}
       <div className="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold border border-slate-200 shadow-sm">

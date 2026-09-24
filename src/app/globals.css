@@ -56,6 +56,49 @@ html, body {
   min-height: 100vh;
 }
 
+/* Banknote & Security Guilloche Background Styles */
+.bg-security-sunburst {
+  background-image: url("/backgrounds/7168912.webp");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.bg-security-ribbon {
+  background-image: url("/backgrounds/ca18d734-2fb8-483c-8a5a-a4ea71fcb4cf.webp");
+  background-repeat: no-repeat;
+  background-position: right top;
+  background-size: 440px auto;
+}
+
+.border-strip-flower {
+  background-image: url("/backgrounds/1033454350116.webp");
+  background-repeat: repeat-x;
+  background-position: center;
+  background-size: auto 16px;
+}
+
+.border-strip-rings {
+  background-image: url("/backgrounds/103345550116.webp");
+  background-repeat: repeat-x;
+  background-position: center;
+  background-size: auto 16px;
+}
+
+.border-strip-waves {
+  background-image: url("/backgrounds/10350112346.webp");
+  background-repeat: repeat-x;
+  background-position: center;
+  background-size: auto 18px;
+}
+
+.border-strip-halfcircles {
+  background-image: url("/backgrounds/10350116.webp");
+  background-repeat: repeat-x;
+  background-position: center;
+  background-size: auto 18px;
+}
+
 /* Telegram Liquid Glass Effect */
 .liquid-glass {
   background: rgba(255, 255, 255, 0.85);

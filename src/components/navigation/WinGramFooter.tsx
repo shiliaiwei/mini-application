@@ -17,7 +17,10 @@ export const WinGramFooter: React.FC<WinGramFooterProps> = ({
   onOpenSupport,
 }) => {
   return (
-    <footer className="bg-white/80 backdrop-blur-xl border-t border-slate-200/90 mt-8 pt-8 pb-16 px-4 text-slate-500 text-xs font-body select-none">
+    <footer className="bg-white/80 backdrop-blur-xl border-t border-slate-200/90 mt-8 pb-16 px-4 text-slate-500 text-xs font-body select-none">
+      {/* Rings Banknote Security Guilloche Border Strip (103345550116.webp) */}
+      <div className="w-full h-3 border-strip-rings opacity-80 mb-6" />
+
       <div className="max-w-xl mx-auto space-y-6">
         {/* Brand Row */}
         <div className="flex items-center justify-between">

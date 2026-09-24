@@ -198,6 +198,8 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
 
         {/* Main Vault Balance Card */}
         <div className="liquid-glass p-4 sm:p-5 text-center relative overflow-hidden border border-slate-200/90 shadow-sm">
+          {/* Banknote Security Waves Strip (10350112346.webp) */}
+          <div className="w-full h-3 border-strip-waves opacity-60 mb-2.5" />
           <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
             {activeCurrency === "USD" && "ESTIMATED USD VAULT NET WORTH"}
             {activeCurrency === "KHR" && "CAMBODIAN KHMER RIEL BALANCE"}
@@ -322,9 +324,12 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           className="tap-button-white relative w-64 h-64 rounded-full flex flex-col items-center justify-center cursor-pointer select-none"
         >
           {/* Outer Grooved Rim */}
-          <div className="w-56 h-56 rounded-full border-2 border-[#0098ea]/40 flex flex-col items-center justify-center bg-white shadow-xl relative p-1">
+          <div className="w-56 h-56 rounded-full border-2 border-[#0098ea]/40 flex flex-col items-center justify-center bg-white shadow-xl relative p-1 overflow-hidden">
+            {/* Guilloche Radial Sunburst Rosette Watermark (7168912.webp) */}
+            <div className="absolute inset-0 bg-security-sunburst opacity-30 pointer-events-none" />
+
             {/* Inner Ring with Micro-print border */}
-            <div className="w-48 h-48 rounded-full border border-dashed border-[#0098ea]/40 flex flex-col items-center justify-center relative bg-slate-50/80">
+            <div className="w-48 h-48 rounded-full border border-dashed border-[#0098ea]/40 flex flex-col items-center justify-center relative bg-white/70 backdrop-blur-xs">
               <span className="text-[9px] font-bold text-[#0098ea] tracking-widest uppercase mb-1">
                 SHILIAIWEI
               </span>

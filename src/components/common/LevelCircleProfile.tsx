@@ -54,7 +54,7 @@ export const LevelCircleProfile: React.FC<LevelCircleProfileProps> = ({
             cy={container / 2}
             r={radius}
             fill="none"
-            stroke="#232c35"
+            stroke="#e2e8f0"
             strokeWidth={stroke}
           />
           {/* Dynamic Level Progress Arc */}
@@ -72,23 +72,26 @@ export const LevelCircleProfile: React.FC<LevelCircleProfileProps> = ({
           />
         </svg>
 
-        {/* Circular Avatar Container */}
+        {/* Circular Avatar Container with Banknote Sunburst Rosette Watermark (7168912.webp) */}
         <div
-          className="rounded-full overflow-hidden flex items-center justify-center bg-[#182026] border border-[#232c35]"
+          className="rounded-full overflow-hidden flex items-center justify-center bg-slate-50 border border-slate-200 relative shadow-inner"
           style={{ width: avatar, height: avatar }}
         >
+          {/* Circular Sunburst Watermark */}
+          <div className="absolute inset-0 bg-security-sunburst opacity-25 pointer-events-none" />
+
           {user?.photo_url ? (
             <Image
               src={user.photo_url}
               alt="Avatar"
               width={avatar}
               height={avatar}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover relative z-10"
               unoptimized
             />
           ) : (
             <div
-              className="w-full h-full flex items-center justify-center text-white font-black"
+              className="w-full h-full flex items-center justify-center text-white font-black relative z-10 shadow-sm"
               style={{ backgroundColor: levelInfo.color }}
             >
               {displayName.charAt(0).toUpperCase()}
@@ -98,7 +101,7 @@ export const LevelCircleProfile: React.FC<LevelCircleProfileProps> = ({
 
         {/* Level Badge Pill (Pinned to Bottom of Circle) */}
         <div
-          className="absolute -bottom-1 px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase tracking-wider text-black flex items-center gap-0.5 border border-black/40 shadow-sm"
+          className="absolute -bottom-1 px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase tracking-wider text-black flex items-center gap-0.5 border border-black/20 shadow-sm z-20"
           style={{ backgroundColor: levelInfo.color }}
         >
           <span>L{levelInfo.level}</span>
@@ -109,25 +112,24 @@ export const LevelCircleProfile: React.FC<LevelCircleProfileProps> = ({
       {showDetails && (
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-bold text-white truncate block">
+            <span className="text-xs font-bold text-slate-900 truncate block">
               {displayName}
             </span>
             <span
-              className="text-[10px] font-bold px-1.5 py-0.2 rounded text-white flex items-center gap-1"
-              style={{ backgroundColor: "#202932", borderColor: levelInfo.color, borderWidth: 1 }}
+              className="text-[10px] font-bold px-1.5 py-0.2 rounded flex items-center gap-1 bg-slate-100 border border-slate-200 text-slate-800"
             >
               <Shield className="w-2.5 h-2.5" style={{ color: levelInfo.color }} />
               <span>{levelInfo.title}</span>
             </span>
           </div>
 
-          <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1 font-semibold">
+          <div className="flex items-center justify-between text-[10px] text-slate-500 mt-1 font-semibold">
             <span>Progress: {score.toLocaleString()} / {levelInfo.nextLevelScore.toLocaleString()} PTS</span>
-            <span className="text-white font-bold">{levelInfo.progressPercent}%</span>
+            <span className="text-slate-900 font-bold">{levelInfo.progressPercent}%</span>
           </div>
 
           {/* Level Progress Bar */}
-          <div className="w-full h-1.5 bg-[#131b22] border border-[#232c35] rounded-full overflow-hidden mt-1">
+          <div className="w-full h-1.5 bg-slate-100 border border-slate-200 rounded-full overflow-hidden mt-1">
             <div
               className="h-full rounded-full transition-all duration-300"
               style={{

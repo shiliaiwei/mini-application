@@ -56,40 +56,45 @@ export const CategoryBar: React.FC<CategoryBarProps> = ({
   };
 
   return (
-    <div className="relative bg-white/80 backdrop-blur-xl border-b border-slate-200/90 px-3 py-2 select-none flex items-center gap-1 font-body">
-      <div
-        ref={scrollRef}
-        className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth flex-1"
-      >
-        {categories.map((cat) => {
-          const isActive = activeCategory === cat.id;
-          return (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => onSelectCategory(cat.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                isActive
-                  ? "bg-[#0098ea] text-white shadow-sm shadow-[#0098ea]/20"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
-              }`}
-            >
-              {cat.icon}
-              <span>{cat.label}</span>
-            </button>
-          );
-        })}
+    <div className="relative flex flex-col font-body">
+      <div className="bg-white/80 backdrop-blur-xl px-3 py-2 select-none flex items-center gap-1">
+        <div
+          ref={scrollRef}
+          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth flex-1"
+        >
+          {categories.map((cat) => {
+            const isActive = activeCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => onSelectCategory(cat.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                  isActive
+                    ? "bg-[#0098ea] text-white shadow-sm shadow-[#0098ea]/20"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+                }`}
+              >
+                {cat.icon}
+                <span>{cat.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Right Scroll Next Arrow Button */}
+        <button
+          type="button"
+          onClick={handleScrollRight}
+          className="w-7 h-7 rounded-full bg-white/90 hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center flex-shrink-0 transition-colors shadow-sm ml-1"
+          title="Scroll Next"
+        >
+          <ChevronRight className="w-3.5 h-3.5" />
+        </button>
       </div>
 
-      {/* Right Scroll Next Arrow Button */}
-      <button
-        type="button"
-        onClick={handleScrollRight}
-        className="w-7 h-7 rounded-full bg-white/90 hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center flex-shrink-0 transition-colors shadow-sm ml-1"
-        title="Scroll Next"
-      >
-        <ChevronRight className="w-3.5 h-3.5" />
-      </button>
+      {/* Flower Banknote Security Guilloche Divider Strip (1033454350116.webp) */}
+      <div className="w-full h-2.5 border-strip-flower opacity-75 border-b border-slate-200/60" />
     </div>
   );
 };

@@ -62,8 +62,10 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
       {/* Current User Standings Card */}
       <div className="liquid-glass p-4 flex items-center justify-between border border-slate-200/90 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-[#0098ea] font-black text-lg shadow-sm">
-            #{userRank}
+          <div className="w-11 h-11 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-[#0098ea] font-black text-lg shadow-sm relative overflow-hidden">
+            {/* Banknote Sunburst Rosette Watermark (7168912.webp) */}
+            <div className="absolute inset-0 bg-security-sunburst opacity-25 pointer-events-none" />
+            <span className="relative z-10">#{userRank}</span>
           </div>
           <div>
             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
@@ -89,7 +91,10 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
       </div>
 
       {/* Leaderboard Table Card */}
-      <div className="liquid-glass p-4 space-y-3 border border-slate-200/90 shadow-sm">
+      <div className="liquid-glass p-4 space-y-3 border border-slate-200/90 shadow-sm relative overflow-hidden">
+        {/* Flower Banknote Security Strip (1033454350116.webp) */}
+        <div className="w-full h-2.5 border-strip-flower opacity-70 mb-2" />
+
         <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
           <div className="flex items-center gap-2">
             <Trophy className="w-4 h-4 text-amber-500" />
