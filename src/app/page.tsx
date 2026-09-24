@@ -120,7 +120,6 @@ export default function MiniAppPage() {
         const tgUser = app.initDataUnsafe?.user;
         if (tgUser && tgUser.id) {
           setUser(tgUser);
-          // Initial sync to database
           syncWithDatabase(scoreRef.current, spendRef.current);
         }
       }
@@ -138,7 +137,6 @@ export default function MiniAppPage() {
     try {
       tgApp?.HapticFeedback?.impactOccurred("light");
     } catch {}
-    // Trigger sync on tab change
     syncWithDatabase(scoreRef.current, spendRef.current);
     setActiveTab(tab);
   };
@@ -152,8 +150,8 @@ export default function MiniAppPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen bg-[#080c0a] flex items-center justify-center text-lime-400 font-mono text-xs">
-        <span className="animate-game-pulse uppercase">STARTING SESSION...</span>
+      <div className="min-h-screen bg-white flex items-center justify-center text-lime-700 font-display text-sm">
+        <span className="uppercase tracking-widest animate-pulse">STARTING SESSION...</span>
       </div>
     );
   }
@@ -175,20 +173,20 @@ export default function MiniAppPage() {
   }
 
   return (
-    <main className="min-h-dvh max-w-md mx-auto w-full flex flex-col justify-between p-4 bg-[#080c0a] text-white select-none overflow-x-hidden relative font-mono">
+    <main className="min-h-dvh max-w-md mx-auto w-full flex flex-col justify-between p-4 guilloche-bg bg-white text-slate-900 select-none overflow-x-hidden relative font-body">
       {/* Top Header */}
-      <header className="flex items-center justify-between pb-2.5 pt-1 border-b border-[#233827]">
+      <header className="flex items-center justify-between pb-2.5 pt-1 border-b border-slate-200">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-[#16211b] border border-lime-400 flex items-center justify-center text-lime-400">
+          <div className="w-7 h-7 rounded-lg bg-lime-50 border border-lime-600 flex items-center justify-center text-lime-700">
             <Gamepad2 className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-xs font-bold text-white block uppercase tracking-wide">
+            <span className="text-xs font-bold text-slate-900 block uppercase tracking-wide font-display">
               {activeTab === "game" && "LIME TAP GAME"}
               {activeTab === "leaderboard" && "GLOBAL RANKINGS"}
               {activeTab === "profile" && "PLAYER PROFILE"}
             </span>
-            <span className="text-[10px] text-lime-400 block uppercase">
+            <span className="text-[10px] text-lime-700 font-bold block uppercase tracking-wider">
               1 TAP = 1 POINT
             </span>
           </div>
@@ -198,7 +196,7 @@ export default function MiniAppPage() {
           <button
             type="button"
             onClick={() => setShowWelcome(true)}
-            className="p-1.5 rounded-lg bg-[#111914] border border-[#233827] text-neutral-400 hover:text-white"
+            className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-900"
             title="Restart Session"
           >
             <RefreshCw className="w-3.5 h-3.5" />
@@ -207,7 +205,7 @@ export default function MiniAppPage() {
           <button
             type="button"
             onClick={handleClose}
-            className="p-1.5 rounded-lg bg-[#111914] border border-[#233827] text-neutral-400 hover:text-white"
+            className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-900"
             title="Close"
           >
             <X className="w-3.5 h-3.5" />

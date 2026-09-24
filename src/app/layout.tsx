@@ -1,21 +1,35 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import Script from "next/script";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const googleSans = localFont({
+  src: [
+    {
+      path: "../../public/fonts/GoogleSans-VariableFont_GRAD,opsz,wght.ttf",
+      weight: "100 900",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/GoogleSans-Italic-VariableFont_GRAD,opsz,wght.ttf",
+      weight: "100 900",
+      style: "italic",
+    },
+  ],
+  variable: "--font-google-sans",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const facultyGlyphic = localFont({
+  src: "../../public/fonts/FacultyGlyphic-Regular.ttf",
+  variable: "--font-faculty-glyphic",
+  weight: "400",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Telegram HUD Mini App",
-  description: "Next.js Liquid Glass Telegram Mini App with HUD shape designs",
+  title: "Telegram Tap Game",
+  description: "Touch to earn points - Telegram Mini App",
 };
 
 export const viewport: Viewport = {
@@ -24,7 +38,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#070a10",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -33,14 +47,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${googleSans.variable} ${facultyGlyphic.variable} h-full antialiased`}
+    >
       <head>
         <Script
           src="https://telegram.org/js/telegram-web-app.js"
           strategy="beforeInteractive"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#070a10] text-slate-100 antialiased selection:bg-cyan-500/30">
+      <body className="min-h-full flex flex-col bg-white text-slate-900 antialiased font-sans">
         {children}
       </body>
     </html>

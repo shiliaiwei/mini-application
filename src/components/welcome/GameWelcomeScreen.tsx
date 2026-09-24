@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
-import { Gamepad2, Check } from "lucide-react";
+import { Gamepad2 } from "lucide-react";
 
 interface GameWelcomeScreenProps {
   user: TelegramUser | null;
@@ -40,26 +40,26 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
     : "Telegram Player";
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-between p-6 bg-[#080c0a] text-white max-w-md mx-auto w-full select-none font-mono">
+    <div className="fixed inset-0 z-50 flex flex-col justify-between p-6 guilloche-bg bg-white text-slate-900 max-w-md mx-auto w-full select-none font-body">
       {/* Top Tag */}
-      <div className="flex items-center justify-between text-xs text-neutral-400 border-b border-[#233827] pb-3">
-        <span className="text-lime-400 font-bold uppercase">@srievibot</span>
-        <span className="text-[10px] bg-[#16211b] border border-[#233827] px-2 py-0.5 rounded text-neutral-300">
+      <div className="flex items-center justify-between text-xs text-slate-500 border-b border-slate-200 pb-3">
+        <span className="text-lime-700 font-bold uppercase tracking-wider">@srievibot</span>
+        <span className="text-[10px] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-700 font-semibold">
           TAP TO EARN
         </span>
       </div>
 
       {/* Center Welcome */}
       <div className="my-auto text-center space-y-4">
-        <div className="w-20 h-20 rounded-full bg-[#111914] border-2 border-lime-400 mx-auto flex items-center justify-center text-lime-400 shadow-xl">
+        <div className="w-20 h-20 rounded-full bg-white border-2 border-lime-700 mx-auto flex items-center justify-center text-lime-700 shadow-xl">
           <Gamepad2 className="w-10 h-10" />
         </div>
 
         <div className="space-y-1">
-          <h1 className="text-xl font-black text-white uppercase tracking-wider">
+          <h1 className="text-2xl font-black text-slate-900 uppercase tracking-wider font-display">
             {synced ? `Ready, ${playerName}` : "Connecting Telegram..."}
           </h1>
-          <p className="text-xs text-neutral-400">
+          <p className="text-xs text-slate-500">
             {synced
               ? "Telegram Owner verified. Launching game..."
               : "Synchronizing account identity..."}
@@ -67,13 +67,13 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
         </div>
 
         {/* Status Pill */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#111914] border border-[#233827] text-xs">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-300 text-xs">
           <span
             className={`w-2 h-2 rounded-full ${
-              synced ? "bg-lime-400" : "bg-neutral-500 animate-ping"
+              synced ? "bg-lime-600" : "bg-slate-400 animate-ping"
             }`}
           />
-          <span className="font-bold text-lime-400 uppercase">
+          <span className="font-bold text-lime-800 uppercase text-[11px]">
             {synced ? "TELEGRAM AUTH VERIFIED" : "SYNCING"}
           </span>
         </div>
@@ -84,7 +84,7 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
         <button
           type="button"
           onClick={onComplete}
-          className="w-full py-3 px-4 rounded-xl bg-lime-400 hover:bg-lime-500 text-black font-black text-xs uppercase tracking-wider transition-colors"
+          className="w-full py-3.5 px-4 rounded-xl bg-lime-700 hover:bg-lime-800 text-white font-black text-xs uppercase tracking-wider transition-colors shadow-md"
         >
           {synced ? "Entering Game..." : "Start Now"}
         </button>

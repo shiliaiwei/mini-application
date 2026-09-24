@@ -20,19 +20,19 @@ export const GameDock: React.FC<GameDockProps> = ({
 }) => {
   return (
     <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[90%] max-w-[360px] select-none">
-      <div className="game-dock rounded-full px-4 py-2 flex items-center justify-around shadow-lg">
+      <div className="white-dock rounded-full px-4 py-2.5 flex items-center justify-around border border-slate-200">
         {/* Game Tab */}
         <button
           type="button"
           onClick={() => onChangeTab("game")}
           className={`flex flex-col items-center justify-center py-1 px-4 rounded-full transition-colors ${
             activeTab === "game"
-              ? "text-lime-400 font-bold"
-              : "text-neutral-400 hover:text-white"
+              ? "text-lime-700 font-bold"
+              : "text-slate-400 hover:text-slate-700"
           }`}
         >
-          <Gamepad2 className={`w-5 h-5 ${activeTab === "game" ? "text-lime-400" : ""}`} />
-          <span className="text-[10px] mt-0.5 tracking-wide uppercase">Tap</span>
+          <Gamepad2 className={`w-5 h-5 ${activeTab === "game" ? "text-lime-700" : ""}`} />
+          <span className="text-[10px] mt-0.5 tracking-wide uppercase font-body">Tap</span>
         </button>
 
         {/* Leaderboard Tab */}
@@ -41,12 +41,12 @@ export const GameDock: React.FC<GameDockProps> = ({
           onClick={() => onChangeTab("leaderboard")}
           className={`flex flex-col items-center justify-center py-1 px-4 rounded-full transition-colors ${
             activeTab === "leaderboard"
-              ? "text-lime-400 font-bold"
-              : "text-neutral-400 hover:text-white"
+              ? "text-lime-700 font-bold"
+              : "text-slate-400 hover:text-slate-700"
           }`}
         >
-          <Trophy className={`w-5 h-5 ${activeTab === "leaderboard" ? "text-lime-400" : ""}`} />
-          <span className="text-[10px] mt-0.5 tracking-wide uppercase">Rank</span>
+          <Trophy className={`w-5 h-5 ${activeTab === "leaderboard" ? "text-lime-700" : ""}`} />
+          <span className="text-[10px] mt-0.5 tracking-wide uppercase font-body">Rank</span>
         </button>
 
         {/* Profile Tab */}
@@ -55,14 +55,14 @@ export const GameDock: React.FC<GameDockProps> = ({
           onClick={() => onChangeTab("profile")}
           className={`flex flex-col items-center justify-center py-1 px-4 rounded-full transition-colors ${
             activeTab === "profile"
-              ? "text-lime-400 font-bold"
-              : "text-neutral-400 hover:text-white"
+              ? "text-lime-700 font-bold"
+              : "text-slate-400 hover:text-slate-700"
           }`}
         >
           {user?.photo_url ? (
             <div
               className={`w-5 h-5 rounded-full overflow-hidden border ${
-                activeTab === "profile" ? "border-lime-400" : "border-neutral-600"
+                activeTab === "profile" ? "border-lime-700" : "border-slate-300"
               }`}
             >
               <Image
@@ -75,9 +75,9 @@ export const GameDock: React.FC<GameDockProps> = ({
               />
             </div>
           ) : (
-            <User className={`w-5 h-5 ${activeTab === "profile" ? "text-lime-400" : ""}`} />
+            <User className={`w-5 h-5 ${activeTab === "profile" ? "text-lime-700" : ""}`} />
           )}
-          <span className="text-[10px] mt-0.5 tracking-wide uppercase">User</span>
+          <span className="text-[10px] mt-0.5 tracking-wide uppercase font-body">User</span>
         </button>
       </div>
     </nav>

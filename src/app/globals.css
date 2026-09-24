@@ -1,16 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --bg-game: #080c0a;
-  --panel-game: #111914;
-  --panel-active: #16211b;
-  --lime-primary: #84cc16;
-  --lime-light: #a3e635;
-  --lime-dark: #4d7c0f;
-  --border-game: #233827;
-  --border-lime: #4d7c0f;
-  --text-white: #ffffff;
-  --text-muted: #9ca3af;
+  --font-sans: var(--font-google-sans), "Google Sans", system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-faculty-glyphic), "Faculty Glyphic", Georgia, serif;
+
+  --bg-app: #ffffff;
+  --surface-card: #ffffff;
+  --surface-muted: #f8fafc;
+  --border-light: #e2e8f0;
+  --border-dark: #cbd5e1;
+  --lime-primary: #65a30d;
+  --lime-dark: #3f6212;
+  --lime-light: #84cc16;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
 }
 
 * {
@@ -21,9 +24,9 @@
 }
 
 html, body {
-  background-color: var(--bg-game);
-  color: var(--text-white);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #ffffff;
+  color: #0f172a;
+  font-family: var(--font-sans);
   overscroll-behavior-y: none;
   touch-action: manipulation;
   height: 100%;
@@ -33,37 +36,51 @@ html, body {
   overflow-x: hidden;
 }
 
-/* Solid Flat Cards (Zero Gradients) */
-.game-card {
-  background-color: #111914;
-  border: 1px solid #233827;
+/* White Watermark Guilloche Line Grid Background */
+.guilloche-bg {
+  background-color: #ffffff;
+  background-image: url("/backgrounds/guilloche-grid-bg.png");
+  background-position: top center;
+  background-repeat: repeat-y;
+  background-size: 100% auto;
 }
 
-.game-card-active {
-  background-color: #16211b;
-  border: 1px solid #84cc16;
+/* Solid Flat Cards on White (Zero Gradients) */
+.white-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
-.game-dock {
-  background-color: #111914;
-  border: 1px solid #233827;
+.white-card-active {
+  background-color: #f7fee7;
+  border: 1.5px solid #65a30d;
+  box-shadow: 0 4px 12px rgba(101, 163, 13, 0.08);
 }
 
-/* Big Tap Target Button */
-.tap-button {
-  background-color: #16211b;
-  border: 4px solid #84cc16;
+.white-dock {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+}
+
+/* Luxury Guilloche Tap Button */
+.tap-button-white {
+  background-color: #ffffff;
+  border: 4px solid #65a30d;
+  box-shadow: 0 8px 24px rgba(101, 163, 13, 0.16);
   transition: transform 0.05s ease, background-color 0.1s ease;
 }
 
-.tap-button:active {
+.tap-button-white:active {
   transform: scale(0.94);
-  background-color: #1c2a22;
-  border-color: #a3e635;
+  background-color: #f7fee7;
+  border-color: #4d7c0f;
+  box-shadow: 0 2px 8px rgba(101, 163, 13, 0.1);
 }
 
 /* Floating +1 Text Animation */
-@keyframes float-up {
+@keyframes float-up-white {
   0% {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -74,25 +91,21 @@ html, body {
   }
 }
 
-.float-point {
+.float-point-white {
   position: absolute;
   pointer-events: none;
+  font-family: var(--font-serif);
   font-weight: 800;
-  font-size: 24px;
-  color: #a3e635;
-  animation: float-up 0.7s ease-out forwards;
+  font-size: 26px;
+  color: #65a30d;
+  animation: float-up-white 0.7s ease-out forwards;
 }
 
-/* Pulse animation */
-@keyframes game-pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
+/* Display Font Utility */
+.font-display {
+  font-family: var(--font-serif);
 }
 
-.animate-game-pulse {
-  animation: game-pulse 1.8s ease-in-out infinite;
+.font-body {
+  font-family: var(--font-sans);
 }
