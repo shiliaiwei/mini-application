@@ -27,6 +27,10 @@ import {
 } from "@/components/icons/KeylineIcons";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
+import { WinGramPromoCards } from "@/components/promo/WinGramPromoCards";
+import { BanknoteCreditCards } from "@/components/cards/BanknoteCreditCards";
+import { BrandFeatureCards } from "@/components/cards/BrandFeatureCards";
+import { NavCategory } from "@/components/navigation/CategoryBar";
 
 interface FloatingPoint {
   id: number;
@@ -43,9 +47,11 @@ interface TapGameViewProps {
   spendSeconds: number;
   tapPower: number;
   passiveRate: number;
+  onAddScore?: (amount: number) => void;
   onGoToSwap?: () => void;
   onGoToEarn?: () => void;
   onGoToSettings?: () => void;
+  onSelectCategory?: (cat: NavCategory) => void;
   user: TelegramUser | null;
   tgApp: TelegramWebApp | null;
 }
@@ -58,9 +64,11 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
   spendSeconds,
   tapPower,
   passiveRate,
+  onAddScore,
   onGoToSwap,
   onGoToEarn,
   onGoToSettings,
+  onSelectCategory,
   user,
   tgApp,
 }) => {
@@ -70,6 +78,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
   const [showSendModal, setShowSendModal] = useState(false);
   const [showScanModal, setShowScanModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
+  const [showTapVaultModal, setShowTapVaultModal] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [sendRecipient, setSendRecipient] = useState("");
   const [sendAmount, setSendAmount] = useState("");
@@ -86,33 +95,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
   const khrValue = Math.floor(score * 41).toLocaleString();
   const tonValue = (score / 500).toFixed(3);
 
-  const [activeCardIndex, setActiveCardIndex] = useState(0);
-  const cardsScrollRef = useRef<HTMLDivElement | null>(null);
 
-  const handleCardsScroll = () => {
-    if (cardsScrollRef.current) {
-      const { scrollLeft, clientWidth } = cardsScrollRef.current;
-      const cardWidth = Math.min(clientWidth * 0.86, 340);
-      const newIndex = Math.round(scrollLeft / cardWidth);
-      if (newIndex >= 0 && newIndex <= 2 && newIndex !== activeCardIndex) {
-        setActiveCardIndex(newIndex);
-      }
-    }
-  };
-
-  const scrollToCard = (index: number) => {
-    setActiveCardIndex(index);
-    if (cardsScrollRef.current) {
-      const cardWidth = Math.min(cardsScrollRef.current.clientWidth * 0.86, 340);
-      cardsScrollRef.current.scrollTo({
-        left: index * cardWidth,
-        behavior: "smooth",
-      });
-    }
-    try {
-      tgApp?.HapticFeedback?.selectionChanged();
-    } catch {}
-  };
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
@@ -243,445 +226,148 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           </div>
         </div>
 
-        {/* 2. DUAL/TRI-CURRENCY BANKNOTE CARDS (Scrollable Snap-Carousel with Better Mobile View) */}
-        <div className="relative">
-          <div
-            ref={cardsScrollRef}
-            onScroll={handleCardsScroll}
-            className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory py-1 px-0.5 -mx-0.5 touch-pan-x scroll-smooth"
-          >
-            {/* Card 1: Cambodian Khmer Riel (គណនីប្រាក់រៀល) - Pure Code Banknote Design */}
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={onGoToSwap}
-              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onGoToSwap?.()}
-              className="banknote-khr-card w-[86vw] max-w-[340px] sm:w-auto min-w-[270px] sm:min-w-0 snap-center shrink-0 rounded-2xl p-3.5 shadow-xs relative overflow-hidden transition-all hover:shadow-sm active:scale-[0.99] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 border border-purple-200"
-              aria-label="KHR Account. Tap to exchange."
-            >
-              {/* Background Banknote Watermark Currency Glyph */}
-              <div className="absolute -right-3 -bottom-5 select-none pointer-events-none opacity-[0.07] text-purple-950 font-serif font-black text-8xl leading-none">
-                ៛
-              </div>
+        {/* 2. DUAL KHMER & DOLLAR BANKNOTE CREDIT CARDS (Top of all cards, ACLEDA-inspired luxury credit card styling) */}
+        <BanknoteCreditCards
+          score={score}
+          showBalance={showBalances}
+          onToggleBalance={() => {
+            setShowBalances(!showBalances);
+            tgApp?.HapticFeedback?.selectionChanged();
+          }}
+          user={user}
+          tgApp={tgApp}
+          onOpenDeposit={() => setShowDepositModal(true)}
+          onOpenSend={() => setShowSendModal(true)}
+          onOpenSwap={onGoToSwap}
+          onOpenAddress={() => setShowAddressModal(true)}
+        />
 
-              {/* Top Serial & Security Tag */}
-              <div className="flex items-center justify-between text-[9px] font-mono text-purple-900/70 pb-1 mb-1 border-b border-purple-100">
-                <span className="tracking-widest">№ KHR-0849201</span>
-                <span className="font-bold text-[8px] tracking-wider uppercase bg-purple-100/80 text-purple-900 px-1.5 py-0.2 rounded border border-purple-300">
-                  NBC OFFICIAL NOTE
+        {/* 3. WINGRAM HERO PROMO & BONUS CARDS (Sports free bet + Turbine of Fortune 2x2 grid) */}
+        <WinGramPromoCards
+          onAddScore={onAddScore || (() => {})}
+          onOpenDeposit={() => setShowDepositModal(true)}
+          tgApp={tgApp}
+        />
+
+
+
+
+        {/* 3. REORDERABLE BRAND FEATURE CARDS (Tap Vault, Missions, Tournaments, Popular, Favorites, Settings, Swap) */}
+        <BrandFeatureCards
+          score={score}
+          energy={energy}
+          maxEnergy={maxEnergy}
+          tapPower={tapPower}
+          onQuickTap={onTap}
+          onOpenTapVault={() => setShowTapVaultModal(true)}
+          onSelectCategory={(cat) => {
+            if (cat === "swap") {
+              onGoToSwap?.();
+            } else if (onSelectCategory) {
+              onSelectCategory(cat);
+            } else if (cat === "earn") {
+              onGoToEarn?.();
+            } else if (cat === "settings") {
+              onGoToSettings?.();
+            }
+          }}
+          tgApp={tgApp}
+        />
+
+
+
+
+      </div>
+
+      {/* MODAL: Tap Vault Medallion & Energy Minting */}
+      {showTapVaultModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md">
+          <div className="liquid-glass-modal p-5 max-w-sm w-full space-y-4 animate-in fade-in zoom-in-95 duration-150 border border-slate-200 shadow-2xl relative">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+              <div className="flex items-center gap-2">
+                <Zap size={20} className="text-[#0098ea]" />
+                <span className="text-sm font-bold text-slate-900 uppercase font-sans">
+                  SHILIAIWEI Tap Vault
                 </span>
               </div>
-
-              <div className="flex items-center justify-between relative z-10">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-sm font-bold text-purple-950 font-sans">
-                    គណនីប្រាក់រៀល
-                  </span>
-                  <span className="text-[10px] text-purple-900 font-bold uppercase tracking-wider">
-                    (KHR)
-                  </span>
-                </div>
-                <span className="text-[9px] font-black text-purple-900 bg-purple-100/90 px-2 py-0.5 rounded-full border border-purple-300">
-                  National Reserve
-                </span>
-              </div>
-
-              <div className="mt-1 flex items-baseline relative z-10">
-                <span className="text-xl font-black text-purple-950 mr-1.5 font-sans">
-                  ៛
-                </span>
-                <span className="text-2xl font-black text-purple-950 tracking-tight font-sans">
-                  {showBalances ? khrValue : "••••••"}
-                </span>
-              </div>
-
-              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-700 font-semibold pt-1.5 border-t border-purple-200/80 relative z-10">
-                <span className="text-[10px] text-purple-950/70 font-medium truncate">100 PTS = 4,100 KHR</span>
-                <span className="text-[#0077b5] font-black flex items-center gap-0.5 text-xs flex-shrink-0">
-                  <span>Exchange</span>
-                  <ChevronRight size={14} />
-                </span>
-              </div>
-            </div>
-
-            {/* Card 2: US Dollar Account (គណនីប្រាក់ដុល្លារ) - Pure Code Banknote Design */}
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={onGoToSwap}
-              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onGoToSwap?.()}
-              className="banknote-usd-card w-[86vw] max-w-[340px] sm:w-auto min-w-[270px] sm:min-w-0 snap-center shrink-0 rounded-2xl p-3.5 shadow-xs relative overflow-hidden transition-all hover:shadow-sm active:scale-[0.99] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 border border-emerald-200"
-              aria-label="USD Account. Tap to exchange."
-            >
-              {/* Background Banknote Watermark Currency Glyph */}
-              <div className="absolute -right-2 -bottom-5 select-none pointer-events-none opacity-[0.07] text-emerald-950 font-serif font-black text-8xl leading-none">
-                $
-              </div>
-
-              {/* Top Serial & Security Tag */}
-              <div className="flex items-center justify-between text-[9px] font-mono text-emerald-900/70 pb-1 mb-1 border-b border-emerald-100">
-                <span className="tracking-widest">№ USD-7729104</span>
-                <span className="font-bold text-[8px] tracking-wider uppercase bg-emerald-100/80 text-emerald-900 px-1.5 py-0.2 rounded border border-emerald-300">
-                  US FEDERAL NOTE
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between relative z-10">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-sm font-bold text-emerald-950 font-sans">
-                    គណនីប្រាក់ដុល្លារ
-                  </span>
-                  <span className="text-[10px] text-emerald-900 font-bold uppercase tracking-wider">
-                    (USD)
-                  </span>
-                </div>
-                <span className="text-[9px] font-black text-emerald-900 bg-emerald-100/90 px-2 py-0.5 rounded-full border border-emerald-300">
-                  Federal Reserve
-                </span>
-              </div>
-
-              <div className="mt-1 flex items-baseline relative z-10">
-                <span className="text-xl font-black text-emerald-950 mr-1.5 font-sans">
-                  $
-                </span>
-                <span className="text-2xl font-black text-emerald-950 tracking-tight font-sans">
-                  {showBalances ? usdValue : "••••••"}
-                </span>
-              </div>
-
-              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-700 font-semibold pt-1.5 border-t border-emerald-200/80 relative z-10">
-                <span className="text-[10px] text-emerald-950/70 font-medium truncate">100 PTS = $1.00 USD</span>
-                <span className="text-[#0077b5] font-black flex items-center gap-0.5 text-xs flex-shrink-0">
-                  <span>Exchange</span>
-                  <ChevronRight size={14} />
-                </span>
-              </div>
-            </div>
-
-            {/* Card 3: TON & Points Web3 Vault (គណនីគ្រីបតូ TON) - Pure Code Banknote Design */}
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={onGoToSwap}
-              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onGoToSwap?.()}
-              className="banknote-ton-card w-[86vw] max-w-[340px] sm:w-auto min-w-[270px] sm:min-w-0 snap-center shrink-0 rounded-2xl p-3.5 shadow-xs relative overflow-hidden transition-all hover:shadow-sm active:scale-[0.99] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 border border-sky-200"
-              aria-label="TON Web3 Vault Account. Tap to exchange."
-            >
-              {/* Background Banknote Watermark Currency Glyph */}
-              <div className="absolute -right-2 -bottom-5 select-none pointer-events-none opacity-[0.08] text-sky-950 font-serif font-black text-7xl leading-none">
-                TON
-              </div>
-
-              {/* Top Serial & Security Tag */}
-              <div className="flex items-center justify-between text-[9px] font-mono text-sky-900/70 pb-1 mb-1 border-b border-sky-100">
-                <span className="tracking-widest">№ TON-0082914</span>
-                <span className="font-bold text-[8px] tracking-wider uppercase bg-sky-100/80 text-sky-900 px-1.5 py-0.2 rounded border border-sky-300">
-                  TELEGRAM VAULT
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between relative z-10">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-sm font-bold text-sky-950 font-sans">
-                    គណនីគ្រីបតូ TON
-                  </span>
-                  <span className="text-[10px] text-sky-900 font-bold uppercase tracking-wider">
-                    (TON / PTS)
-                  </span>
-                </div>
-                <span className="text-[9px] font-black text-sky-900 bg-sky-100/90 px-2 py-0.5 rounded-full border border-sky-300">
-                  Web3 Secure
-                </span>
-              </div>
-
-              <div className="mt-1 flex items-baseline relative z-10">
-                <span className="text-xl font-black text-sky-950 mr-1.5 font-sans">
-                  💎
-                </span>
-                <span className="text-2xl font-black text-sky-950 tracking-tight font-sans">
-                  {showBalances ? `${tonValue} TON` : "••••••"}
-                </span>
-              </div>
-
-              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-700 font-semibold pt-1.5 border-t border-sky-200/80 relative z-10">
-                <span className="text-[10px] text-sky-950/70 font-medium truncate">500 PTS ≈ 1.00 TON</span>
-                <span className="text-[#0077b5] font-black flex items-center gap-0.5 text-xs flex-shrink-0">
-                  <span>Exchange</span>
-                  <ChevronRight size={14} />
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile Snap Carousel Indicator Dots */}
-          <div className="flex sm:hidden items-center justify-center gap-1.5 pt-1.5 pb-0.5">
-            {[0, 1, 2].map((idx) => (
               <button
-                key={idx}
                 type="button"
-                onClick={() => scrollToCard(idx)}
-                className={`h-1.5 rounded-full transition-all ${
-                  activeCardIndex === idx
-                    ? "w-6 bg-[#0098ea]"
-                    : "w-2 bg-slate-300 hover:bg-slate-400"
-                }`}
-                aria-label={`Scroll to card ${idx + 1}`}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Real Points Standing & Exchange Rate Pill */}
-        <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs">
-          <div className="flex items-center gap-2">
-            <Coins size={18} className="text-amber-600 flex-shrink-0" />
-            <span className="font-bold text-slate-900">
-              {score.toLocaleString()} PTS Available
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={onGoToSwap}
-            className="text-xs font-bold text-[#0077b5] hover:text-[#0088cc] flex items-center gap-0.5 min-h-[36px] px-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] rounded"
-          >
-            <span>ដូរប្រាក់ (Swap)</span>
-            <ChevronRight size={16} />
-          </button>
-        </div>
-
-        {/* 3. 4-COLUMN COMPACT QUICK ACTIONS (Ergonomic Mobile Banking Layout) */}
-        <div className="grid grid-cols-4 gap-1.5 pt-0.5">
-          {/* Button 1: Transfer */}
-          <button
-            type="button"
-            onClick={() => setShowSendModal(true)}
-            className="bg-white hover:bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col items-center justify-center text-center shadow-xs active:scale-95 transition-all min-h-[64px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
-            aria-label="Transfer or Send currency"
-          >
-            <div className="w-9 h-9 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center text-[#0098ea] mb-1">
-              <ArrowUpRight size={20} />
+                onClick={() => setShowTapVaultModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700"
+                aria-label="Close modal"
+              >
+                <X size={20} />
+              </button>
             </div>
-            <span className="text-xs font-bold text-slate-900 truncate w-full leading-tight">
-              ផ្ទេរប្រាក់
-            </span>
-            <span className="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">
-              Transfer
-            </span>
-          </button>
 
-          {/* Button 2: Scan QR */}
-          <button
-            type="button"
-            onClick={() => setShowScanModal(true)}
-            className="bg-white hover:bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col items-center justify-center text-center shadow-xs active:scale-95 transition-all min-h-[64px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
-            aria-label="Scan QR Code"
-          >
-            <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 mb-1">
-              <ScanLine size={20} />
-            </div>
-            <span className="text-xs font-bold text-slate-900 truncate w-full leading-tight">
-              ស្កេន QR
-            </span>
-            <span className="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">
-              Scan QR
-            </span>
-          </button>
-
-          {/* Button 3: Receive */}
-          <button
-            type="button"
-            onClick={() => setShowAddressModal(true)}
-            className="bg-white hover:bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col items-center justify-center text-center shadow-xs active:scale-95 transition-all min-h-[64px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
-            aria-label="Receive funds or show deposit address"
-          >
-            <div className="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[#16a34a] mb-1">
-              <ArrowDownLeft size={20} />
-            </div>
-            <span className="text-xs font-bold text-slate-900 truncate w-full leading-tight">
-              ទទួលប្រាក់
-            </span>
-            <span className="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">
-              Receive
-            </span>
-          </button>
-
-          {/* Button 4: Deposit / Boost */}
-          <button
-            type="button"
-            onClick={() => setShowDepositModal(true)}
-            className="bg-white hover:bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col items-center justify-center text-center shadow-xs active:scale-95 transition-all min-h-[64px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
-            aria-label="Deposit and Claim free PTS"
-          >
-            <div className="w-9 h-9 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 mb-1">
-              <Coins size={20} />
-            </div>
-            <span className="text-xs font-bold text-slate-900 truncate w-full leading-tight">
-              ដាក់ប្រាក់
-            </span>
-            <span className="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">
-              Deposit
-            </span>
-          </button>
-        </div>
-
-        {/* 4. Services Row (សេវាកម្ម) */}
-        <div className="pt-1.5 px-0.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-sm font-bold text-slate-900 font-sans">
-                សេវាកម្ម
+            {/* Score & Multiplier */}
+            <div className="text-center py-1">
+              <span className="text-2xl font-black text-slate-900 font-sans">
+                {score.toLocaleString()} PTS
               </span>
-              <span className="text-xs text-slate-500 font-semibold">
-                (Services)
+              <span className="text-xs text-slate-500 block">
+                +{tapPower} PTS per tap • Vault Energy Active
               </span>
             </div>
-            <button
-              type="button"
-              onClick={onGoToSettings}
-              className="text-xs text-[#0077b5] font-bold flex items-center gap-0.5 hover:underline min-h-[36px] px-1"
-            >
-              <span>ការកំណត់ (Settings)</span>
-              <ChevronRight size={16} />
-            </button>
-          </div>
 
-          {/* Services 3-Grid */}
-          <div className="grid grid-cols-3 gap-2 mt-1.5">
-            <button
-              type="button"
-              onClick={onGoToSettings}
-              className="p-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 flex flex-col items-center justify-center shadow-xs active:scale-95 transition-all min-h-[60px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
-              aria-label="Telegram Settings and Profile Config"
-            >
-              <ShieldCheck size={22} className="text-[#0098ea] mb-1" />
-              <span className="text-xs font-bold text-slate-900">ការកំណត់</span>
-              <span className="text-[9px] text-slate-500 font-medium">Settings</span>
-            </button>
+            {/* Tap Medallion */}
+            <div className="flex items-center justify-center py-2">
+              <button
+                ref={buttonRef}
+                type="button"
+                onClick={handleTap}
+                onTouchStart={handleTap}
+                aria-label="Tap Medallion to mint points"
+                className="tap-button-white relative w-44 h-44 rounded-full flex flex-col items-center justify-center cursor-pointer select-none focus:outline-none active:scale-95 transition-transform"
+              >
+                <div className="w-36 h-36 rounded-full border-2 border-[#0098ea]/40 flex flex-col items-center justify-center bg-white shadow-xl relative p-1 overflow-hidden">
+                  <div className="w-30 h-30 rounded-full border border-dashed border-[#0098ea]/40 flex flex-col items-center justify-center relative bg-white/90">
+                    <ShiliaiweiBrand variant="mark" height={40} className="my-1" />
+                    <span className="text-[10px] font-black text-[#16a34a] tracking-wider uppercase mt-0.5">
+                      TAP FOR POINTS
+                    </span>
+                    <span className="text-[8px] font-bold text-slate-500 tracking-widest uppercase">
+                      +{tapPower} PTS / TAP
+                    </span>
+                  </div>
+                </div>
+
+                {floatingPoints.map((p) => (
+                  <span
+                    key={p.id}
+                    className="absolute pointer-events-none text-sm font-black text-[#16a34a] animate-out fade-out slide-out-to-top duration-700 font-sans"
+                    style={{ left: p.x, top: p.y }}
+                  >
+                    {p.text}
+                  </span>
+                ))}
+              </button>
+            </div>
+
+            {/* Vault Energy Bar */}
+            <div className="w-full space-y-1">
+              <div className="flex items-center justify-between text-xs text-slate-600 font-bold">
+                <span>Energy</span>
+                <span>{energy} / {maxEnergy}</span>
+              </div>
+              <div className="w-full h-2.5 bg-slate-100 border border-slate-200 rounded-full overflow-hidden p-0.5">
+                <div
+                  className="h-full bg-[#0098ea] rounded-full transition-all duration-150"
+                  style={{ width: `${energyPercent}%` }}
+                />
+              </div>
+            </div>
 
             <button
               type="button"
-              onClick={onGoToEarn}
-              className="p-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 flex flex-col items-center justify-center shadow-xs active:scale-95 transition-all min-h-[60px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
-              aria-label="View Tasks and Missions"
+              onClick={() => setShowTapVaultModal(false)}
+              className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs uppercase tracking-wider transition-colors"
             >
-              <Gift size={22} className="text-rose-600 mb-1" />
-              <span className="text-xs font-bold text-slate-900">បេសកកម្ម</span>
-              <span className="text-[9px] text-slate-500 font-medium">Tasks</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onGoToSwap}
-              className="p-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 flex flex-col items-center justify-center shadow-xs active:scale-95 transition-all min-h-[60px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
-              aria-label="Exchange Currency and Points"
-            >
-              <Repeat size={22} className="text-amber-600 mb-1" />
-              <span className="text-xs font-bold text-slate-900">ដូរប្រាក់</span>
-              <span className="text-[9px] text-slate-500 font-medium">Exchange</span>
+              Done
             </button>
           </div>
         </div>
-
-        {/* Telemetry Stats */}
-        <div className="grid grid-cols-2 gap-2 pt-0.5">
-          <div className="liquid-glass p-2.5 flex items-center gap-2.5 border border-slate-200 shadow-xs">
-            <Timer size={20} className="text-[#0098ea] flex-shrink-0" />
-            <div className="min-w-0">
-              <span className="text-[9px] text-slate-500 uppercase block leading-none font-bold">
-                SESSION TIME
-              </span>
-              <span className="text-xs font-bold text-slate-900 block mt-1">
-                {formatTime(spendSeconds)}
-              </span>
-            </div>
-          </div>
-
-          <div className="liquid-glass p-2.5 flex items-center gap-2.5 border border-slate-200 shadow-xs">
-            <TrendingUp size={20} className="text-[#16a34a] flex-shrink-0" />
-            <div className="min-w-0">
-              <span className="text-[9px] text-slate-500 uppercase block leading-none font-bold">
-                MINT POWER
-              </span>
-              <span className="text-xs font-bold text-slate-900 block mt-1">
-                +{tapPower} PTS / TAP
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 5. Center Luxury Tap Medallion with VLogo */}
-      <div className="relative my-auto flex items-center justify-center py-3">
-        <button
-          ref={buttonRef}
-          type="button"
-          onClick={handleTap}
-          onTouchStart={handleTap}
-          aria-label="Tap Medallion to mint points"
-          className="tap-button-white relative w-48 h-48 sm:w-56 sm:h-56 rounded-full flex flex-col items-center justify-center cursor-pointer select-none focus:outline-none focus-visible:ring-4 focus-visible:ring-[#0098ea]"
-        >
-          {/* Outer Grooved Rim */}
-          <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-full border-2 border-[#0098ea]/40 flex flex-col items-center justify-center bg-white shadow-xl relative p-1 overflow-hidden">
-            {/* Inner Ring with Micro-print border and Centered Brand Mark (Zero text per rule) */}
-            <div className="w-34 h-34 sm:w-40 sm:h-40 rounded-full border border-dashed border-[#0098ea]/40 flex flex-col items-center justify-center relative bg-white/80 backdrop-blur-xs">
-              {/* Centered Brand Mark */}
-              <ShiliaiweiBrand variant="mark" height={42} className="my-1" />
-              <span className="text-[10px] font-black text-[#16a34a] tracking-wider uppercase mt-0.5">
-                TAP FOR POINTS
-              </span>
-              <span className="text-[8px] font-bold text-slate-500 tracking-widest uppercase mt-0.5">
-                +{tapPower} PTS / TAP
-              </span>
-            </div>
-          </div>
-
-          {/* Floating Currency Numbers */}
-          {floatingPoints.map((p) => (
-            <span
-              key={p.id}
-              className="absolute pointer-events-none text-sm font-black text-[#16a34a] animate-out fade-out slide-out-to-top duration-700 font-sans"
-              style={{ left: p.x, top: p.y }}
-            >
-              {p.text}
-            </span>
-          ))}
-        </button>
-      </div>
-
-      {/* 6. Bottom Vault Energy Gauge */}
-      <div className="w-full space-y-1 pb-1">
-        <div className="flex items-center justify-between text-xs">
-          <span className="flex items-center gap-1.5 text-slate-700 font-bold">
-            <Zap size={18} className="text-[#0098ea]" />
-            <span>VAULT ENERGY</span>
-          </span>
-          <div className="flex items-center gap-2">
-            {passiveRate > 0 && (
-              <span className="text-[10px] font-bold text-[#14532d] bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#16a34a] animate-ping" />
-                <span>+${passiveRate}/s Passive</span>
-              </span>
-            )}
-            <span className="text-[#0077b5] font-black font-mono text-xs">
-              {energy} / {maxEnergy}
-            </span>
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div
-          role="progressbar"
-          aria-valuenow={energy}
-          aria-valuemin={0}
-          aria-valuemax={maxEnergy}
-          className="w-full h-3 bg-slate-100 border border-slate-200 rounded-full overflow-hidden p-0.5"
-        >
-          <div
-            className="h-full bg-[#0098ea] rounded-full transition-all duration-150"
-            style={{ width: `${energyPercent}%` }}
-          />
-        </div>
-      </div>
+      )}
 
       {/* MODAL 1: Receive / Wallet Address */}
       {showAddressModal && (

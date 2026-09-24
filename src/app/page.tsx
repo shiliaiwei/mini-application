@@ -12,7 +12,6 @@ import { GameProfileView, ProfileSubTab } from "@/components/views/GameProfileVi
 import { GameWelcomeScreen } from "@/components/welcome/GameWelcomeScreen";
 import { TelegramGateScreen } from "@/components/common/TelegramGateScreen";
 import {
-  Headphones,
   X,
   Check,
   Wallet,
@@ -29,7 +28,6 @@ export default function MiniAppPage() {
   const [profileSubTab, setProfileSubTab] = useState<ProfileSubTab>("profile");
 
   // Modals
-  const [showSupportModal, setShowSupportModal] = useState(false);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState(100);
   const [topUpSuccess, setTopUpSuccess] = useState(false);
@@ -75,7 +73,7 @@ export default function MiniAppPage() {
     return () => clearInterval(passiveTimer);
   }, [passiveRate]);
 
-  // Load initial score and upgrades from localStorage
+  // Load initial score, upgrades, and cached Telegram user from localStorage for instant start
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedScore = localStorage.getItem("shi_game_score");
@@ -94,6 +92,16 @@ export default function MiniAppPage() {
       if (savedPassive) {
         setPassiveRate(parseInt(savedPassive, 10) || 0);
       }
+      // Instant User Hydration from cache
+      try {
+        const cachedUserStr = localStorage.getItem("shi_tg_user_cache");
+        if (cachedUserStr) {
+          const cachedUser = JSON.parse(cachedUserStr);
+          if (cachedUser?.id) {
+            setUser(cachedUser);
+          }
+        }
+      } catch {}
     }
   }, []);
 
@@ -117,6 +125,9 @@ export default function MiniAppPage() {
       const data = await res.json();
       if (data && data.rank) {
         setUserRank(data.rank);
+      }
+      if (data?.player?.score && data.player.score > currentScore) {
+        setScore(data.player.score);
       }
     } catch {}
   }, [user]);
@@ -162,45 +173,69 @@ export default function MiniAppPage() {
     }
   }, [score, spendSeconds]);
 
-  // Initialize Telegram WebApp & Auto-Sync
+  // High-Speed Telegram WebApp Detection & Instant Sync
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const app = window.Telegram?.WebApp;
-      if (app) {
-        try {
-          app.ready();
-          app.expand();
-          if (app.isVersionAtLeast?.("8.0") && typeof app.requestFullscreen === "function") {
-            try {
-              app.requestFullscreen();
-            } catch {}
-          }
-          if (app.isVersionAtLeast?.("6.2") && typeof app.enableClosingConfirmation === "function") {
-            try {
-              app.enableClosingConfirmation();
-            } catch {}
-          }
-          if (app.isVersionAtLeast?.("6.1")) {
-            try {
-              app.setHeaderColor?.("#ffffff");
-              app.setBackgroundColor?.("#ffffff");
-            } catch {}
-          }
-        } catch (e) {
-          console.warn("Telegram WebApp init error:", e);
-        }
+    if (typeof window === "undefined") return;
 
-        setTgApp(app);
-
-        const tgUser = app.initDataUnsafe?.user;
-        if (tgUser && tgUser.id) {
-          setUser(tgUser);
-          syncWithDatabase(scoreRef.current, spendRef.current);
+    const setupApp = (app: TelegramWebApp) => {
+      try {
+        app.ready();
+        app.expand();
+        if (app.isVersionAtLeast?.("8.0") && typeof app.requestFullscreen === "function") {
+          try {
+            app.requestFullscreen();
+          } catch {}
         }
+        if (app.isVersionAtLeast?.("6.2") && typeof app.enableClosingConfirmation === "function") {
+          try {
+            app.enableClosingConfirmation();
+          } catch {}
+        }
+        if (app.isVersionAtLeast?.("6.1")) {
+          try {
+            app.setHeaderColor?.("#ffffff");
+            app.setBackgroundColor?.("#ffffff");
+          } catch {}
+        }
+      } catch (e) {
+        console.warn("Telegram WebApp init error:", e);
       }
 
+      setTgApp(app);
+
+      const tgUser = app.initDataUnsafe?.user;
+      if (tgUser && tgUser.id) {
+        setUser(tgUser);
+        try {
+          localStorage.setItem("shi_tg_user_cache", JSON.stringify(tgUser));
+        } catch {}
+        syncWithDatabase(scoreRef.current, spendRef.current);
+      }
       setIsReady(true);
+    };
+
+    // Check immediately
+    const directApp = window.Telegram?.WebApp;
+    if (directApp) {
+      setupApp(directApp);
+      return;
     }
+
+    // High-speed micro-poll every 20ms up to 600ms to catch Telegram injection without delay
+    let pollCount = 0;
+    const interval = setInterval(() => {
+      pollCount++;
+      const polledApp = window.Telegram?.WebApp;
+      if (polledApp) {
+        clearInterval(interval);
+        setupApp(polledApp);
+      } else if (pollCount >= 30) {
+        clearInterval(interval);
+        setIsReady(true);
+      }
+    }, 20);
+
+    return () => clearInterval(interval);
   }, [syncWithDatabase]);
 
   const handleTap = useCallback(() => {
@@ -346,12 +381,6 @@ export default function MiniAppPage() {
         onOpenTopUp={() => setShowTopUpModal(true)}
       />
 
-      {/* 2. WinGram Style Horizontal Category Scroller */}
-      <CategoryBar
-        activeCategory={activeCategory}
-        onSelectCategory={handleCategorySelect}
-      />
-
       {/* 3. Main SPA View Switcher */}
       <main className="flex-1 w-full max-w-4xl mx-auto px-3 pt-2 pb-safe">
         {activeTab === "wallet" && (
@@ -363,6 +392,8 @@ export default function MiniAppPage() {
             spendSeconds={spendSeconds}
             tapPower={tapPower}
             passiveRate={passiveRate}
+            onAddScore={handleAddScore}
+            onSelectCategory={handleCategorySelect}
             onGoToSwap={() => {
               setProfileSubTab("swap");
               handleTabChange("profile");
@@ -414,72 +445,14 @@ export default function MiniAppPage() {
         )}
       </main>
 
-      {/* 4. WinGram Floating Headphone Support Button - elevated safely above mobile dock */}
-      <button
-        type="button"
-        onClick={() => setShowSupportModal(true)}
-        className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+4.75rem)] right-3.5 z-40 w-12 h-12 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white flex items-center justify-center shadow-lg shadow-[#0098ea]/30 border-2 border-white/60 active:scale-95 transition-all cursor-pointer touch-target-44"
-        title="24/7 Customer Support"
-        aria-label="24/7 Customer Support"
-      >
-        <Headphones size={24} className="w-6 h-6 text-white" />
-      </button>
-
-      {/* 5. Floating Bottom Dock for Easy Mobile Navigation */}
+      {/* Floating Bottom Dock for Easy Mobile Navigation */}
       <GameDock
         activeTab={activeTab}
         onChangeTab={handleTabChange}
         user={user}
       />
 
-      {/* Support Modal (WinGram 24/7 Support) */}
-      {showSupportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
-          <div className="liquid-glass-modal p-5 max-w-sm w-full space-y-4 animate-in fade-in zoom-in-95 duration-150 border border-slate-200/95 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
-              <div className="flex items-center gap-2">
-                <Headphones size={20} className="w-5 h-5 text-[#0098ea]" />
-                <span className="text-sm font-bold text-slate-900 uppercase font-display">
-                  SHILIAIWEI Support 24/7
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowSupportModal(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 touch-target-44 flex items-center justify-center"
-                aria-label="Close modal"
-              >
-                <X size={20} className="w-5 h-5" />
-              </button>
-            </div>
 
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-center">
-              <Headphones size={32} className="w-8 h-8 text-[#0098ea] mx-auto" />
-              <h4 className="text-sm font-bold text-slate-900">Live Customer Assistance</h4>
-              <p className="text-xs text-slate-500">
-                Contact our official Telegram concierge desk for instant deposit, account verification, and transaction support.
-              </p>
-            </div>
-
-            <a
-              href="https://t.me/srievibot"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full py-3 rounded-xl bg-[#0098ea] hover:bg-[#0088cc] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all touch-target-44"
-            >
-              <span>Message Support on Telegram</span>
-            </a>
-
-            <button
-              type="button"
-              onClick={() => setShowSupportModal(false)}
-              className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider shadow-sm touch-target-44 flex items-center justify-center"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Top Up Modal (WinGram Quick Top-up) */}
       {showTopUpModal && (

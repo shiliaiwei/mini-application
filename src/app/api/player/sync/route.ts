@@ -40,42 +40,40 @@ export async function POST(req: Request) {
 
     const sql = neon(dbUrl);
 
-    // Upsert player record with parameterized SQL
-    const upsertResult = await sql`
-      INSERT INTO game_players (
-        telegram_id, first_name, last_name, username, photo_url, score, spend_seconds, updated_at
+    // Optimized Single-Roundtrip CTE: Upsert player and calculate rank in one database hop
+    const results = await sql`
+      WITH upserted AS (
+        INSERT INTO game_players (
+          telegram_id, first_name, last_name, username, photo_url, score, spend_seconds, updated_at
+        )
+        VALUES (
+          ${cleanId}, 
+          ${cleanFirstName}, 
+          ${cleanLastName}, 
+          ${cleanUsername}, 
+          ${cleanPhotoUrl}, 
+          ${safeScore}, 
+          ${safeSpendSeconds}, 
+          NOW()
+        )
+        ON CONFLICT (telegram_id) DO UPDATE SET
+          first_name = EXCLUDED.first_name,
+          last_name = EXCLUDED.last_name,
+          username = EXCLUDED.username,
+          photo_url = COALESCE(EXCLUDED.photo_url, game_players.photo_url),
+          score = GREATEST(game_players.score, EXCLUDED.score),
+          spend_seconds = GREATEST(game_players.spend_seconds, EXCLUDED.spend_seconds),
+          updated_at = NOW()
+        RETURNING *
       )
-      VALUES (
-        ${cleanId}, 
-        ${cleanFirstName}, 
-        ${cleanLastName}, 
-        ${cleanUsername}, 
-        ${cleanPhotoUrl}, 
-        ${safeScore}, 
-        ${safeSpendSeconds}, 
-        NOW()
-      )
-      ON CONFLICT (telegram_id) DO UPDATE SET
-        first_name = EXCLUDED.first_name,
-        last_name = EXCLUDED.last_name,
-        username = EXCLUDED.username,
-        photo_url = COALESCE(EXCLUDED.photo_url, game_players.photo_url),
-        score = GREATEST(game_players.score, EXCLUDED.score),
-        spend_seconds = GREATEST(game_players.spend_seconds, EXCLUDED.spend_seconds),
-        updated_at = NOW()
-      RETURNING *;
+      SELECT 
+        upserted.*,
+        (SELECT COUNT(*) + 1 FROM game_players WHERE score > upserted.score) AS rank
+      FROM upserted;
     `;
 
-    const player = upsertResult[0];
-
-    // Calculate real rank
-    const rankResult = await sql`
-      SELECT COUNT(*) + 1 as rank 
-      FROM game_players 
-      WHERE score > ${player.score};
-    `;
-
-    const rank = parseInt(rankResult[0].rank, 10) || 1;
+    const player = results[0];
+    const rank = parseInt(player?.rank, 10) || 1;
 
     return NextResponse.json({
       success: true,
