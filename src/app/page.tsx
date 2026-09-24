@@ -15,15 +15,19 @@ export default function MiniAppPage() {
   const [user, setUser] = useState<TelegramUser | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
-  const [isTelegramMobile, setIsTelegramMobile] = useState(true);
-  const [bypassGate, setBypassGate] = useState(false);
   const [activeTab, setActiveTab] = useState<GameTab>("game");
 
   // Game Mechanics State
   const [score, setScore] = useState(0);
   const [spendSeconds, setSpendSeconds] = useState(0);
   const [energy, setEnergy] = useState(1000);
+  const [userRank, setUserRank] = useState(1);
   const maxEnergy = 1000;
+
+  const scoreRef = useRef(score);
+  const spendRef = useRef(spendSeconds);
+  scoreRef.current = score;
+  spendRef.current = spendSeconds;
 
   // Track active time spent tapping
   useEffect(() => {
@@ -41,7 +45,7 @@ export default function MiniAppPage() {
     return () => clearInterval(energyTimer);
   }, [maxEnergy]);
 
-  // Load saved score from localStorage
+  // Load initial score from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedScore = localStorage.getItem("lime_game_score");
@@ -55,7 +59,40 @@ export default function MiniAppPage() {
     }
   }, []);
 
-  // Save score periodically
+  // Sync to Neon Database
+  const syncWithDatabase = useCallback(async (currentScore: number, currentTime: number) => {
+    if (!user?.id) return;
+    try {
+      const res = await fetch("/api/player/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          telegram_id: user.id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          username: user.username,
+          photo_url: user.photo_url,
+          score: currentScore,
+          spend_seconds: currentTime,
+        }),
+      });
+      const data = await res.json();
+      if (data && data.rank) {
+        setUserRank(data.rank);
+      }
+    } catch {}
+  }, [user]);
+
+  // Periodic database sync every 3 seconds
+  useEffect(() => {
+    if (!user?.id) return;
+    const interval = setInterval(() => {
+      syncWithDatabase(scoreRef.current, spendRef.current);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [user, syncWithDatabase]);
+
+  // Save to localStorage
   useEffect(() => {
     if (typeof window !== "undefined" && score > 0) {
       localStorage.setItem("lime_game_score", String(score));
@@ -67,7 +104,7 @@ export default function MiniAppPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const app = window.Telegram?.WebApp;
-      if (app && app.initData) {
+      if (app) {
         try {
           app.ready();
           app.expand();
@@ -79,20 +116,18 @@ export default function MiniAppPage() {
         }
 
         setTgApp(app);
-        setIsTelegramMobile(true);
 
         const tgUser = app.initDataUnsafe?.user;
-        if (tgUser) {
+        if (tgUser && tgUser.id) {
           setUser(tgUser);
+          // Initial sync to database
+          syncWithDatabase(scoreRef.current, spendRef.current);
         }
-      } else {
-        // Outside Telegram
-        setIsTelegramMobile(false);
       }
 
       setIsReady(true);
     }
-  }, []);
+  }, [syncWithDatabase]);
 
   const handleTap = useCallback(() => {
     setScore((prev) => prev + 1);
@@ -103,6 +138,8 @@ export default function MiniAppPage() {
     try {
       tgApp?.HapticFeedback?.impactOccurred("light");
     } catch {}
+    // Trigger sync on tab change
+    syncWithDatabase(scoreRef.current, spendRef.current);
     setActiveTab(tab);
   };
 
@@ -116,9 +153,14 @@ export default function MiniAppPage() {
   if (!isReady) {
     return (
       <div className="min-h-screen bg-[#080c0a] flex items-center justify-center text-lime-400 font-mono text-xs">
-        <span className="animate-game-pulse uppercase">LAUNCHING GAME...</span>
+        <span className="animate-game-pulse uppercase">STARTING SESSION...</span>
       </div>
     );
+  }
+
+  // Strict Telegram Sync Gate: Only users synced with Telegram can play
+  if (!user?.id) {
+    return <TelegramGateScreen />;
   }
 
   // Welcome Screen with Auto-Sync & Auto-Open
@@ -192,6 +234,7 @@ export default function MiniAppPage() {
             userScore={score}
             userSpendSeconds={spendSeconds}
             user={user}
+            userRank={userRank}
           />
         )}
 
