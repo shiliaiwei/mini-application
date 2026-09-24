@@ -333,8 +333,8 @@ export default function MiniAppPage() {
 
   return (
     <div className="min-h-dvh flex flex-col justify-between app-bg-white text-slate-900 select-none overflow-x-hidden font-body relative">
-      {/* Vertical Flowing Banknote Security Ribbon (ca18d734-2fb8-483c-8a5a-a4ea71fcb4cf.webp) */}
-      <div className="fixed inset-0 bg-security-ribbon opacity-[0.04] pointer-events-none z-0" />
+      {/* Vector Guilloche Banknote Security Mesh from background.svg */}
+      <div className="fixed inset-0 bg-app-guilloche opacity-[0.06] pointer-events-none z-0" />
 
       {/* 1. WinGram Style Top Navigation Header */}
       <WinGramHeader

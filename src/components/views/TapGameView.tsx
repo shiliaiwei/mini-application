@@ -216,16 +216,29 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
 
         {/* 2. DUAL BANKNOTE CURRENCY CARDS (Mobile-Optimized Compact Design) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {/* Card 1: Cambodian Khmer Riel (គណនីប្រាក់រៀល) */}
+          {/* Card 1: Cambodian Khmer Riel (គណនីប្រាក់រៀល) - Pure Code Banknote Design */}
           <div
             role="button"
             tabIndex={0}
             onClick={onGoToSwap}
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onGoToSwap?.()}
-            className="banknote-khr-card rounded-2xl p-3.5 border border-purple-300 shadow-xs relative overflow-hidden transition-all hover:shadow-sm active:scale-[0.99] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-600"
+            className="banknote-khr-card rounded-2xl p-3.5 shadow-xs relative overflow-hidden transition-all hover:shadow-sm active:scale-[0.99] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-600"
             aria-label="KHR Account. Tap to exchange."
           >
-            <div className="flex items-center justify-between">
+            {/* Background Banknote Watermark Currency Glyph */}
+            <div className="absolute -right-3 -bottom-5 select-none pointer-events-none opacity-[0.06] text-purple-950 font-serif font-black text-8xl leading-none">
+              ៛
+            </div>
+
+            {/* Top Serial & Security Tag */}
+            <div className="flex items-center justify-between text-[9px] font-mono text-purple-900/60 pb-1 mb-1 border-b border-purple-100">
+              <span className="tracking-widest">№ KHR-08492</span>
+              <span className="font-bold text-[8px] tracking-wider uppercase bg-purple-50 text-purple-800 px-1.5 py-0.2 rounded border border-purple-200">
+                OFFICIAL NOTE
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between relative z-10">
               <div className="flex items-baseline gap-1.5">
                 <span className="text-sm font-bold text-purple-950 font-sans">
                   គណនីប្រាក់រៀល
@@ -234,12 +247,12 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
                   (KHR)
                 </span>
               </div>
-              <span className="text-[9px] font-black text-purple-900 bg-purple-100 px-2 py-0.5 rounded-full border border-purple-300">
-                Official
+              <span className="text-[9px] font-black text-purple-900 bg-purple-100/80 px-2 py-0.5 rounded-full border border-purple-300">
+                Reserve
               </span>
             </div>
 
-            <div className="mt-1.5 flex items-baseline">
+            <div className="mt-1 flex items-baseline relative z-10">
               <span className="text-xl font-black text-purple-950 mr-1.5 font-sans">
                 ៛
               </span>
@@ -248,8 +261,8 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
               </span>
             </div>
 
-            <div className="mt-1.5 flex items-center justify-between text-[11px] text-slate-700 font-semibold pt-1.5 border-t border-purple-200/80">
-              <span className="text-[10px] text-slate-600 font-medium truncate">100 PTS = 4,100 KHR</span>
+            <div className="mt-2 flex items-center justify-between text-[11px] text-slate-700 font-semibold pt-1.5 border-t border-purple-200/80 relative z-10">
+              <span className="text-[10px] text-purple-950/70 font-medium truncate">100 PTS = 4,100 KHR</span>
               <span className="text-[#0077b5] font-black flex items-center gap-0.5 text-xs flex-shrink-0">
                 <span>Exchange</span>
                 <ChevronRight size={14} />
@@ -257,16 +270,29 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
             </div>
           </div>
 
-          {/* Card 2: US Dollar Account (គណនីប្រាក់ដុល្លារ) */}
+          {/* Card 2: US Dollar Account (គណនីប្រាក់ដុល្លារ) - Pure Code Banknote Design */}
           <div
             role="button"
             tabIndex={0}
             onClick={onGoToSwap}
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onGoToSwap?.()}
-            className="banknote-usd-card rounded-2xl p-3.5 border border-emerald-300 shadow-xs relative overflow-hidden transition-all hover:shadow-sm active:scale-[0.99] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+            className="banknote-usd-card rounded-2xl p-3.5 shadow-xs relative overflow-hidden transition-all hover:shadow-sm active:scale-[0.99] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
             aria-label="USD Account. Tap to exchange."
           >
-            <div className="flex items-center justify-between">
+            {/* Background Banknote Watermark Currency Glyph */}
+            <div className="absolute -right-2 -bottom-5 select-none pointer-events-none opacity-[0.06] text-emerald-950 font-serif font-black text-8xl leading-none">
+              $
+            </div>
+
+            {/* Top Serial & Security Tag */}
+            <div className="flex items-center justify-between text-[9px] font-mono text-emerald-900/60 pb-1 mb-1 border-b border-emerald-100">
+              <span className="tracking-widest">№ USD-88492</span>
+              <span className="font-bold text-[8px] tracking-wider uppercase bg-emerald-50 text-emerald-800 px-1.5 py-0.2 rounded border border-emerald-200">
+                FEDERAL NOTE
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between relative z-10">
               <div className="flex items-baseline gap-1.5">
                 <span className="text-sm font-bold text-emerald-950 font-sans">
                   គណនីប្រាក់ដុល្លារ
@@ -275,12 +301,12 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
                   (USD)
                 </span>
               </div>
-              <span className="text-[9px] font-black text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
-                Official
+              <span className="text-[9px] font-black text-emerald-900 bg-emerald-100/80 px-2 py-0.5 rounded-full border border-emerald-300">
+                Reserve
               </span>
             </div>
 
-            <div className="mt-1.5 flex items-baseline">
+            <div className="mt-1 flex items-baseline relative z-10">
               <span className="text-xl font-black text-emerald-950 mr-1.5 font-sans">
                 $
               </span>
@@ -289,8 +315,8 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
               </span>
             </div>
 
-            <div className="mt-1.5 flex items-center justify-between text-[11px] text-slate-700 font-semibold pt-1.5 border-t border-emerald-200/80">
-              <span className="text-[10px] text-slate-600 font-medium truncate">100 PTS = $1.00 USD</span>
+            <div className="mt-2 flex items-center justify-between text-[11px] text-slate-700 font-semibold pt-1.5 border-t border-emerald-200/80 relative z-10">
+              <span className="text-[10px] text-emerald-950/70 font-medium truncate">100 PTS = $1.00 USD</span>
               <span className="text-[#0077b5] font-black flex items-center gap-0.5 text-xs flex-shrink-0">
                 <span>Exchange</span>
                 <ChevronRight size={14} />
@@ -490,9 +516,6 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
         >
           {/* Outer Grooved Rim */}
           <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-full border-2 border-[#0098ea]/40 flex flex-col items-center justify-center bg-white shadow-xl relative p-1 overflow-hidden">
-            {/* Guilloche Radial Sunburst Rosette Watermark */}
-            <div className="absolute inset-0 bg-security-sunburst opacity-25 pointer-events-none" />
-
             {/* Inner Ring with Micro-print border and Centered Brand Mark (Zero text per rule) */}
             <div className="w-34 h-34 sm:w-40 sm:h-40 rounded-full border border-dashed border-[#0098ea]/40 flex flex-col items-center justify-center relative bg-white/80 backdrop-blur-xs">
               {/* Centered Brand Mark */}

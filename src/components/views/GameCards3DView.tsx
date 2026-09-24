@@ -216,9 +216,6 @@ export const GameCards3DView: React.FC<GameCards3DViewProps> = ({
             }}
             className="card-3d-item liquid-glass p-3.5 sm:p-4 border border-slate-200 hover:border-[#0098ea] cursor-pointer relative overflow-hidden group shadow-xs transition-all"
           >
-            {/* Banknote Half-Circles Security Strip (10350116.webp) */}
-            <div className="w-full h-2.5 border-strip-halfcircles opacity-70 mb-3 rounded-t-lg" />
-
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Grid2x2 size={24} className="text-[#0098ea] flex-shrink-0" />
@@ -259,9 +256,6 @@ export const GameCards3DView: React.FC<GameCards3DViewProps> = ({
             }}
             className="card-3d-item liquid-glass p-3.5 sm:p-4 border border-slate-200 hover:border-amber-500 cursor-pointer relative overflow-hidden group shadow-xs transition-all"
           >
-            {/* Banknote Half-Circles Security Strip (10350116.webp) */}
-            <div className="w-full h-2.5 border-strip-halfcircles opacity-70 mb-3 rounded-t-lg" />
-
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Crown size={24} className="text-amber-500 flex-shrink-0" />
@@ -302,8 +296,6 @@ export const GameCards3DView: React.FC<GameCards3DViewProps> = ({
             }}
             className="card-3d-item liquid-glass p-3.5 sm:p-4 border border-slate-200 hover:border-[#16a34a] cursor-pointer relative overflow-hidden group shadow-xs transition-all"
           >
-            {/* Banknote Half-Circles Security Strip (10350116.webp) */}
-            <div className="w-full h-2.5 border-strip-halfcircles opacity-70 mb-3 rounded-t-lg" />
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

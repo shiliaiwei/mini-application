@@ -10,26 +10,22 @@ interface TelegramGateScreenProps {
 export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass }) => {
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-between p-6 app-bg-white text-slate-900 max-w-md mx-auto w-full select-none font-body relative overflow-hidden">
-      {/* Flowing Vertical Banknote Security Ribbon (ca18d734-2fb8-483c-8a5a-a4ea71fcb4cf.webp) */}
-      <div className="absolute inset-0 bg-security-ribbon opacity-[0.05] pointer-events-none z-0" />
+      {/* Vector Guilloche Banknote Security Mesh from background.svg */}
+      <div className="absolute inset-0 bg-app-guilloche opacity-[0.06] pointer-events-none z-0" />
 
       {/* Top Banner */}
       <div className="relative z-10">
-        <div className="flex items-center justify-between text-xs text-slate-500 pb-2">
+        <div className="flex items-center justify-between text-xs text-slate-500 pb-2 border-b border-slate-200/80">
           <span className="text-[#0098ea] font-bold uppercase tracking-wider">@srievibot</span>
           <span className="text-[10px] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-600 font-semibold">
             TELEGRAM VERIFICATION
           </span>
         </div>
-        {/* Flower Banknote Security Strip (1033454350116.webp) */}
-        <div className="w-full h-2 border-strip-flower opacity-70 border-b border-slate-200/80" />
       </div>
 
       {/* Center Notice */}
       <div className="my-auto text-center space-y-4 relative z-10">
         <div className="w-20 h-20 rounded-full bg-white border-2 border-[#0098ea] mx-auto flex items-center justify-center shadow-lg relative overflow-hidden">
-          {/* Radial Rosette Watermark (7168912.webp) */}
-          <div className="absolute inset-0 bg-security-sunburst opacity-30 pointer-events-none" />
           <ShiliaiweiBrand variant="mark" height={44} className="relative z-10" />
         </div>
 

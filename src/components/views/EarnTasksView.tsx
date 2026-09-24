@@ -184,9 +184,6 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
     <div className="space-y-3.5 pb-28 font-body select-none text-slate-900 max-w-xl mx-auto w-full px-1">
       {/* Top Banner Overview */}
       <div className="liquid-glass p-3.5 border border-slate-200 shadow-xs relative overflow-hidden">
-        {/* Banknote Waves Security Strip (10350112346.webp) */}
-        <div className="w-full h-2.5 border-strip-waves opacity-60 mb-2" />
-
         <div className="flex items-center justify-between">
           <div>
             <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider block">

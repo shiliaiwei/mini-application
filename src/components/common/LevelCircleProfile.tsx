@@ -73,13 +73,11 @@ export const LevelCircleProfile: React.FC<LevelCircleProfileProps> = ({
           />
         </svg>
 
-        {/* Circular Avatar Container with Banknote Sunburst Rosette Watermark (7168912.webp) */}
+        {/* Circular Avatar Container */}
         <div
           className="rounded-full overflow-hidden flex items-center justify-center bg-slate-50 border border-slate-200 relative shadow-inner"
           style={{ width: avatar, height: avatar }}
         >
-          {/* Circular Sunburst Watermark */}
-          <div className="absolute inset-0 bg-security-sunburst opacity-25 pointer-events-none" />
 
           {user?.photo_url ? (
             <Image

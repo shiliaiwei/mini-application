@@ -150,9 +150,6 @@ export const SwapView: React.FC<SwapViewProps> = ({
 
       {/* Main Swap Card */}
       <div className="liquid-glass p-4 sm:p-5 space-y-3 relative border border-slate-200 shadow-sm">
-        {/* Banknote Waves Security Strip (10350112346.webp) */}
-        <div className="w-full h-3 border-strip-waves opacity-60 mb-1" />
-
         {/* From Section */}
         <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-700 font-bold">
