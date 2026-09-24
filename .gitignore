@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Heavy media & document files
+*.mov
+*.mp4
+*.pptx
+*.ppt
+*.zip
+*.pdf
+*.docx
+*.wav
+*.mp3
+*.ogg
+*.aac
+*.db
