@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
+import "@telegram-apps/telegram-ui/dist/styles.css";
 import "./globals.css";
 
 const googleSans = localFont({
@@ -28,8 +29,14 @@ const facultyGlyphic = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Telegram Tap Game",
-  description: "Touch to earn points - Telegram Mini App",
+  title: "SHILIAIWEI - Telegram Web3 Vault & Gaming",
+  description: "Official SHILIAIWEI Telegram Web3 Mini App",
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "default",
+    "X-Content-Type-Options": "nosniff",
+  },
 };
 
 export const viewport: Viewport = {
@@ -49,7 +56,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${googleSans.variable} ${facultyGlyphic.variable} h-full antialiased`}
+      className={`${googleSans.variable} ${facultyGlyphic.variable} h-full antialiased light`}
     >
       <head>
         <Script
@@ -57,7 +64,7 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-white text-slate-900 antialiased font-sans">
+      <body className="min-h-full flex flex-col bg-white text-[#0f172a] antialiased font-sans selection:bg-[#0098ea] selection:text-white">
         {children}
       </body>
     </html>

@@ -37,10 +37,15 @@ export interface TelegramWebApp {
   viewportStableHeight: number;
   headerColor: string;
   backgroundColor: string;
+  setHeaderColor?: (color: string) => void;
+  setBackgroundColor?: (color: string) => void;
   isClosingConfirmationEnabled: boolean;
   ready: () => void;
   expand: () => void;
   close: () => void;
+  requestFullscreen?: () => void;
+  exitFullscreen?: () => void;
+  isFullscreen?: boolean;
   enableClosingConfirmation: () => void;
   disableClosingConfirmation: () => void;
   openTelegramLink: (url: string) => void;

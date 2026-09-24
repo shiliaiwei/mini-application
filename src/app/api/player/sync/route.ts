@@ -19,28 +19,40 @@ export async function POST(req: Request) {
       spend_seconds,
     } = body;
 
-    if (!telegram_id) {
+    // Cloudflare Security Audit: Strict Input Sanitization
+    const cleanId = String(telegram_id || "").replace(/[^0-9]/g, "").slice(0, 32);
+    if (!cleanId) {
       return NextResponse.json(
-        { error: "telegram_id required" },
+        { error: "Valid numeric telegram_id required" },
         { status: 400 }
       );
     }
 
+    const cleanFirstName = String(first_name || "Player").slice(0, 64).trim();
+    const cleanLastName = last_name ? String(last_name).slice(0, 64).trim() : null;
+    const cleanUsername = username ? String(username).replace(/[^a-zA-Z0-9_]/g, "").slice(0, 64) : null;
+    const cleanPhotoUrl = photo_url && typeof photo_url === "string" && photo_url.startsWith("https://")
+      ? photo_url.slice(0, 255)
+      : null;
+
+    const safeScore = Math.max(0, Math.min(100_000_000, Math.floor(Number(score) || 0)));
+    const safeSpendSeconds = Math.max(0, Math.min(100_000_000, Math.floor(Number(spend_seconds) || 0)));
+
     const sql = neon(dbUrl);
 
-    // Upsert player record
+    // Upsert player record with parameterized SQL
     const upsertResult = await sql`
       INSERT INTO game_players (
         telegram_id, first_name, last_name, username, photo_url, score, spend_seconds, updated_at
       )
       VALUES (
-        ${telegram_id}, 
-        ${first_name || "Player"}, 
-        ${last_name || null}, 
-        ${username || null}, 
-        ${photo_url || null}, 
-        ${Number(score) || 0}, 
-        ${Number(spend_seconds) || 0}, 
+        ${cleanId}, 
+        ${cleanFirstName}, 
+        ${cleanLastName}, 
+        ${cleanUsername}, 
+        ${cleanPhotoUrl}, 
+        ${safeScore}, 
+        ${safeSpendSeconds}, 
         NOW()
       )
       ON CONFLICT (telegram_id) DO UPDATE SET
@@ -63,15 +75,18 @@ export async function POST(req: Request) {
       WHERE score > ${player.score};
     `;
 
-    const rank = Number(rankResult[0]?.rank) || 1;
+    const rank = parseInt(rankResult[0].rank, 10) || 1;
 
     return NextResponse.json({
       success: true,
       player,
       rank,
     });
-  } catch (error: unknown) {
-    const errMsg = error instanceof Error ? error.message : "Database sync error";
-    return NextResponse.json({ error: errMsg }, { status: 500 });
+  } catch (err: any) {
+    console.error("Player sync error:", err);
+    return NextResponse.json(
+      { error: "Internal server error", details: err.message },
+      { status: 500 }
+    );
   }
 }

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { TelegramUser } from "@/types/telegram";
-import { Trophy, Timer, RefreshCw } from "lucide-react";
+import { Trophy, RefreshCw, Crown } from "lucide-react";
 
 interface LeaderboardViewProps {
   userScore: number;
@@ -58,133 +58,117 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
   }, []);
 
   return (
-    <div className="space-y-4 pb-20 select-none">
-      {/* Header Card */}
-      <div className="white-card rounded-2xl p-4 text-center">
-        <div className="w-12 h-12 rounded-full bg-lime-50 border-2 border-lime-600 mx-auto flex items-center justify-center text-lime-700 mb-2">
-          <Trophy className="w-6 h-6" />
-        </div>
-        <h2 className="text-lg font-bold text-slate-900 uppercase tracking-wider font-display">
-          Global Leaderboard
-        </h2>
-        <p className="text-xs text-slate-500 font-body mt-0.5">
-          Real Players Ranked by Tap Score and Active Time
-        </p>
-      </div>
-
-      {/* Current User Live Card */}
-      <div className="white-card-active rounded-2xl p-3.5 flex items-center justify-between">
+    <div className="space-y-4 pb-24 font-body select-none text-slate-900 max-w-xl mx-auto w-full px-1">
+      {/* Current User Standings Card */}
+      <div className="liquid-glass p-4 flex items-center justify-between border border-slate-200/90 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-lime-700 text-white font-black flex items-center justify-center text-xs font-display">
+          <div className="w-11 h-11 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-[#0098ea] font-black text-lg shadow-sm">
             #{userRank}
           </div>
           <div>
-            <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5 font-body">
-              <span>{currentUserName}</span>
-              <span className="text-[10px] text-lime-700 font-bold uppercase">(You)</span>
-            </div>
-            <div className="flex items-center gap-2 text-[10px] text-slate-500 font-body mt-0.5">
-              <span className="flex items-center gap-1">
-                <Timer className="w-3 h-3 text-lime-700" />
-                {formatTime(userSpendSeconds)}
-              </span>
-            </div>
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+              YOUR GLOBAL RANK
+            </span>
+            <span className="text-sm font-black text-slate-900 font-display block">
+              {currentUserName}
+            </span>
+            <span className="text-[11px] text-slate-500 font-semibold block">
+              Active: {formatTime(userSpendSeconds)}
+            </span>
           </div>
         </div>
 
         <div className="text-right">
-          <div className="text-base font-black text-lime-700 font-display">
-            {userScore.toLocaleString()}
-          </div>
-          <div className="text-[10px] text-slate-500 font-body uppercase font-semibold">
-            POINTS
+          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+            VAULT VALUE
+          </span>
+          <div className="text-lg font-black text-[#16a34a] font-display">
+            ${userScore.toLocaleString()}.00
           </div>
         </div>
       </div>
 
-      {/* Leaderboard Table List (Real Database Data Only, Zero Demo Data) */}
-      <div className="white-card rounded-2xl overflow-hidden divide-y divide-slate-100">
-        <div className="p-2.5 bg-slate-50 flex items-center justify-between text-[10px] text-slate-500 uppercase tracking-wider font-body font-bold">
-          <span className="w-12">RANK</span>
-          <span className="flex-1">PLAYER</span>
-          <span className="w-20 text-center">SPEND TIME</span>
-          <span className="w-20 text-right">SCORE</span>
+      {/* Leaderboard Table Card */}
+      <div className="liquid-glass p-4 space-y-3 border border-slate-200/90 shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-4 h-4 text-amber-500" />
+            <span className="text-xs font-black text-slate-900 uppercase tracking-wider font-display">
+              SHILIAIWEI Global Wealth Leaderboard
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={fetchLeaderboard}
+            disabled={loading}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 transition-colors"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#0098ea]" : ""}`} />
+          </button>
         </div>
 
-        {loading && players.length === 0 ? (
-          <div className="p-6 text-center text-xs text-slate-400 font-body animate-pulse">
-            LOADING REAL PLAYER RANKINGS...
-          </div>
-        ) : players.length === 0 ? (
-          <div className="p-6 text-center text-xs text-slate-500 font-body">
-            No other players registered yet. You are currently rank #1. Keep tapping to build your score.
-          </div>
-        ) : (
-          players.map((entry) => {
-            const isSelf = user?.id && String(entry.telegram_id) === String(user.id);
-            const displayName = [entry.first_name, entry.last_name]
-              .filter(Boolean)
-              .join(" ");
+        {/* Players List */}
+        <div className="space-y-1.5">
+          {players.length === 0 && !loading && (
+            <div className="text-center py-8 text-xs text-slate-500">
+              No ranked holders yet. Be the first to mint!
+            </div>
+          )}
+
+          {players.map((p) => {
+            const isMe = String(p.telegram_id) === String(user?.id);
+            const isTop1 = p.rank === 1;
+            const isTop2 = p.rank === 2;
+            const isTop3 = p.rank === 3;
 
             return (
               <div
-                key={entry.telegram_id}
-                className={`p-3 flex items-center justify-between text-xs font-body ${
-                  isSelf ? "bg-lime-50/50" : ""
+                key={p.telegram_id}
+                className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${
+                  isMe
+                    ? "bg-sky-50/80 border-[#0098ea]/40 text-slate-900 shadow-sm"
+                    : "bg-slate-50 border-slate-200 text-slate-800 hover:border-slate-300"
                 }`}
               >
-                {/* Rank */}
-                <div className="w-12">
-                  <span
-                    className={`font-black font-display ${
-                      entry.rank === 1
-                        ? "text-lime-700 text-sm"
-                        : entry.rank === 2
-                        ? "text-slate-800"
-                        : entry.rank === 3
-                        ? "text-slate-600"
-                        : "text-slate-400"
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0 ${
+                      isTop1
+                        ? "bg-amber-400 text-slate-900 shadow-sm"
+                        : isTop2
+                        ? "bg-slate-200 text-slate-800"
+                        : isTop3
+                        ? "bg-amber-700 text-white"
+                        : "bg-white border border-slate-200 text-slate-600"
                     }`}
                   >
-                    #{entry.rank}
+                    {isTop1 ? <Crown className="w-3.5 h-3.5" /> : `#${p.rank}`}
+                  </div>
+
+                  <div className="min-w-0">
+                    <span className="text-xs font-bold text-slate-900 block truncate">
+                      {[p.first_name, p.last_name].filter(Boolean).join(" ") || `@${p.username}`}
+                    </span>
+                    <span className="text-[10px] text-slate-500 block">
+                      Active: {formatTime(p.spend_seconds)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-right flex-shrink-0 ml-2">
+                  <span className="text-xs font-black text-[#16a34a] font-display block">
+                    ${Number(p.score).toLocaleString()}.00
                   </span>
-                </div>
-
-                {/* Player Name */}
-                <div className="flex-1 min-w-0 pr-2">
-                  <span className="font-semibold text-slate-900 truncate block">
-                    {displayName || (entry.username ? `@${entry.username}` : "Player")}
-                    {isSelf && (
-                      <span className="text-[10px] text-lime-700 font-bold ml-1">(You)</span>
-                    )}
+                  <span className="text-[9px] text-slate-400 font-bold uppercase block">
+                    USD VAULT
                   </span>
-                </div>
-
-                {/* Spend Time */}
-                <div className="w-20 text-center text-slate-500 text-[11px]">
-                  {formatTime(entry.spend_seconds || 0)}
-                </div>
-
-                {/* Score */}
-                <div className="w-20 text-right font-bold text-slate-900 font-display">
-                  {entry.score.toLocaleString()}
                 </div>
               </div>
             );
-          })
-        )}
+          })}
+        </div>
       </div>
-
-      {/* Refresh Button */}
-      <button
-        type="button"
-        onClick={fetchLeaderboard}
-        disabled={loading}
-        className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 text-xs font-bold font-body uppercase tracking-wider flex items-center justify-center gap-2 active:scale-98 transition-all"
-      >
-        <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-lime-700" : ""}`} />
-        Refresh Leaderboard Rankings
-      </button>
     </div>
   );
 };
