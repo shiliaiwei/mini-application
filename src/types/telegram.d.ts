@@ -21,6 +21,7 @@ export interface TelegramWebApp {
     chat_instance?: string;
   };
   version: string;
+  isVersionAtLeast?: (version: string) => boolean;
   platform: string;
   colorScheme: "light" | "dark";
   themeParams: {

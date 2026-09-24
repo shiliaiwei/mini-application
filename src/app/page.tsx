@@ -170,19 +170,21 @@ export default function MiniAppPage() {
         try {
           app.ready();
           app.expand();
-          if (app.requestFullscreen) {
+          if (app.isVersionAtLeast?.("8.0") && typeof app.requestFullscreen === "function") {
             try {
               app.requestFullscreen();
             } catch {}
           }
-          if (app.enableClosingConfirmation) {
-            app.enableClosingConfirmation();
+          if (app.isVersionAtLeast?.("6.2") && typeof app.enableClosingConfirmation === "function") {
+            try {
+              app.enableClosingConfirmation();
+            } catch {}
           }
-          if (app.setHeaderColor) {
-            app.setHeaderColor("#ffffff");
-          }
-          if (app.setBackgroundColor) {
-            app.setBackgroundColor("#ffffff");
+          if (app.isVersionAtLeast?.("6.1")) {
+            try {
+              app.setHeaderColor?.("#ffffff");
+              app.setBackgroundColor?.("#ffffff");
+            } catch {}
           }
         } catch (e) {
           console.warn("Telegram WebApp init error:", e);
