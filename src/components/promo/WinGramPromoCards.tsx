@@ -16,8 +16,8 @@ interface WinGramPromoCardsProps {
 }
 
 /**
- * Scattered / Repeating Watermark — single word "SHILIAIWEI"
- * Brand rule: full word only. No split. No badge alongside text.
+ * Scattered / Repeating Watermark Pattern of SHILIAI [WEI] Logo
+ * Diagonal repeated pattern across the background of feature cards
  */
 const CardWatermarkPattern: React.FC<{ patternId: string }> = ({ patternId }) => (
   <svg
@@ -27,29 +27,41 @@ const CardWatermarkPattern: React.FC<{ patternId: string }> = ({ patternId }) =>
     <defs>
       <pattern
         id={patternId}
-        width="200"
-        height="70"
+        width="160"
+        height="80"
         patternUnits="userSpaceOnUse"
         patternTransform="rotate(-18)"
       >
-        {/* Single continuous word: SHILIAIWEI */}
+        {/* SHILIAI in Bold Text */}
         <text
           x="5"
           y="28"
           fill="white"
-          fontSize="15"
+          fontSize="16"
           fontWeight="900"
-          letterSpacing="0.04em"
+          letterSpacing="-0.02em"
           fontFamily="system-ui, -apple-system, sans-serif"
         >
-          SHILIAIWEI
+          SHILIAI
+        </text>
+        {/* [WEI] in Rounded Rectangle Badge */}
+        <rect x="76" y="13" width="34" height="20" rx="5" fill="white" />
+        <text
+          x="93"
+          y="28"
+          textAnchor="middle"
+          fill="#0077b5"
+          fontSize="11"
+          fontWeight="900"
+          fontFamily="system-ui, -apple-system, sans-serif"
+        >
+          WEI
         </text>
       </pattern>
     </defs>
     <rect width="100%" height="100%" fill={`url(#${patternId})`} />
   </svg>
 );
-
 
 export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
   score = 0,

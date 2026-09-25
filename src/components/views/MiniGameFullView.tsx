@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
+import { BrandFooter } from "@/components/brand/BrandFooter";
 import { gameAudio } from "@/lib/audio/gameAudio";
 import {
   WORD_FLASH_POOL,
@@ -570,11 +571,8 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
 
         {/* Brand & Active Game Name */}
         <div className="text-center">
-          <div className="flex items-center justify-center gap-1">
-            <ShiliaiweiBrand variant="mark" height={12} colorScheme="blue" />
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-              SHILIAIWEI SPA
-            </span>
+          <div className="flex items-center justify-center pb-0.5">
+            <ShiliaiweiBrand height={14} colorScheme="blue" />
           </div>
           <h1 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-tight">
             {activeTab === "wheel" && "Daily Spin Wheel"}
@@ -1212,8 +1210,9 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
         </div>
       )}
 
-      {/* BOTTOM ACTION BAR: Clean back to home */}
-      <div className="pt-4 text-center">
+      {/* BOTTOM ACTION BAR: Brand Footer & Clean back to home */}
+      <div className="pt-2 text-center">
+        <BrandFooter height={16} className="mb-2" />
         <button
           type="button"
           onClick={() => {

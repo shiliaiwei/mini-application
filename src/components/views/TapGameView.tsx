@@ -20,6 +20,7 @@ import {
   Send,
 } from "@/components/icons/KeylineIcons";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
+import { BrandFooter } from "@/components/brand/BrandFooter";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 import { WinGramPromoCards } from "@/components/promo/WinGramPromoCards";
 import { BanknoteCreditCards } from "@/components/cards/BanknoteCreditCards";
@@ -213,7 +214,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
             >
               <div className="w-44 h-44 rounded-full border-4 border-[#0098ea]/40 flex flex-col items-center justify-center bg-white shadow-2xl relative p-1 overflow-hidden">
                 <div className="w-36 h-36 rounded-full border border-dashed border-[#0098ea]/40 flex flex-col items-center justify-center relative bg-white/90">
-                  <ShiliaiweiBrand variant="mark" height={44} className="my-1" />
+                  <ShiliaiweiBrand height={22} className="my-1" />
                   <span className="text-[11px] font-black text-[#16a34a] tracking-wider uppercase mt-1">
                     TAP FOR POINTS
                   </span>
@@ -574,9 +575,9 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
       {/* 1. Top Brand & Visibility Status Bar */}
       <div className="w-full space-y-2.5 pt-0.5">
         <div className="flex items-center justify-between px-1">
-          {/* Brand Wordmark (Zero Logo Icon per rule) */}
+          {/* Brand Logo (Full word logo: SHILIAI [WEI], no duplicate text alongside) */}
           <div className="flex items-center">
-            <ShiliaiweiBrand variant="wordmark" height={22} colorScheme="blue" />
+            <ShiliaiweiBrand height={22} colorScheme="blue" />
           </div>
 
           {/* Top Actions: Eye Toggle, Notifications, User Avatar */}
@@ -640,6 +641,9 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           onSelectGame={onSelectGame}
           tgApp={tgApp}
         />
+
+        {/* 4. Brand Footer for screen consistency */}
+        <BrandFooter height={16} className="mt-4 pb-2" />
       </div>
     </div>
   );

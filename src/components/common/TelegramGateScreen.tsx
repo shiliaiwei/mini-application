@@ -25,8 +25,8 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass
 
       {/* Center Notice */}
       <div className="my-auto text-center space-y-4 relative z-10">
-        <div className="w-20 h-20 rounded-full bg-white border-2 border-[#0098ea] mx-auto flex items-center justify-center shadow-lg relative overflow-hidden">
-          <ShiliaiweiBrand variant="mark" height={44} className="relative z-10" />
+        <div className="px-5 py-3 rounded-2xl bg-white border-2 border-[#0098ea] mx-auto flex items-center justify-center shadow-lg w-fit">
+          <ShiliaiweiBrand height={24} colorScheme="blue" />
         </div>
 
         <div className="space-y-1.5">

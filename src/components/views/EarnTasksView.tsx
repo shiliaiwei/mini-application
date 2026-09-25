@@ -11,6 +11,7 @@ import {
   ArrowUpRight,
   Award,
 } from "@/components/icons/KeylineIcons";
+import { BrandFooter } from "@/components/brand/BrandFooter";
 
 interface EarnTasksViewProps {
   score: number;
@@ -440,6 +441,9 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
           </button>
         </div>
       )}
+
+      {/* Consistent Brand Footer */}
+      <BrandFooter height={16} className="mt-4 pb-2" />
     </div>
   );
 };

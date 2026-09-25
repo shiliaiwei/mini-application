@@ -22,6 +22,7 @@ import {
   Gift,
 } from "@/components/icons/KeylineIcons";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
+import { BrandFooter } from "@/components/brand/BrandFooter";
 
 /* ──────────────────────────────────────────────────────────── */
 /* Types                                                        */
@@ -68,9 +69,10 @@ const ProfileWatermark: React.FC = () => (
     xmlns="http://www.w3.org/2000/svg"
   >
     <defs>
-      <pattern id="pm-wm" width="200" height="70" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)">
-        {/* Single continuous word: SHILIAIWEI — no split, no badge */}
-        <text x="5" y="28" fill="#0098ea" fontSize="15" fontWeight="900" letterSpacing="0.04em" fontFamily="system-ui,-apple-system,sans-serif">SHILIAIWEI</text>
+      <pattern id="pm-wm" width="160" height="80" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)">
+        <text x="5" y="28" fill="#0098ea" fontSize="16" fontWeight="900" letterSpacing="-0.02em" fontFamily="system-ui,-apple-system,sans-serif">SHILIAI</text>
+        <rect x="76" y="13" width="34" height="20" rx="5" fill="#0098ea" />
+        <text x="93" y="28" textAnchor="middle" fill="white" fontSize="11" fontWeight="900" fontFamily="system-ui,-apple-system,sans-serif">WEI</text>
       </pattern>
     </defs>
     <rect width="100%" height="100%" fill="url(#pm-wm)" />
@@ -510,9 +512,9 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
               Edit
             </button>
           </div>
-          {/* Wordmark only — no mark icon alongside text (brand mutual exclusivity rule) */}
-          <div className="flex items-center">
-            <ShiliaiweiBrand variant="wordmark" height={13} colorScheme="white" />
+          <div className="flex items-center gap-2">
+            <ShiliaiweiBrand height={14} colorScheme="white" />
+            <span className="text-[9px] font-black text-blue-200 uppercase tracking-widest">VAULT MEMBER</span>
           </div>
         </div>
       </div>
@@ -593,6 +595,9 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Consistent Brand Footer */}
+      <BrandFooter height={16} className="mt-2 mb-1" />
 
       {onBack && (
         <button type="button" onClick={onBack}

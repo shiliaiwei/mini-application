@@ -48,21 +48,12 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
 
       {/* Center Brand Showcase & Loading Animation - ONLY CENTER */}
       <div className="flex flex-col items-center justify-center text-center space-y-6 relative z-10 max-w-xs w-full">
-        {/* Animated Brand Logo Mark with Concentric Pulse Aura */}
+        {/* Animated Brand Logo Container with Concentric Pulse Aura */}
         <div className="relative flex items-center justify-center">
-          {/* Subtle Outer Pulse Rings */}
-          <div className="absolute w-28 h-28 rounded-full border border-[#0098ea]/20 animate-ping pointer-events-none" />
-          <div className="absolute w-32 h-32 rounded-full border border-[#0098ea]/10 pointer-events-none" />
-
-          {/* Central Logo Container */}
-          <div className="w-24 h-24 rounded-3xl bg-white border-2 border-[#0098ea] flex items-center justify-center shadow-lg relative overflow-hidden transition-transform duration-500 hover:scale-105">
-            <ShiliaiweiBrand variant="mark" height={52} className="relative z-10" />
+          <div className="absolute w-44 h-24 rounded-3xl border border-[#0098ea]/20 animate-ping pointer-events-none" />
+          <div className="px-6 py-4 rounded-3xl bg-white border-2 border-[#0098ea] flex items-center justify-center shadow-lg relative overflow-hidden transition-transform duration-500 hover:scale-105">
+            <ShiliaiweiBrand height={28} colorScheme="blue" />
           </div>
-        </div>
-
-        {/* Brand Name Wordmark Showcase */}
-        <div className="pt-1 transition-opacity duration-700">
-          <ShiliaiweiBrand variant="wordmark" height={32} />
         </div>
 
         {/* Minimalist Center Loading Bar */}

@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { TelegramUser } from "@/types/telegram";
 import { Trophy, RefreshCw, Crown } from "@/components/icons/KeylineIcons";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
+import { BrandFooter } from "@/components/brand/BrandFooter";
 
 interface LeaderboardViewProps {
   userScore: number;
@@ -196,6 +197,9 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
           })}
         </div>
       </div>
+
+      {/* Consistent Brand Footer */}
+      <BrandFooter height={16} className="mt-4 pb-2" />
     </div>
   );
 };
