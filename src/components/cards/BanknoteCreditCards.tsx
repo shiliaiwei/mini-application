@@ -27,7 +27,7 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = ({
     <div className="w-full flex flex-col space-y-2.5 select-none">
       {/* 1. KHMER RIEL CARD (FIRST) */}
       <div
-        className="relative w-full h-[120px] rounded-[32px] overflow-hidden border border-[#d4af37]/40 shadow-md shadow-amber-950/15 flex items-center justify-between px-5 sm:px-6"
+        className="relative w-full h-[120px] rounded-2xl overflow-hidden border border-[#d4af37]/40 shadow-md shadow-amber-950/15 flex items-center justify-between px-5 sm:px-6"
         style={{
           background:
             "linear-gradient(135deg, #7c5810 0%, #b88a22 25%, #dfb743 50%, #af821a 75%, #6e4905 100%)",
@@ -68,7 +68,7 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = ({
 
       {/* 2. US DOLLAR CARD (BELOW RIEL) */}
       <div
-        className="relative w-full h-[120px] rounded-[32px] overflow-hidden border border-cyan-400/30 shadow-md shadow-blue-950/30 flex items-center justify-between px-5 sm:px-6"
+        className="relative w-full h-[120px] rounded-2xl overflow-hidden border border-cyan-400/30 shadow-md shadow-blue-950/30 flex items-center justify-between px-5 sm:px-6"
         style={{
           background:
             "linear-gradient(135deg, #071526 0%, #0d2644 30%, #153c66 55%, #0a1b30 85%, #050d18 100%)",

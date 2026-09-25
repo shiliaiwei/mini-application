@@ -412,7 +412,7 @@ export default function MiniAppPage() {
               <div className="w-14" />
             </div>
 
-            <div className="bg-white rounded-[32px] p-5 border border-slate-200 shadow-sm space-y-5">
+            <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-5">
               <div className="text-center py-2 space-y-1">
                 <span className="text-xs font-black tracking-widest text-[#0098ea] uppercase block">
                   Simulated USD Boost

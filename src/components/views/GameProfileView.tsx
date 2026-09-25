@@ -105,7 +105,7 @@ const StatCell: React.FC<{ value: string | number; label: string }> = ({ value, 
 
 const QuickAction: React.FC<{ icon: React.ReactNode; label: string; onClick: () => void; accent?: boolean }> = ({ icon, label, onClick, accent }) => (
   <button type="button" onClick={onClick} className="flex flex-col items-center gap-1.5 cursor-pointer active:scale-95 transition-all duration-300 ease-out group font-sans">
-    <div className={`w-14 h-14 rounded-full flex items-center justify-center border transition-all duration-300 ease-out group-hover:shadow-md ${accent ? "bg-gradient-to-br from-[#0098ea] to-[#005f99] border-blue-400/30 text-white shadow-sm shadow-blue-500/20" : "bg-white border-slate-200/80 text-slate-700 shadow-sm group-hover:border-[#0098ea]/30"}`}>
+    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all duration-300 ease-out group-hover:shadow-md ${accent ? "bg-gradient-to-br from-[#0098ea] to-[#005f99] border-blue-400/30 text-white shadow-sm shadow-blue-500/20" : "bg-white border-slate-200/80 text-slate-700 shadow-sm group-hover:border-[#0098ea]/30"}`}>
       {icon}
     </div>
     <span className="text-[11px] font-bold text-slate-600 leading-tight text-center">{label}</span>
@@ -113,10 +113,10 @@ const QuickAction: React.FC<{ icon: React.ReactNode; label: string; onClick: () 
 );
 
 const TaskRow: React.FC<{ title: string; sub: string; badge?: React.ReactNode; right?: React.ReactNode; onClick?: () => void }> = ({ title, sub, badge, right, onClick }) => (
-  <button type="button" onClick={onClick} className="flex items-center justify-between w-full py-3 px-3 cursor-pointer active:bg-slate-50 rounded-full transition-colors duration-300 ease-out text-left font-sans">
+  <button type="button" onClick={onClick} className="flex items-center justify-between w-full py-3 px-3 cursor-pointer active:bg-slate-50 transition-colors duration-300 ease-out text-left font-sans">
     <div className="flex items-center gap-3">
       {badge && (
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] flex items-center justify-center shadow-xs flex-shrink-0">
+        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] flex items-center justify-center shadow-xs flex-shrink-0">
           {badge}
         </div>
       )}
@@ -130,9 +130,9 @@ const TaskRow: React.FC<{ title: string; sub: string; badge?: React.ReactNode; r
 );
 
 const MenuRow: React.FC<{ icon: React.ReactNode; title: string; sub?: string; onClick: () => void; danger?: boolean }> = ({ icon, title, sub, onClick, danger }) => (
-  <button type="button" onClick={onClick} className="flex items-center justify-between w-full py-3 px-2 cursor-pointer active:bg-slate-50 rounded-full transition-colors duration-300 ease-out font-sans">
+  <button type="button" onClick={onClick} className="flex items-center justify-between w-full py-3 px-2 cursor-pointer active:bg-slate-50 transition-colors duration-300 ease-out font-sans">
     <div className="flex items-center gap-3">
-      <div className={`w-9 h-9 rounded-full flex items-center justify-center border ${danger ? "bg-rose-50 border-rose-200 text-rose-500" : "bg-slate-50 border-slate-200/80 text-slate-700"}`}>
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${danger ? "bg-rose-50 border-rose-200 text-rose-500" : "bg-slate-50 border-slate-200/80 text-slate-700"}`}>
         {icon}
       </div>
       <div className="text-left">
@@ -556,18 +556,18 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         </div>
       </div>
 
-      {/* STATS ROW (32dp Expressive Roundness & Primary Currency: Riel KHR) */}
-      <div className="bg-white rounded-[32px] border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
+      {/* STATS ROW */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
         <div className="flex items-stretch divide-x divide-slate-100">
-          <StatCell value={`${khrValue} ៛`} label="Riel (KHR)" />
           <StatCell value={score.toLocaleString()} label="Points" />
           <StatCell value={`$${usdValue}`} label="USD" />
+          <StatCell value={tapPower} label="Tap Power" />
           <StatCell value={fmtTime(spendSeconds)} label="Online" />
         </div>
       </div>
 
-      {/* QUICK ACTION GRID (32dp Expressive Roundness) */}
-      <div className="bg-white rounded-[32px] border border-slate-200/80 shadow-sm p-5 mb-4">
+      {/* QUICK ACTION GRID */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-4 mb-4">
         <div className="grid grid-cols-4 gap-3">
           <QuickAction icon={<Wallet size={22} />} label="Wallet" onClick={() => setView("wallet-detail")} accent />
           <QuickAction icon={<Repeat size={22} />} label="Swap" onClick={() => setView("swap")} />
@@ -580,10 +580,10 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         </div>
       </div>
 
-      {/* TASK / REWARD ROWS (32dp Expressive Roundness) */}
-      <div className="bg-white rounded-[32px] border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
+      {/* TASK / REWARD ROWS */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
         <div className="grid grid-cols-2 divide-x divide-slate-100">
-          <TaskRow title="Tasks" sub={`${khrValue} ៛ (${score > 0 ? score.toLocaleString() : 0} PTS)`} badge={<Coins size={18} className="text-white" />} />
+          <TaskRow title="Tasks" sub={`${score > 0 ? score.toLocaleString() : 0} Points`} badge={<Coins size={18} className="text-white" />} />
           <TaskRow title="Streak" sub="Tap to Join" badge={<Zap size={18} className="text-white" />} />
         </div>
         <div className="border-t border-slate-100 grid grid-cols-2 divide-x divide-slate-100">
@@ -593,18 +593,18 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         </div>
       </div>
 
-      {/* MENU LIST (32dp Expressive Roundness) */}
-      <div className="bg-white rounded-[32px] border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
-        <div className="px-2 py-1.5">
+      {/* MENU LIST */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
+        <div className="px-2 py-1">
           <MenuRow icon={<User size={17} />} title="Edit Profile" sub="Name, bio, handle" onClick={() => setView("edit")} />
           <MenuRow icon={<ShieldCheck size={17} />} title="Security & Wallet" sub="Keys, 2FA, address" onClick={() => setView("security")} />
-          <MenuRow icon={<Repeat size={17} />} title="Token Swap" sub="PTS → KHR / USD" onClick={() => setView("swap")} />
+          <MenuRow icon={<Repeat size={17} />} title="Token Swap" sub="PTS → USD / KHR" onClick={() => setView("swap")} />
           <MenuRow icon={<Timer size={17} />} title="Activity Log" sub="Login & action history" onClick={() => { setView("audit"); fetchAuditLogs(); }} />
           <MenuRow icon={<Bell size={17} />} title="Notifications" sub="Alerts & rewards" onClick={() => setView("notifications")} />
         </div>
 
         {/* Preference toggles */}
-        <div className="border-t border-slate-100 px-5 py-3.5 space-y-3">
+        <div className="border-t border-slate-100 px-4 py-3 space-y-3">
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Preferences</span>
           {[
             { label: "Haptic Feedback", value: hapticsEnabled, onToggle: () => { const n = !hapticsEnabled; setHapticsEnabled(n); localStorage.setItem("shi_pref_haptics", String(n)); } },
@@ -621,13 +621,13 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         </div>
       </div>
 
-      {/* PLAYER ID FOOTER (32dp Expressive Roundness) */}
-      <div className="bg-white rounded-[32px] border border-slate-200/80 shadow-sm p-5 mb-3">
+      {/* PLAYER ID FOOTER */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-4 mb-3">
         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Player ID</span>
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs font-mono text-slate-700 truncate">{playerId}</span>
           <button type="button" onClick={() => copyToClipboard(playerId, setCopiedId)}
-            className="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 text-slate-600 flex items-center justify-center transition-all duration-300 ease-out cursor-pointer flex-shrink-0">
+            className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 cursor-pointer flex-shrink-0">
             {copiedId ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
           </button>
         </div>

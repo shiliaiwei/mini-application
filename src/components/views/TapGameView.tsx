@@ -23,7 +23,6 @@ import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { BrandFooter } from "@/components/brand/BrandFooter";
 import { WinGramPromoCards } from "@/components/promo/WinGramPromoCards";
 import { BanknoteCreditCards } from "@/components/cards/BanknoteCreditCards";
-import { LiveClaimsTicker } from "@/components/common/LiveClaimsTicker";
 import { NavCategory } from "@/components/navigation/CategoryBar";
 import { MiniGameType } from "@/components/views/MiniGameFullView";
 
@@ -199,7 +198,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <div className="w-14" />
         </div>
 
-        <div className="bg-white rounded-[32px] p-5 border border-slate-200 shadow-sm space-y-5 text-center">
+        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-5 text-center">
           {/* Score & Multiplier */}
           <div className="text-center py-1">
             <span className="text-3xl font-black text-slate-900 block font-sans">
@@ -294,13 +293,13 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <div className="w-14" />
         </div>
 
-        <div className="bg-white rounded-[32px] p-5 border border-slate-200 shadow-sm space-y-4">
-          <div className="w-44 h-44 bg-white border border-slate-200 rounded-[32px] mx-auto flex flex-col items-center justify-center text-slate-500 shadow-xs">
+        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+          <div className="w-44 h-44 bg-white border border-slate-200 rounded-2xl mx-auto flex flex-col items-center justify-center text-slate-500 shadow-xs">
             <QrCode size={110} className="text-[#0098ea]" />
             <span className="text-xs font-mono mt-1 text-slate-600 font-bold">SHILIAIWEI QR</span>
           </div>
 
-          <div className="p-3.5 rounded-[32px] bg-slate-50 border border-slate-200">
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
             <span className="text-[10px] font-bold text-slate-600 uppercase block">
               Simulated Deposit Address (SHILIAIWEI L2)
             </span>
@@ -363,9 +362,9 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <div className="w-14" />
         </div>
 
-        <div className="bg-white rounded-[32px] p-5 border border-slate-200 shadow-sm space-y-4">
+        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
           {sendSuccess ? (
-            <div className="p-6 rounded-[32px] bg-emerald-50 border border-emerald-200 text-center space-y-2">
+            <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-2">
               <Check size={36} className="text-[#16a34a] mx-auto" />
               <h4 className="text-base font-bold text-emerald-950">Transfer Successful!</h4>
               <p className="text-xs text-emerald-800">
@@ -479,8 +478,8 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <div className="w-14" />
         </div>
 
-        <div className="bg-white rounded-[32px] p-5 border border-slate-200 shadow-sm space-y-4 text-center">
-          <div className="w-64 h-64 bg-slate-900 rounded-[32px] mx-auto flex flex-col items-center justify-center relative overflow-hidden shadow-inner">
+        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4 text-center">
+          <div className="w-64 h-64 bg-slate-900 rounded-2xl mx-auto flex flex-col items-center justify-center relative overflow-hidden shadow-inner">
             <div className="w-44 h-44 border-2 border-[#0098ea] rounded-[24px] flex items-center justify-center relative">
               <div className="w-full h-0.5 bg-[#0098ea] animate-pulse" />
             </div>
@@ -529,8 +528,8 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <div className="w-14" />
         </div>
 
-        <div className="bg-white rounded-[32px] p-5 border border-slate-200 shadow-sm space-y-4">
-          <div className="p-4 rounded-[32px] bg-slate-50 border border-slate-200 text-center space-y-1">
+        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-1">
             <h4 className="text-sm font-black text-slate-900">Earn Points for Free</h4>
             <p className="text-xs text-slate-600 leading-relaxed">
               You do not need to pay real money. Tap the medallion, complete daily missions, and win games to earn PTS that you can exchange directly for USD ($) or KHR (៛)!
@@ -580,12 +579,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
   // ==============================================================
   return (
     <div className="flex flex-col items-center justify-between min-h-[calc(100dvh-150px)] pb-28 select-none font-sans text-slate-900 max-w-xl mx-auto w-full px-1">
-      {/* 1. Live User Claims Social-Proof Ticker */}
-      <div className="w-full pt-1 mb-2">
-        <LiveClaimsTicker />
-      </div>
-
-      <div className="w-full space-y-2.5">
+      <div className="w-full space-y-2.5 pt-1">
         {/* 2. DUAL KHMER & DOLLAR BANKNOTE CREDIT CARDS */}
         <BanknoteCreditCards
           score={score}

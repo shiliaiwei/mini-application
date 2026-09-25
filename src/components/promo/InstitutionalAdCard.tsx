@@ -122,11 +122,11 @@ export const InstitutionalAdCard: React.FC<InstitutionalAdCardProps> = ({
       onClick={() => onOpenDetail(partner.id)}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpenDetail(partner.id)}
       aria-label={fullName}
-      className="sm:col-span-6 relative overflow-hidden rounded-[32px] bg-gradient-to-b from-[#0088cc] via-[#006fa7] to-[#004f77] min-h-[255px] sm:min-h-[270px] border border-blue-400/25 shadow-sm cursor-pointer select-none group active:scale-[0.98] transition-transform duration-300 ease-out"
+      className="sm:col-span-6 relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#0088cc] via-[#006fa7] to-[#004f77] min-h-[255px] sm:min-h-[270px] border border-blue-400/25 shadow-sm cursor-pointer select-none group active:scale-[0.98] transition-transform duration-300 ease-out"
     >
       {/* Dynamic Ambient Background Glow */}
       <div
-        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full opacity-25 pointer-events-none filter blur-2xl transition-colors duration-1000"
+        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full opacity-30 pointer-events-none filter blur-2xl transition-colors duration-1000"
         style={{ backgroundColor: partner.officialColor || "#38bdf8" }}
       />
 
@@ -137,17 +137,25 @@ export const InstitutionalAdCard: React.FC<InstitutionalAdCardProps> = ({
         }`}
       />
 
-      {/* ── BIG CENTERED LOGO SHOWCASE (Transparent background, no box) ── */}
+      {/* ── BIG CENTERED LOGO SHOWCASE (Transparent background, no box, slow float when center) ── */}
       <div className="absolute inset-0 flex items-center justify-center pb-12 pt-3 px-4 z-10 pointer-events-none">
         <div
-          className={`relative w-44 h-44 sm:w-48 sm:h-48 flex items-center justify-center transform ${getTransformClass()}`}
+          className={`relative w-44 h-44 sm:w-48 sm:h-48 flex items-center justify-center transform ${getTransformClass()} ${
+            animStage === "idle" ? "animate-ad-logo-float" : ""
+          }`}
         >
+          {/* Subtle luminous halo ring behind logo */}
+          <div
+            className="absolute inset-3 rounded-full opacity-30 filter blur-xl pointer-events-none transition-all duration-700"
+            style={{ backgroundColor: partner.officialColor || "#38bdf8" }}
+          />
+
           <Image
             src={`/ads/${partner.filename}`}
             alt={fullName}
             fill
             sizes="(max-width: 640px) 192px, 220px"
-            className="object-contain filter drop-shadow-2xl select-none pointer-events-none"
+            className="object-contain filter drop-shadow-[0_12px_28px_rgba(0,0,0,0.65)] drop-shadow-[0_2px_10px_rgba(255,255,255,0.22)] select-none pointer-events-none relative z-10"
             priority
           />
         </div>

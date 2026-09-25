@@ -252,6 +252,20 @@ html, body {
   z-index: 50;
 }
 
+/* Institutional Ad Logo Smooth Center Float */
+@keyframes ad-logo-float {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.025);
+  }
+}
+
+.animate-ad-logo-float {
+  animation: ad-logo-float 4.2s ease-in-out infinite;
+}
+
 /* 3D List Card Utilities */
 .perspective-1000 {
   perspective: 1000px;
