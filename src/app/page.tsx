@@ -12,9 +12,8 @@ import { GameWelcomeScreen } from "@/components/welcome/GameWelcomeScreen";
 import { TelegramGateScreen } from "@/components/common/TelegramGateScreen";
 import { MiniGameFullView, MiniGameType } from "@/components/views/MiniGameFullView";
 import { StatsDetailSpaView } from "@/components/views/StatsDetailSpaView";
-import { TopNavBar } from "@/components/navigation/TopNavBar";
 import { AdDetailSpaView } from "@/components/views/AdDetailSpaView";
-import { AdItem } from "@/data/adsRegistry";
+import { TopBrandNavBar } from "@/components/navigation/TopBrandNavBar";
 import {
   Check,
   Wallet,
@@ -32,8 +31,10 @@ export default function MiniAppPage() {
   const [profileSubTab, setProfileSubTab] = useState<ProfileSubTab>("profile");
   const [activeGameScreen, setActiveGameScreen] = useState<MiniGameType | null>(null);
   const [activeStatsScreen, setActiveStatsScreen] = useState(false);
+  const [activeAdPartnerId, setActiveAdPartnerId] = useState<string>("mpwt");
+  const [activeAdSpaScreen, setActiveAdSpaScreen] = useState(false);
+  const [showBalances, setShowBalances] = useState(true);
   const [activeTopUpScreen, setActiveTopUpScreen] = useState(false);
-  const [activeAdDetail, setActiveAdDetail] = useState<AdItem | null>(null);
 
   // Top Up State
   const [topUpAmount, setTopUpAmount] = useState(100);
@@ -289,8 +290,7 @@ export default function MiniAppPage() {
     syncWithDatabase(scoreRef.current, spendRef.current);
     setActiveGameScreen(null);
     setActiveStatsScreen(false);
-    setActiveTopUpScreen(false);
-    setActiveAdDetail(null);
+    setActiveAdSpaScreen(false);
     setActiveTab(tab);
 
     // Sync category bar state
@@ -306,8 +306,7 @@ export default function MiniAppPage() {
     } catch {}
     setActiveGameScreen(null);
     setActiveStatsScreen(false);
-    setActiveTopUpScreen(false);
-    setActiveAdDetail(null);
+    setActiveAdSpaScreen(false);
     setActiveCategory(cat);
 
     if (cat === "lobby" || cat === "vault" || cat === "popular" || cat === "favorites") {
@@ -375,32 +374,20 @@ export default function MiniAppPage() {
       {/* Vector Guilloche Banknote Security Mesh from background.svg */}
       <div className="fixed inset-0 bg-app-guilloche opacity-[0.06] pointer-events-none z-0" />
 
-      {/* Universal Sticky Top Navigation Bar (Fixed across all views) */}
-      <TopNavBar
-        score={score}
-        user={user}
-        onOpenTopUp={() => {
-          setActiveAdDetail(null);
-          setActiveStatsScreen(false);
-          setActiveGameScreen(null);
-          setActiveTopUpScreen(true);
-        }}
-        onOpenProfile={() => {
-          setActiveAdDetail(null);
-          setActiveStatsScreen(false);
-          setActiveGameScreen(null);
-          setActiveTopUpScreen(false);
-          setProfileSubTab("profile");
-          handleTabChange("profile");
-        }}
-        onLogoClick={() => {
-          setActiveAdDetail(null);
-          setActiveStatsScreen(false);
-          setActiveGameScreen(null);
-          setActiveTopUpScreen(false);
-          handleTabChange("wallet");
-        }}
-      />
+      {/* Sticky Global Top Navigation Bar with pt-[45px] - NOT in profile menu */}
+      {activeTab !== "profile" && (
+        <TopBrandNavBar
+          showBalances={showBalances}
+          onToggleBalances={() => setShowBalances(!showBalances)}
+          onOpenProfile={() => {
+            setProfileSubTab("profile");
+            handleTabChange("profile");
+          }}
+          onOpenNotifications={() => setActiveStatsScreen(true)}
+          user={user}
+          tgApp={tgApp}
+        />
+      )}
 
       {/* 3. Main SPA View Switcher */}
       <main className="flex-1 w-full max-w-4xl mx-auto px-3 pt-2 pb-safe">
@@ -487,14 +474,6 @@ export default function MiniAppPage() {
               </button>
             </div>
           </div>
-        ) : activeAdDetail ? (
-          <AdDetailSpaView
-            ad={activeAdDetail}
-            onBack={() => setActiveAdDetail(null)}
-            onClaimPoints={handleAddScore}
-            user={user}
-            tgApp={tgApp}
-          />
         ) : activeGameScreen ? (
           <MiniGameFullView
             game={activeGameScreen}
@@ -511,6 +490,15 @@ export default function MiniAppPage() {
             user={user}
             tgApp={tgApp}
           />
+        ) : activeAdSpaScreen ? (
+          <AdDetailSpaView
+            partnerId={activeAdPartnerId}
+            onBack={() => setActiveAdSpaScreen(false)}
+            onSelectPartner={(id) => setActiveAdPartnerId(id)}
+            onAddScore={handleAddScore}
+            user={user}
+            tgApp={tgApp}
+          />
         ) : (
           <>
             {activeTab === "wallet" && (
@@ -522,6 +510,8 @@ export default function MiniAppPage() {
                 spendSeconds={spendSeconds}
                 tapPower={tapPower}
                 passiveRate={passiveRate}
+                showBalances={showBalances}
+                onToggleBalances={() => setShowBalances(!showBalances)}
                 onAddScore={handleAddScore}
                 onSelectCategory={handleCategorySelect}
                 onOpenStats={() => {
@@ -530,11 +520,12 @@ export default function MiniAppPage() {
                   } catch {}
                   setActiveStatsScreen(true);
                 }}
-                onOpenAdDetail={(ad) => {
+                onOpenAdDetail={(partnerId) => {
                   try {
                     tgApp?.HapticFeedback?.impactOccurred("medium");
                   } catch {}
-                  setActiveAdDetail(ad);
+                  setActiveAdPartnerId(partnerId);
+                  setActiveAdSpaScreen(true);
                 }}
                 onSelectGame={(selectedGame) => {
                   try {

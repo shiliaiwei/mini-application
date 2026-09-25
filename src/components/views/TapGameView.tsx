@@ -24,11 +24,9 @@ import { BrandFooter } from "@/components/brand/BrandFooter";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 import { WinGramPromoCards } from "@/components/promo/WinGramPromoCards";
 import { BanknoteCreditCards } from "@/components/cards/BanknoteCreditCards";
+import { LiveClaimsTicker } from "@/components/common/LiveClaimsTicker";
 import { NavCategory } from "@/components/navigation/CategoryBar";
 import { MiniGameType } from "@/components/views/MiniGameFullView";
-
-import { LiveActivityTicker } from "@/components/promo/LiveActivityTicker";
-import { AdItem } from "@/data/adsRegistry";
 
 interface FloatingPoint {
   id: number;
@@ -47,6 +45,8 @@ interface TapGameViewProps {
   spendSeconds: number;
   tapPower: number;
   passiveRate: number;
+  showBalances?: boolean;
+  onToggleBalances?: () => void;
   onAddScore?: (amount: number) => void;
   onGoToSwap?: () => void;
   onGoToEarn?: () => void;
@@ -54,7 +54,7 @@ interface TapGameViewProps {
   onSelectCategory?: (cat: NavCategory) => void;
   onSelectGame?: (game: MiniGameType) => void;
   onOpenStats?: () => void;
-  onOpenAdDetail?: (ad: AdItem) => void;
+  onOpenAdDetail?: (partnerId: string) => void;
   user: TelegramUser | null;
   tgApp: TelegramWebApp | null;
 }
@@ -75,12 +75,14 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
   onSelectGame,
   onOpenStats,
   onOpenAdDetail,
+  showBalances,
+  onToggleBalances,
   user,
   tgApp,
 }) => {
   const [subView, setSubView] = useState<TapSubView>("none");
   const [floatingPoints, setFloatingPoints] = useState<FloatingPoint[]>([]);
-  const [showBalances, setShowBalances] = useState(true);
+  const [showLocalBalances, setShowLocalBalances] = useState(true);
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [sendRecipient, setSendRecipient] = useState("");
   const [sendAmount, setSendAmount] = useState("");
@@ -579,18 +581,20 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
   // ==============================================================
   return (
     <div className="flex flex-col items-center justify-between min-h-[calc(100dvh-150px)] pb-28 select-none font-sans text-slate-900 max-w-xl mx-auto w-full px-1">
-      {/* 1. Live Notification Stream & Activity Ticker */}
-      <div className="w-full space-y-2 pt-1">
-        <LiveActivityTicker className="mb-1" />
+      {/* 1. Live User Claims Social-Proof Ticker */}
+      <div className="w-full pt-1 mb-2">
+        <LiveClaimsTicker />
+      </div>
 
+      <div className="w-full space-y-2.5">
         {/* 2. DUAL KHMER & DOLLAR BANKNOTE CREDIT CARDS */}
         <BanknoteCreditCards
           score={score}
-          showBalance={showBalances}
-          onToggleBalance={() => {
-            setShowBalances(!showBalances);
+          showBalance={showBalances !== undefined ? showBalances : showLocalBalances}
+          onToggleBalance={onToggleBalances || (() => {
+            setShowLocalBalances(!showLocalBalances);
             tgApp?.HapticFeedback?.selectionChanged();
-          }}
+          })}
           user={user}
           tgApp={tgApp}
           onOpenDeposit={() => setSubView("deposit")}
@@ -599,7 +603,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           onOpenAddress={() => setSubView("receive")}
         />
 
-        {/* 3. WINGRAM HERO PROMO & BONUS CARDS (Highlight Sports Ads + Stats) */}
+        {/* 3. WINGRAM HERO PROMO & BONUS CARDS (Highlighting institutional ads in 31s loop) */}
         <WinGramPromoCards
           score={score}
           totalPlayed={spendSeconds * 5 + Math.floor(score * 0.4)}
