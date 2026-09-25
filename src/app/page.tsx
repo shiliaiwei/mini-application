@@ -412,7 +412,7 @@ export default function MiniAppPage() {
               <div className="w-14" />
             </div>
 
-            <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-5">
+            <div className="bg-white rounded-[32px] p-5 border border-slate-200 shadow-sm space-y-5">
               <div className="text-center py-2 space-y-1">
                 <span className="text-xs font-black tracking-widest text-[#0098ea] uppercase block">
                   Simulated USD Boost
@@ -434,7 +434,7 @@ export default function MiniAppPage() {
                     onClick={() => {
                       setTopUpAmount(amt);
                     }}
-                    className={`py-3 rounded-2xl border text-xs font-black transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer active:scale-95 ${
+                    className={`py-3 rounded-full border text-xs font-black transition-all duration-300 ease-out flex flex-col items-center justify-center gap-0.5 cursor-pointer active:scale-95 ${
                       topUpAmount === amt
                         ? "bg-[#0098ea] border-[#0098ea] text-white shadow-md shadow-[#0098ea]/20"
                         : "bg-slate-50 hover:bg-white border-slate-200 text-slate-700 hover:border-slate-300 shadow-2xs"
@@ -449,7 +449,7 @@ export default function MiniAppPage() {
               </div>
 
               {topUpSuccess && (
-                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-[#16a34a] text-xs font-bold flex items-center justify-center gap-2 animate-fadeIn">
+                <div className="p-3 rounded-full bg-emerald-50 border border-emerald-200 text-[#16a34a] text-xs font-bold flex items-center justify-center gap-2 animate-fadeIn">
                   <Check size={18} className="w-4 h-4" />
                   <span>Successfully added +${topUpAmount}.00 (+{topUpAmount * 100} PTS) to Vault!</span>
                 </div>
@@ -459,7 +459,7 @@ export default function MiniAppPage() {
                 type="button"
                 onClick={handleExecuteTopUp}
                 disabled={topUpSuccess}
-                className="w-full py-3.5 rounded-2xl bg-[#0098ea] hover:bg-[#0088cc] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all duration-300 ease-out cursor-pointer disabled:opacity-50"
               >
                 <DollarSign size={18} />
                 <span>Confirm Top Up (${topUpAmount}.00)</span>
@@ -468,7 +468,7 @@ export default function MiniAppPage() {
               <button
                 type="button"
                 onClick={() => setActiveTopUpScreen(false)}
-                className="w-full py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                className="w-full py-2.5 rounded-full text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors duration-300 ease-out cursor-pointer"
               >
                 Exit to Home View
               </button>

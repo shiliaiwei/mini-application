@@ -592,8 +592,8 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
       </div>
 
       {/* TOP TAB SWITCHER: Direct SPA Links to all 6 games (2 rows x 3) */}
-      <div className="flex flex-col gap-1 mb-4">
-        <div className="grid grid-cols-3 gap-1.5 bg-slate-200/60 p-1 rounded-2xl text-center">
+      <div className="flex flex-col gap-1.5 mb-4">
+        <div className="grid grid-cols-3 gap-1.5 bg-slate-200/60 p-1.5 rounded-full text-center">
           {([
             { key: "wheel", label: "Daily Spin" },
             { key: "word-flash", label: "Word Flash" },
@@ -603,7 +603,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
               key={key}
               type="button"
               onClick={() => { setActiveTab(key); gameAudio.playGameStart(key); }}
-              className={`py-2 px-1 rounded-xl text-[11px] font-extrabold transition-all cursor-pointer truncate ${
+              className={`py-2 px-2 rounded-full text-[11px] font-extrabold transition-all duration-300 ease-out cursor-pointer truncate ${
                 activeTab === key ? "bg-white text-[#0098ea] shadow-xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
@@ -611,7 +611,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
             </button>
           ))}
         </div>
-        <div className="grid grid-cols-3 gap-1.5 bg-slate-200/60 p-1 rounded-2xl text-center">
+        <div className="grid grid-cols-3 gap-1.5 bg-slate-200/60 p-1.5 rounded-full text-center">
           {([
             { key: "row5", label: "Row 5" },
             { key: "number-match", label: "Num Match" },
@@ -621,7 +621,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
               key={key}
               type="button"
               onClick={() => { setActiveTab(key); gameAudio.playGameStart(key); }}
-              className={`py-2 px-1 rounded-xl text-[11px] font-extrabold transition-all cursor-pointer truncate ${
+              className={`py-2 px-2 rounded-full text-[11px] font-extrabold transition-all duration-300 ease-out cursor-pointer truncate ${
                 activeTab === key ? "bg-white text-[#0098ea] shadow-xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
@@ -635,7 +635,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
       {/* 1. FULL PAGE: DAILY SPIN WHEEL                          */}
       {/* ======================================================== */}
       {activeTab === "wheel" && (
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm text-center space-y-5 animate-fadeIn">
+        <div className="bg-white rounded-[32px] p-5 border border-slate-200/90 shadow-sm text-center space-y-5 animate-fadeIn">
           <div className="space-y-1">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">
               LUCKY FORTUNE TURBINE
@@ -685,7 +685,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
             type="button"
             disabled={wheelSpinning}
             onClick={handleSpinWheel}
-            className={`w-full py-3.5 rounded-2xl font-black text-sm tracking-wide shadow-md transition-all cursor-pointer ${
+            className={`w-full py-3.5 rounded-full font-black text-sm tracking-wide shadow-md transition-all duration-300 ease-out cursor-pointer ${
               wheelSpinning
                 ? "bg-slate-300 text-slate-500 cursor-not-allowed"
                 : "bg-gradient-to-r from-[#0088cc] via-[#0098ea] to-[#00a8ff] text-white active:scale-98 shadow-blue-500/25"
@@ -719,7 +719,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
       {/* 2. FULL PAGE: WORD FLASH MEMORY CHESSBOARD GRID          */}
       {/* ======================================================== */}
       {activeTab === "word-flash" && (
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm space-y-4 animate-fadeIn">
+        <div className="bg-white rounded-[32px] p-5 border border-slate-200/90 shadow-sm space-y-4 animate-fadeIn">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div>
               <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">
@@ -817,7 +817,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
                   setWordPoolIndex(nextIdx);
                   startWordGame(nextIdx);
                 }}
-                className="px-5 py-2.5 rounded-2xl bg-[#0098ea] text-white font-extrabold text-xs shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
+                className="px-5 py-2.5 rounded-full bg-[#0098ea] text-white font-extrabold text-xs shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer transition-all duration-300 ease-out"
               >
                 NEXT WORD PUZZLE
               </button>
@@ -830,7 +830,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
       {/* 3. FULL PAGE: GUESS FASTER SPEED CHALLENGE               */}
       {/* ======================================================== */}
       {activeTab === "guess-faster" && (
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm space-y-4 animate-fadeIn">
+        <div className="bg-white rounded-[32px] p-5 border border-slate-200/90 shadow-sm space-y-4 animate-fadeIn">
           {/* Header with Timer */}
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div>
@@ -910,7 +910,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
               <button
                 type="button"
                 onClick={() => startGuessFaster(guessIndex + 1)}
-                className="px-5 py-2.5 rounded-2xl bg-[#0098ea] text-white font-extrabold text-xs shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
+                className="px-5 py-2.5 rounded-full bg-[#0098ea] text-white font-extrabold text-xs shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer transition-all duration-300 ease-out"
               >
                 NEXT CLUE CHALLENGE
               </button>
@@ -925,7 +925,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
               <button
                 type="button"
                 onClick={() => startGuessFaster(guessIndex)}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs active:scale-95 cursor-pointer"
+                className="px-5 py-2 rounded-full bg-slate-900 text-white font-bold text-xs active:scale-95 cursor-pointer transition-all duration-300 ease-out"
               >
                 RETRY PUZZLE
               </button>
@@ -938,7 +938,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
       {/* 4. FULL PAGE: ROW 5 WINNER & TIC TAC TOE STRATEGY         */}
       {/* ======================================================== */}
       {activeTab === "row5" && (
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm space-y-4 animate-fadeIn">
+        <div className="bg-white rounded-[32px] p-5 border border-slate-200/90 shadow-sm space-y-4 animate-fadeIn">
           {/* Subgame Mode Switcher */}
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div>
@@ -1026,7 +1026,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
                   <button
                     type="button"
                     onClick={startTicTac}
-                    className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs active:scale-95 cursor-pointer"
+                    className="px-5 py-2 rounded-full bg-slate-900 text-white font-bold text-xs active:scale-95 cursor-pointer transition-all duration-300 ease-out"
                   >
                     PLAY AGAIN
                   </button>
@@ -1071,7 +1071,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
                   <button
                     type="button"
                     onClick={startRow5}
-                    className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs active:scale-95 cursor-pointer"
+                    className="px-5 py-2 rounded-full bg-slate-900 text-white font-bold text-xs active:scale-95 cursor-pointer transition-all duration-300 ease-out"
                   >
                     PLAY AGAIN
                   </button>
@@ -1086,7 +1086,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
       {/* 5. FULL PAGE: NUMBER MATCH                               */}
       {/* ======================================================== */}
       {activeTab === "number-match" && (
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm space-y-4 animate-fadeIn">
+        <div className="bg-white rounded-[32px] p-5 border border-slate-200/90 shadow-sm space-y-4 animate-fadeIn">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div>
               <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">
@@ -1137,7 +1137,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
               <button
                 type="button"
                 onClick={startNumberMatch}
-                className="px-5 py-2.5 rounded-2xl bg-[#0098ea] text-white font-extrabold text-xs shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
+                className="px-5 py-2.5 rounded-full bg-[#0098ea] text-white font-extrabold text-xs shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer transition-all duration-300 ease-out"
               >
                 PLAY AGAIN
               </button>
@@ -1150,7 +1150,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
       {/* 6. FULL PAGE: FLIP CARD MEMORY                           */}
       {/* ======================================================== */}
       {activeTab === "flip-card" && (
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm space-y-4 animate-fadeIn">
+        <div className="bg-white rounded-[32px] p-5 border border-slate-200/90 shadow-sm space-y-4 animate-fadeIn">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div>
               <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">
@@ -1201,7 +1201,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
               <button
                 type="button"
                 onClick={startFlipCard}
-                className="px-5 py-2.5 rounded-2xl bg-[#0098ea] text-white font-extrabold text-xs shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
+                className="px-5 py-2.5 rounded-full bg-[#0098ea] text-white font-extrabold text-xs shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer transition-all duration-300 ease-out"
               >
                 PLAY AGAIN
               </button>
@@ -1218,7 +1218,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
           onClick={() => {
             onBack();
           }}
-          className="w-full py-3 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 font-bold text-xs shadow-2xs active:scale-98 transition-all cursor-pointer"
+          className="w-full py-3 rounded-full bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 font-bold text-xs shadow-2xs active:scale-98 transition-all duration-300 ease-out cursor-pointer"
         >
           Exit to Home View
         </button>

@@ -349,14 +349,14 @@ export const StatsDetailSpaView: React.FC<StatsDetailSpaViewProps> = ({
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 select-none font-sans max-w-xl mx-auto w-full px-3 py-3 pb-28">
       {/* ── 1. HEADER BAR: Back + Brand Logo ── */}
-      <div className="flex items-center justify-between gap-2 mb-3 bg-white px-3 py-2.5 rounded-2xl border border-slate-200 shadow-xs">
+      <div className="flex items-center justify-between gap-2 mb-3 bg-white px-3 py-2.5 rounded-full border border-slate-200 shadow-xs">
         <button
           type="button"
           onClick={() => {
             try { tgApp?.HapticFeedback?.impactOccurred("medium"); } catch {}
             onBack();
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs active:scale-95 transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs active:scale-95 transition-all duration-300 ease-out cursor-pointer"
         >
           <ChevronLeft size={16} className="text-[#0098ea]" />
           <span>Back</span>
@@ -394,7 +394,7 @@ export const StatsDetailSpaView: React.FC<StatsDetailSpaViewProps> = ({
                 setActiveChart(t.id);
                 setSelectedEntity(null);
               }}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 border ${
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-black transition-all duration-300 ease-out cursor-pointer flex items-center gap-1.5 border ${
                 activeChart === t.id
                   ? "bg-[#0098ea] border-[#0098ea] text-white shadow-sm scale-102"
                   : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
@@ -414,7 +414,7 @@ export const StatsDetailSpaView: React.FC<StatsDetailSpaViewProps> = ({
       </div>
 
       {/* ── 3. RICH INTERACTION FEATURES TOOLBAR (Zoom, Crosshair, Trackball, Tooltips, Selection) ── */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-2 shadow-2xs mb-3">
+      <div className="bg-white rounded-[32px] border border-slate-200 p-3 shadow-2xs mb-3">
         <div className="flex items-center justify-between mb-1.5 px-1">
           <span className="text-[9px] font-black uppercase tracking-wider text-slate-400">
             RICH INTERACTION FEATURES (BUILT-IN)
@@ -525,12 +525,12 @@ export const StatsDetailSpaView: React.FC<StatsDetailSpaViewProps> = ({
 
       {/* ── 4. SELECTION INSPECTOR CARD (When an element is selected) ── */}
       {selectedEntity && (
-        <div className="bg-gradient-to-r from-blue-900 to-slate-900 text-white rounded-2xl p-3 border border-cyan-400/40 shadow-md mb-3 animate-fadeIn flex items-center justify-between">
+        <div className="bg-gradient-to-r from-blue-900 to-slate-900 text-white rounded-[32px] p-3.5 border border-cyan-400/40 shadow-md mb-3 animate-fadeIn flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <span className="w-3 h-3 rounded-full flex-shrink-0 animate-ping" style={{ backgroundColor: selectedEntity.color || "#38bdf8" }} />
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[9px] uppercase font-black px-1.5 py-0.2 rounded bg-white/20 text-cyan-200">
+                <span className="text-[9px] uppercase font-black px-2 py-0.5 rounded-full bg-white/20 text-cyan-200">
                   {selectedEntity.type}
                 </span>
                 <span className="text-xs font-black">{selectedEntity.title}</span>
@@ -544,7 +544,7 @@ export const StatsDetailSpaView: React.FC<StatsDetailSpaViewProps> = ({
           <button
             type="button"
             onClick={() => setSelectedEntity(null)}
-            className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[9px] font-black text-white/80 cursor-pointer"
+            className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-[9px] font-black text-white/80 transition-all duration-300 ease-out cursor-pointer"
           >
             Clear
           </button>
@@ -557,7 +557,7 @@ export const StatsDetailSpaView: React.FC<StatsDetailSpaViewProps> = ({
         onMouseMove={handleContainerPointerMove}
         onTouchMove={handleContainerPointerMove}
         onMouseLeave={handleContainerPointerLeave}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-4 text-white shadow-md border border-blue-400/40 mb-3.5"
+        className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-4 text-white shadow-md border border-blue-400/40 mb-3.5"
       >
         {/* Top Header of Active Chart */}
         <div className="flex items-center justify-between gap-2 mb-2">
@@ -1259,19 +1259,19 @@ export const StatsDetailSpaView: React.FC<StatsDetailSpaViewProps> = ({
       </div>
 
       {/* ── 6. FEATURE | DETAIL TABLE (Requested by User) ── */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 mb-3.5">
+      <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm p-4 mb-3.5">
         <div className="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
           <div>
             <h2 className="text-sm font-black text-slate-900 tracking-tight">Feature & Detail Overview</h2>
             <p className="text-[11px] text-slate-500 font-medium">All-in-one system analytics specifications</p>
           </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-[#0098ea] border border-blue-200">
+          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0098ea] border border-blue-200">
             System Spec
           </span>
         </div>
 
         {/* Structured Feature | Detail Table */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200/80">
+        <div className="overflow-hidden rounded-[24px] border border-slate-200/80">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 border-b border-slate-200/80 text-[10px] font-black text-slate-500 uppercase tracking-wider">
               <tr>
@@ -1283,7 +1283,7 @@ export const StatsDetailSpaView: React.FC<StatsDetailSpaViewProps> = ({
               {[
                 { feature: "Active Chart Type", detail: `${activeOption.label} (${activeOption.tagline})` },
                 { feature: "Built-in Interactions", detail: "Zoom & Pan, Crosshair, Trackball, Tooltips, Selection" },
-                { feature: "Platform Balance", detail: `${score.toLocaleString()} PTS ($${(score / 100).toFixed(2)} USD)` },
+                { feature: "Platform Balance", detail: `${(score * 41).toLocaleString()} ៛ ($${(score / 100).toFixed(2)} USD • ${score.toLocaleString()} PTS)` },
                 { feature: "Live Delta Trend", detail: `${trend}${Math.abs(delta).toLocaleString()} PTS (Real-time)` },
                 { feature: "Total Tracked Events", detail: `${totalTrackedEvents.toLocaleString()} user interactions logged` },
                 { feature: "Chart Types Supported", detail: "14 types (Cartesian, Pie, Bubble, Gauge, Funnel, Heatmap, Maps...)" },
@@ -1308,7 +1308,7 @@ export const StatsDetailSpaView: React.FC<StatsDetailSpaViewProps> = ({
       </div>
 
       {/* ── 7. PER-GAME BREAKDOWN LIST ── */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 mb-3.5">
+      <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm p-4 mb-3.5">
         <h2 className="text-sm font-black text-slate-900 tracking-tight mb-2">Game Analytics Breakdown</h2>
         <div className="space-y-2">
           {gameStats.map((item) => (
@@ -1323,14 +1323,14 @@ export const StatsDetailSpaView: React.FC<StatsDetailSpaViewProps> = ({
                   color: item.color,
                 });
               }}
-              className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all cursor-pointer ${
+              className={`flex items-center justify-between p-2.5 rounded-full border transition-all duration-300 ease-out cursor-pointer ${
                 selectedEntity?.title === item.fullName
                   ? "bg-blue-50 border-[#0098ea] shadow-xs"
                   : "bg-slate-50 border-slate-200/70 hover:bg-slate-100/70"
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <span className="w-3.5 h-3.5 rounded-lg flex-shrink-0" style={{ backgroundColor: item.color }} />
+                <span className="w-3.5 h-3.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
                 <div>
                   <h3 className="text-xs font-black text-slate-900 leading-tight">{item.fullName}</h3>
                   <p className="text-[10px] text-slate-500 font-semibold">{item.plays} sessions • {item.winRate} win rate</p>
@@ -1338,10 +1338,10 @@ export const StatsDetailSpaView: React.FC<StatsDetailSpaViewProps> = ({
               </div>
               <div className="text-right">
                 <span className="text-xs font-black font-mono text-slate-900 block leading-tight">
-                  {item.pts.toLocaleString()} PTS
+                  {Math.round((item.pts / 100) * 4100).toLocaleString()} ៛
                 </span>
                 <span className="text-[9px] font-bold text-[#0098ea] block">
-                  ${(item.pts / 100).toFixed(2)}
+                  ${(item.pts / 100).toFixed(2)} • {item.pts.toLocaleString()} PTS
                 </span>
               </div>
             </div>
@@ -1359,7 +1359,7 @@ export const StatsDetailSpaView: React.FC<StatsDetailSpaViewProps> = ({
             try { tgApp?.HapticFeedback?.impactOccurred("medium"); } catch {}
             onBack();
           }}
-          className="w-full py-3 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs shadow-2xs active:scale-98 transition-all cursor-pointer"
+          className="w-full py-3 rounded-full bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs shadow-2xs active:scale-98 transition-all duration-300 ease-out cursor-pointer"
         >
           Exit to Home View
         </button>

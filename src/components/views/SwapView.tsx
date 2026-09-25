@@ -25,7 +25,7 @@ export const SwapView: React.FC<SwapViewProps> = ({
   tgApp,
 }) => {
   const [fromCurrency, setFromCurrency] = useState<CurrencyType>("PTS");
-  const [toCurrency, setToCurrency] = useState<CurrencyType>("USD");
+  const [toCurrency, setToCurrency] = useState<CurrencyType>("KHR");
   const [inputAmount, setInputAmount] = useState<string>("100");
   const [swapSuccess, setSwapSuccess] = useState<string | null>(null);
 
@@ -134,13 +134,13 @@ export const SwapView: React.FC<SwapViewProps> = ({
   return (
     <div className="space-y-3.5 pb-28 font-body select-none text-slate-900 max-w-xl mx-auto w-full px-1">
       {/* Header Info */}
-      <div className="liquid-glass p-3.5 flex items-center justify-between border border-slate-200 shadow-xs">
+      <div className="liquid-glass rounded-[32px] p-3.5 flex items-center justify-between border border-slate-200 shadow-xs">
         <div>
           <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider block">
             SHILIAIWEI POINTS & CURRENCY EXCHANGE
           </span>
           <span className="text-sm font-black text-slate-900 font-display block mt-0.5">
-            Convert Game Points to USD or Khmer Riel
+            Convert Game Points to Khmer Riel or USD
           </span>
         </div>
         <div className="px-2.5 py-1 rounded-full bg-emerald-100 border border-emerald-300 text-[#14532d] text-[10px] font-black">
@@ -149,9 +149,9 @@ export const SwapView: React.FC<SwapViewProps> = ({
       </div>
 
       {/* Main Swap Card */}
-      <div className="liquid-glass p-4 sm:p-5 space-y-3 relative border border-slate-200 shadow-sm">
+      <div className="liquid-glass rounded-[32px] p-4 sm:p-5 space-y-3 relative border border-slate-200 shadow-sm">
         {/* From Section */}
-        <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+        <div className="p-3.5 rounded-[32px] bg-slate-50 border border-slate-200 space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-700 font-bold">
             <span>YOU PAY</span>
             <span className="font-mono text-slate-800">
@@ -180,11 +180,11 @@ export const SwapView: React.FC<SwapViewProps> = ({
                 if (val === toCurrency) handleFlip();
                 else setFromCurrency(val);
               }}
-              className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-black text-slate-900 focus:outline-none shadow-xs cursor-pointer min-h-[44px]"
+              className="bg-white border border-slate-300 rounded-full px-4 py-2 text-xs font-black text-slate-900 focus:outline-none shadow-xs cursor-pointer min-h-[44px] transition-colors duration-300 ease-out"
             >
               <option value="PTS">Points (PTS)</option>
-              <option value="USD">USD ($)</option>
               <option value="KHR">KHR (៛)</option>
+              <option value="USD">USD ($)</option>
             </select>
           </div>
 
@@ -195,7 +195,7 @@ export const SwapView: React.FC<SwapViewProps> = ({
                 key={pct}
                 type="button"
                 onClick={() => handleQuickPercent(pct)}
-                className="flex-1 py-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-800 transition-colors shadow-xs min-h-[36px] flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
+                className="flex-1 py-1.5 rounded-full bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-800 transition-colors duration-300 ease-out shadow-xs min-h-[36px] flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
               >
                 {pct === 100 ? "MAX" : `${pct}%`}
               </button>
@@ -209,19 +209,19 @@ export const SwapView: React.FC<SwapViewProps> = ({
             type="button"
             onClick={handleFlip}
             aria-label="Switch source and target currencies"
-            className="w-11 h-11 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-white cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
+            className="w-11 h-11 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white flex items-center justify-center shadow-md active:scale-90 transition-all duration-300 ease-out border-2 border-white cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
           >
             <KeylineArrowUpDown size={20} />
           </button>
         </div>
 
         {/* To Section */}
-        <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+        <div className="p-3.5 rounded-[32px] bg-slate-50 border border-slate-200 space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-700 font-bold">
             <span>YOU RECEIVE (ESTIMATED)</span>
             <span className="font-mono text-slate-600 text-[10px]">
-              {fromCurrency === "PTS" && toCurrency === "USD" && "100 PTS = $1.00 USD"}
               {fromCurrency === "PTS" && toCurrency === "KHR" && "100 PTS = 4,100 KHR"}
+              {fromCurrency === "PTS" && toCurrency === "USD" && "100 PTS = $1.00 USD"}
               {fromCurrency === "USD" && toCurrency === "KHR" && "$1.00 USD = 4,100 KHR"}
               {fromCurrency === "KHR" && toCurrency === "USD" && "4,100 KHR = $1.00 USD"}
             </span>
@@ -230,7 +230,7 @@ export const SwapView: React.FC<SwapViewProps> = ({
           <div className="flex items-center justify-between gap-3">
             <div className="text-2xl font-black text-[#14532d] font-display min-h-[44px] flex items-center">
               {toCurrency === "KHR"
-                ? `${Math.floor(calculatedOutput).toLocaleString()} KHR`
+                ? `${Math.floor(calculatedOutput).toLocaleString()} KHR (៛)`
                 : toCurrency === "USD"
                 ? `$${calculatedOutput.toFixed(2)} USD`
                 : `${Math.floor(calculatedOutput).toLocaleString()} PTS`}
@@ -244,10 +244,10 @@ export const SwapView: React.FC<SwapViewProps> = ({
                 if (val === fromCurrency) handleFlip();
                 else setToCurrency(val);
               }}
-              className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-black text-slate-900 focus:outline-none shadow-xs cursor-pointer min-h-[44px]"
+              className="bg-white border border-slate-300 rounded-full px-4 py-2 text-xs font-black text-slate-900 focus:outline-none shadow-xs cursor-pointer min-h-[44px] transition-colors duration-300 ease-out"
             >
-              <option value="USD">USD ($)</option>
               <option value="KHR">KHR (៛)</option>
+              <option value="USD">USD ($)</option>
               <option value="PTS">Points (PTS)</option>
             </select>
           </div>
@@ -255,7 +255,7 @@ export const SwapView: React.FC<SwapViewProps> = ({
 
         {/* Success Alert */}
         {swapSuccess && (
-          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-[#14532d] text-xs font-bold flex items-center gap-2">
+          <div className="p-3 rounded-full bg-emerald-50 border border-emerald-200 text-[#14532d] text-xs font-bold flex items-center gap-2 px-4">
             <Check size={18} className="flex-shrink-0" />
             <span>{swapSuccess}</span>
           </div>
@@ -266,7 +266,7 @@ export const SwapView: React.FC<SwapViewProps> = ({
           type="button"
           onClick={handleExecuteSwap}
           disabled={!canSwap}
-          className={`w-full py-3.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-xs min-h-[48px] ${
+          className={`w-full py-3.5 rounded-full font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 ease-out shadow-xs min-h-[48px] ${
             canSwap
               ? "bg-[#0098ea] hover:bg-[#0088cc] text-white active:scale-98 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
               : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
@@ -278,7 +278,7 @@ export const SwapView: React.FC<SwapViewProps> = ({
       </div>
 
       {/* Conversion Rate Card */}
-      <div className="liquid-glass p-4 space-y-2 border border-slate-200 shadow-xs">
+      <div className="liquid-glass rounded-[32px] p-4 space-y-2 border border-slate-200 shadow-xs">
         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider">
           <Sparkles size={16} className="text-[#0098ea]" />
           <span>Official Conversion Standards</span>
@@ -286,11 +286,11 @@ export const SwapView: React.FC<SwapViewProps> = ({
         <div className="space-y-1 text-xs text-slate-600">
           <div className="flex justify-between py-1.5 border-b border-slate-200">
             <span>100 Game Points (PTS)</span>
-            <span className="font-mono text-[#14532d] font-bold">$1.00 USD</span>
+            <span className="font-mono text-[#0077b5] font-bold">4,100.00 KHR (Riel)</span>
           </div>
           <div className="flex justify-between py-1.5 border-b border-slate-200">
             <span>100 Game Points (PTS)</span>
-            <span className="font-mono text-[#0077b5] font-bold">4,100.00 KHR (Riel)</span>
+            <span className="font-mono text-[#14532d] font-bold">$1.00 USD</span>
           </div>
           <div className="flex justify-between py-1.5">
             <span>1 USD ($)</span>

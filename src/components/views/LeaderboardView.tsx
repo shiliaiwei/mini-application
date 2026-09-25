@@ -77,9 +77,9 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
   return (
     <div className="space-y-3.5 pb-28 font-body select-none text-slate-900 max-w-xl mx-auto w-full px-1">
       {/* Current User Standings Card */}
-      <div className="liquid-glass p-3.5 flex items-center justify-between border border-slate-200 shadow-xs">
+      <div className="liquid-glass rounded-[32px] p-4 flex items-center justify-between border border-slate-200 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-[#0098ea] font-black text-lg shadow-xs relative overflow-hidden flex-shrink-0">
+          <div className="w-12 h-12 rounded-full bg-sky-50 border border-sky-200 flex items-center justify-center text-[#0098ea] font-black text-lg shadow-xs relative overflow-hidden flex-shrink-0">
             <span>#{userRank}</span>
           </div>
           <div>
@@ -100,19 +100,19 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
 
         <div className="text-right">
           <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider block">
-            VAULT VALUE
+            VAULT VALUE (RIEL)
           </span>
-          <div className="text-base sm:text-lg font-black text-[#14532d] font-display">
-            ${(userScore / 100).toFixed(2)} USD
+          <div className="text-base sm:text-lg font-black text-[#0077b5] font-display">
+            ៛{Math.floor(userScore * 41).toLocaleString()}
           </div>
           <span className="text-[10px] text-slate-600 font-bold block">
-            {userScore.toLocaleString()} PTS
+            ${(userScore / 100).toFixed(2)} USD • {userScore.toLocaleString()} PTS
           </span>
         </div>
       </div>
 
       {/* Leaderboard Table Card */}
-      <div className="liquid-glass p-3.5 space-y-3 border border-slate-200 shadow-xs relative overflow-hidden">
+      <div className="liquid-glass rounded-[32px] p-4 space-y-3 border border-slate-200 shadow-xs relative overflow-hidden">
 
         <div className="flex items-center justify-between border-b border-slate-200 pb-2">
           <div className="flex items-center gap-2">
@@ -127,7 +127,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
             onClick={fetchLeaderboard}
             disabled={loading}
             aria-label="Refresh Leaderboard"
-            className="w-9 h-9 rounded-lg text-slate-600 hover:text-slate-900 flex items-center justify-center transition-colors cursor-pointer border border-slate-200 bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
+            className="w-9 h-9 rounded-full text-slate-600 hover:text-slate-900 flex items-center justify-center transition-colors duration-300 ease-out cursor-pointer border border-slate-200 bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
           >
             <RefreshCw size={16} className={loading ? "animate-spin text-[#0098ea]" : ""} />
           </button>
@@ -150,7 +150,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
             return (
               <div
                 key={p.telegram_id}
-                className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${
+                className={`flex items-center justify-between p-3 rounded-full border transition-all duration-300 ease-out px-4 ${
                   isMe
                     ? "bg-sky-50 border-[#0098ea]/60 text-slate-900 shadow-xs"
                     : "bg-slate-50 border-slate-200 text-slate-800 hover:border-slate-300"
@@ -158,7 +158,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0 ${
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 ${
                       isTop1
                         ? "bg-amber-400 text-slate-950 shadow-xs"
                         : isTop2
@@ -185,11 +185,11 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                 </div>
 
                 <div className="text-right flex-shrink-0 ml-2">
-                  <span className="text-xs font-black text-[#14532d] font-display block">
-                    ${(Number(p.score) / 100).toFixed(2)}
+                  <span className="text-xs font-black text-[#0077b5] font-display block">
+                    ៛{Math.floor(Number(p.score) * 41).toLocaleString()}
                   </span>
                   <span className="text-[9px] text-slate-600 font-bold block">
-                    {Number(p.score).toLocaleString()} PTS
+                    ${(Number(p.score) / 100).toFixed(2)} USD
                   </span>
                 </div>
               </div>

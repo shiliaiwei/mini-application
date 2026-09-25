@@ -184,20 +184,20 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
   return (
     <div className="space-y-3.5 pb-28 font-body select-none text-slate-900 max-w-xl mx-auto w-full px-1">
       {/* Top Banner Overview */}
-      <div className="liquid-glass p-3.5 border border-slate-200 shadow-xs relative overflow-hidden">
+      <div className="liquid-glass rounded-[32px] p-4 border border-slate-200 shadow-xs relative overflow-hidden">
         <div className="flex items-center justify-between">
           <div>
             <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider block">
-              TOTAL EARNED POINTS (PTS)
+              TOTAL EARNED ASSETS (RIEL)
             </span>
-            <div className="text-2xl font-black text-slate-900 font-display mt-0.5">
-              <span>{score.toLocaleString()}</span>
-              <span className="text-slate-500 text-sm ml-1">PTS</span>
+            <div className="text-2xl font-black text-[#0077b5] font-display mt-0.5">
+              <span>៛{Math.floor(score * 41).toLocaleString()}</span>
+              <span className="text-slate-500 text-sm ml-1">KHR</span>
             </div>
             <div className="text-[11px] text-slate-600 font-semibold mt-0.5">
-              <span>≈ ${(score / 100).toFixed(2)} USD</span>
+              <span>{score.toLocaleString()} PTS</span>
               <span className="mx-1">•</span>
-              <span>{Math.floor(score * 41).toLocaleString()} KHR</span>
+              <span>${(score / 100).toFixed(2)} USD</span>
             </div>
           </div>
           <div className="text-right">
@@ -212,11 +212,11 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
       </div>
 
       {/* Sub Tabs Selector */}
-      <div className="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold border border-slate-200 shadow-xs">
+      <div className="grid grid-cols-3 gap-1.5 bg-slate-100 p-1.5 rounded-full text-xs font-bold border border-slate-200 shadow-xs">
         <button
           type="button"
           onClick={() => setActiveSubTab("quests")}
-          className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] ${
+          className={`py-2 rounded-full transition-all duration-300 ease-out flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] ${
             activeSubTab === "quests"
               ? "bg-[#0098ea] text-white shadow-xs"
               : "text-slate-700 hover:text-slate-900"
@@ -229,7 +229,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveSubTab("boosts")}
-          className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] ${
+          className={`py-2 rounded-full transition-all duration-300 ease-out flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] ${
             activeSubTab === "boosts"
               ? "bg-[#0098ea] text-white shadow-xs"
               : "text-slate-700 hover:text-slate-900"
@@ -242,7 +242,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveSubTab("streak")}
-          className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] ${
+          className={`py-2 rounded-full transition-all duration-300 ease-out flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] ${
             activeSubTab === "streak"
               ? "bg-[#0098ea] text-white shadow-xs"
               : "text-slate-700 hover:text-slate-900"
@@ -255,11 +255,11 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
 
       {/* 1. QUESTS LIST */}
       {activeSubTab === "quests" && (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {quests.map((quest) => (
             <div
               key={quest.id}
-              className="liquid-glass p-3 flex items-center justify-between border border-slate-200 hover:border-[#0098ea]/60 transition-all shadow-xs"
+              className="liquid-glass rounded-[32px] p-4 flex items-center justify-between border border-slate-200 hover:border-[#0098ea]/60 transition-all duration-300 ease-out shadow-xs"
             >
               <div className="flex-1 pr-3">
                 <div className="flex items-center gap-1.5">
@@ -282,16 +282,16 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
                   {quest.desc}
                 </p>
                 <div className="flex items-center gap-2 mt-1 text-[10px] font-bold">
-                  <span className="text-[#14532d]">+{quest.rewardPoints} PTS</span>
+                  <span className="text-[#0077b5]">+{Math.floor(quest.rewardPoints * 41).toLocaleString()} KHR (៛)</span>
                   <span className="text-slate-500">
-                    (≈ ${(quest.rewardPoints / 100).toFixed(2)} USD • {Math.floor(quest.rewardPoints * 41).toLocaleString()} KHR)
+                    (+{quest.rewardPoints} PTS • ${(quest.rewardPoints / 100).toFixed(2)} USD)
                   </span>
                 </div>
               </div>
 
               <div>
                 {quest.claimed ? (
-                  <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-100 border border-emerald-300 text-[#14532d] text-xs font-bold min-h-[36px]">
+                  <div className="flex items-center gap-1 px-4 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-[#14532d] text-xs font-bold min-h-[36px]">
                     <Check size={16} />
                     <span>Done</span>
                   </div>
@@ -299,7 +299,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
                   <button
                     type="button"
                     onClick={() => handleClaimQuest(quest.id, quest.rewardPoints)}
-                    className="px-3.5 py-1.5 rounded-lg bg-[#0098ea] hover:bg-[#0088cc] text-white text-xs font-bold active:scale-95 transition-all shadow-xs cursor-pointer min-h-[36px] flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
+                    className="px-4 py-1.5 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white text-xs font-bold active:scale-95 transition-all duration-300 ease-out shadow-xs cursor-pointer min-h-[36px] flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
                   >
                     Claim
                   </button>
@@ -314,7 +314,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
       {activeSubTab === "boosts" && (
         <div className="space-y-2.5">
           {/* Mint Power Upgrade */}
-          <div className="liquid-glass p-3.5 space-y-2.5 border border-slate-200 shadow-xs">
+          <div className="liquid-glass rounded-[32px] p-4 space-y-2.5 border border-slate-200 shadow-xs">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <TrendingUp size={22} className="text-[#0098ea] flex-shrink-0" />
@@ -336,18 +336,18 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
               type="button"
               onClick={onUpgradeTapPower}
               disabled={score < tapUpgradeCost}
-              className={`w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-xs min-h-[44px] ${
+              className={`w-full py-3 rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 ease-out shadow-xs min-h-[44px] ${
                 score >= tapUpgradeCost
                   ? "bg-[#0098ea] hover:bg-[#0088cc] text-white active:scale-98 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
                   : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
               }`}
             >
-              <span>Upgrade for {tapUpgradeCost.toLocaleString()} PTS</span>
+              <span>Upgrade for {tapUpgradeCost.toLocaleString()} PTS (≈ {Math.floor(tapUpgradeCost * 41).toLocaleString()} ៛)</span>
             </button>
           </div>
 
           {/* Passive Mining Yield Upgrade */}
-          <div className="liquid-glass p-3.5 space-y-2.5 border border-slate-200 shadow-xs">
+          <div className="liquid-glass rounded-[32px] p-4 space-y-2.5 border border-slate-200 shadow-xs">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <Zap size={22} className="text-[#16a34a] flex-shrink-0" />
@@ -369,13 +369,13 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
               type="button"
               onClick={onUpgradePassiveRate}
               disabled={score < passiveUpgradeCost}
-              className={`w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-xs min-h-[44px] ${
+              className={`w-full py-3 rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 ease-out shadow-xs min-h-[44px] ${
                 score >= passiveUpgradeCost
                   ? "bg-[#16a34a] hover:bg-[#15803d] text-white active:scale-98 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#16a34a]"
                   : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
               }`}
             >
-              <span>Upgrade for {passiveUpgradeCost.toLocaleString()} PTS</span>
+              <span>Upgrade for {passiveUpgradeCost.toLocaleString()} PTS (≈ {Math.floor(passiveUpgradeCost * 41).toLocaleString()} ៛)</span>
             </button>
           </div>
         </div>
@@ -383,7 +383,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
 
       {/* 3. DAILY CHECK-IN STREAK */}
       {activeSubTab === "streak" && (
-        <div className="liquid-glass p-3.5 space-y-3.5 border border-slate-200 shadow-xs">
+        <div className="liquid-glass rounded-[32px] p-4 space-y-3.5 border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between border-b border-slate-200 pb-2">
             <div>
               <span className="text-xs font-bold text-slate-900 uppercase tracking-wider block font-display">
@@ -393,7 +393,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
                 Check in continuously for 7 days to unlock maximum point bonuses.
               </span>
             </div>
-            <div className="px-2.5 py-1 rounded-lg bg-sky-50 border border-sky-200 text-[#0077b5] font-black text-xs">
+            <div className="px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-[#0077b5] font-black text-xs">
               Day {currentStreak} / 7
             </div>
           </div>
@@ -407,7 +407,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
               return (
                 <div
                   key={dayNum}
-                  className={`p-1.5 rounded-xl text-center border transition-all ${
+                  className={`p-1.5 rounded-2xl text-center border transition-all duration-300 ease-out ${
                     isToday
                       ? "bg-sky-50 border-[#0098ea] shadow-xs"
                       : isPast
@@ -430,7 +430,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
             type="button"
             onClick={handleClaimStreak}
             disabled={streakClaimedToday}
-            className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-xs min-h-[44px] ${
+            className={`w-full py-3 rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 ease-out shadow-xs min-h-[44px] ${
               streakClaimedToday
                 ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
                 : "bg-[#0098ea] hover:bg-[#0088cc] text-white active:scale-98 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"

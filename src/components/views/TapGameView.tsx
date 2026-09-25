@@ -199,7 +199,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <div className="w-14" />
         </div>
 
-        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-5 text-center">
+        <div className="bg-white rounded-[32px] p-5 border border-slate-200 shadow-sm space-y-5 text-center">
           {/* Score & Multiplier */}
           <div className="text-center py-1">
             <span className="text-3xl font-black text-slate-900 block font-sans">
@@ -218,7 +218,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
               onClick={handleTap}
               onTouchStart={handleTap}
               aria-label="Tap Medallion to mint points"
-              className="relative w-52 h-52 rounded-full flex flex-col items-center justify-center cursor-pointer select-none focus:outline-none active:scale-95 transition-transform"
+              className="relative w-52 h-52 rounded-full flex flex-col items-center justify-center cursor-pointer select-none focus:outline-none active:scale-95 transition-transform duration-300 ease-out"
             >
               <div className="w-44 h-44 rounded-full border-4 border-[#0098ea]/40 flex flex-col items-center justify-center bg-white shadow-2xl relative p-1 overflow-hidden">
                 <div className="w-36 h-36 rounded-full border border-dashed border-[#0098ea]/40 flex flex-col items-center justify-center relative bg-white/90">
@@ -261,7 +261,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <button
             type="button"
             onClick={() => setSubView("none")}
-            className="w-full py-3 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+            className="w-full py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors duration-300 ease-out cursor-pointer"
           >
             Exit to Home View
           </button>
@@ -294,13 +294,13 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <div className="w-14" />
         </div>
 
-        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
-          <div className="w-44 h-44 bg-white border border-slate-200 rounded-2xl mx-auto flex flex-col items-center justify-center text-slate-500 shadow-xs">
+        <div className="bg-white rounded-[32px] p-5 border border-slate-200 shadow-sm space-y-4">
+          <div className="w-44 h-44 bg-white border border-slate-200 rounded-[32px] mx-auto flex flex-col items-center justify-center text-slate-500 shadow-xs">
             <QrCode size={110} className="text-[#0098ea]" />
             <span className="text-xs font-mono mt-1 text-slate-600 font-bold">SHILIAIWEI QR</span>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+          <div className="p-3.5 rounded-[32px] bg-slate-50 border border-slate-200">
             <span className="text-[10px] font-bold text-slate-600 uppercase block">
               Simulated Deposit Address (SHILIAIWEI L2)
             </span>
@@ -312,7 +312,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
                 type="button"
                 onClick={handleCopyAddress}
                 aria-label="Copy address to clipboard"
-                className="w-9 h-9 rounded-xl text-slate-600 hover:text-slate-900 flex items-center justify-center ml-2 border border-slate-200 bg-white cursor-pointer"
+                className="w-9 h-9 rounded-full text-slate-600 hover:text-slate-900 flex items-center justify-center ml-2 border border-slate-200 bg-white cursor-pointer transition-colors duration-300 ease-out"
               >
                 {copiedAddress ? (
                   <Check size={18} className="text-[#16a34a]" />
@@ -330,7 +330,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <button
             type="button"
             onClick={() => setSubView("none")}
-            className="w-full py-3 rounded-2xl bg-[#0098ea] hover:bg-[#0088cc] text-white font-bold text-xs uppercase tracking-wider shadow-xs cursor-pointer"
+            className="w-full py-3 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white font-bold text-xs uppercase tracking-wider shadow-xs cursor-pointer transition-colors duration-300 ease-out"
           >
             Exit to Home View
           </button>
@@ -363,9 +363,9 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <div className="w-14" />
         </div>
 
-        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+        <div className="bg-white rounded-[32px] p-5 border border-slate-200 shadow-sm space-y-4">
           {sendSuccess ? (
-            <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-2">
+            <div className="p-6 rounded-[32px] bg-emerald-50 border border-emerald-200 text-center space-y-2">
               <Check size={36} className="text-[#16a34a] mx-auto" />
               <h4 className="text-base font-bold text-emerald-950">Transfer Successful!</h4>
               <p className="text-xs text-emerald-800">
@@ -376,30 +376,30 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
             <form onSubmit={handleSendTransaction} className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-slate-800 block mb-1.5">
-                  Currency Type
+                  Currency Type (Primary: Riel)
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => setSendCurrency("USD")}
-                    className={`py-3 rounded-2xl border text-xs font-bold transition-all cursor-pointer ${
-                      sendCurrency === "USD"
-                        ? "bg-[#0098ea] text-white border-[#0098ea] shadow-xs"
-                        : "bg-white text-slate-800 border-slate-200 hover:bg-slate-50"
-                    }`}
-                  >
-                    USD ($) - ${usdValue}
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => setSendCurrency("KHR")}
-                    className={`py-3 rounded-2xl border text-xs font-bold transition-all cursor-pointer ${
+                    className={`py-3 rounded-full border text-xs font-bold transition-all duration-300 ease-out cursor-pointer ${
                       sendCurrency === "KHR"
                         ? "bg-[#0098ea] text-white border-[#0098ea] shadow-xs"
                         : "bg-white text-slate-800 border-slate-200 hover:bg-slate-50"
                     }`}
                   >
                     KHR (៛) - ៛{khrValue}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSendCurrency("USD")}
+                    className={`py-3 rounded-full border text-xs font-bold transition-all duration-300 ease-out cursor-pointer ${
+                      sendCurrency === "USD"
+                        ? "bg-[#0098ea] text-white border-[#0098ea] shadow-xs"
+                        : "bg-white text-slate-800 border-slate-200 hover:bg-slate-50"
+                    }`}
+                  >
+                    USD ($) - ${usdValue}
                   </button>
                 </div>
               </div>
@@ -414,28 +414,28 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
                   value={sendRecipient}
                   onChange={(e) => setSendRecipient(e.target.value)}
                   placeholder="@username or shi_0x..."
-                  className="w-full px-3.5 py-3 rounded-2xl border border-slate-200 text-xs font-mono bg-white focus:outline-none focus:border-[#0098ea]"
+                  className="w-full px-4 py-3 rounded-full border border-slate-200 text-xs font-mono bg-white focus:outline-none focus:border-[#0098ea]"
                 />
               </div>
 
               <div>
                 <label className="text-xs font-bold text-slate-800 block mb-1.5">
-                  Amount ({sendCurrency === "USD" ? "$" : "៛"})
+                  Amount ({sendCurrency === "KHR" ? "៛" : "$"})
                 </label>
                 <input
                   type="number"
-                  step={sendCurrency === "USD" ? "0.01" : "100"}
+                  step={sendCurrency === "KHR" ? "100" : "0.01"}
                   required
                   value={sendAmount}
                   onChange={(e) => setSendAmount(e.target.value)}
-                  placeholder={sendCurrency === "USD" ? "10.00" : "41000"}
-                  className="w-full px-3.5 py-3 rounded-2xl border border-slate-200 text-sm font-bold bg-white focus:outline-none focus:border-[#0098ea]"
+                  placeholder={sendCurrency === "KHR" ? "41000" : "10.00"}
+                  className="w-full px-4 py-3 rounded-full border border-slate-200 text-sm font-bold bg-white focus:outline-none focus:border-[#0098ea]"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-2xl bg-[#0098ea] hover:bg-[#0088cc] text-white font-bold text-xs uppercase tracking-wider shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-3.5 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white font-bold text-xs uppercase tracking-wider shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-colors duration-300 ease-out"
               >
                 <Send size={18} />
                 <span>Confirm Transfer</span>
@@ -446,7 +446,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <button
             type="button"
             onClick={() => setSubView("none")}
-            className="w-full py-3 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+            className="w-full py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors duration-300 ease-out cursor-pointer"
           >
             Exit to Home View
           </button>
@@ -479,9 +479,9 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <div className="w-14" />
         </div>
 
-        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4 text-center">
-          <div className="w-64 h-64 bg-slate-900 rounded-3xl mx-auto flex flex-col items-center justify-center relative overflow-hidden shadow-inner">
-            <div className="w-44 h-44 border-2 border-[#0098ea] rounded-2xl flex items-center justify-center relative">
+        <div className="bg-white rounded-[32px] p-5 border border-slate-200 shadow-sm space-y-4 text-center">
+          <div className="w-64 h-64 bg-slate-900 rounded-[32px] mx-auto flex flex-col items-center justify-center relative overflow-hidden shadow-inner">
+            <div className="w-44 h-44 border-2 border-[#0098ea] rounded-[24px] flex items-center justify-center relative">
               <div className="w-full h-0.5 bg-[#0098ea] animate-pulse" />
             </div>
             <span className="text-xs text-slate-300 font-mono mt-3">
@@ -496,7 +496,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <button
             type="button"
             onClick={() => setSubView("none")}
-            className="w-full py-3 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+            className="w-full py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors duration-300 ease-out cursor-pointer"
           >
             Exit to Home View
           </button>
@@ -515,7 +515,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <button
             type="button"
             onClick={() => setSubView("none")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs shadow-2xs active:scale-95 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs shadow-2xs active:scale-95 transition-all duration-300 ease-out cursor-pointer"
           >
             <ChevronLeft size={16} className="text-[#0098ea]" />
             <span>Back</span>
@@ -529,8 +529,8 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <div className="w-14" />
         </div>
 
-        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-1">
+        <div className="bg-white rounded-[32px] p-5 border border-slate-200 shadow-sm space-y-4">
+          <div className="p-4 rounded-[32px] bg-slate-50 border border-slate-200 text-center space-y-1">
             <h4 className="text-sm font-black text-slate-900">Earn Points for Free</h4>
             <p className="text-xs text-slate-600 leading-relaxed">
               You do not need to pay real money. Tap the medallion, complete daily missions, and win games to earn PTS that you can exchange directly for USD ($) or KHR (៛)!
@@ -544,7 +544,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
                 setSubView("none");
                 onGoToEarn?.();
               }}
-              className="w-full py-3.5 rounded-2xl bg-[#0098ea] hover:bg-[#0088cc] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+              className="w-full py-3.5 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-colors duration-300 ease-out"
             >
               <Gift size={20} />
               <span>Go to Missions (+1,000 PTS)</span>
@@ -556,7 +556,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
                 setSubView("none");
                 onGoToSwap?.();
               }}
-              className="w-full py-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-colors duration-300 ease-out"
             >
               <Repeat size={20} className="text-emerald-600" />
               <span>Exchange Currency (DEX Swap)</span>
@@ -566,7 +566,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <button
             type="button"
             onClick={() => setSubView("none")}
-            className="w-full py-3 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+            className="w-full py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors duration-300 ease-out cursor-pointer"
           >
             Exit to Home View
           </button>

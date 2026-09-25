@@ -1,8 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { Roboto } from "next/font/google";
 import Script from "next/script";
 import "@telegram-apps/telegram-ui/dist/styles.css";
 import "./globals.css";
+
+const roboto = Roboto({
+  weight: ["300", "400", "500", "700", "900"],
+  subsets: ["latin"],
+  variable: "--font-roboto",
+  display: "swap",
+});
 
 const googleSans = localFont({
   src: [
@@ -56,7 +64,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${googleSans.variable} ${facultyGlyphic.variable} h-full antialiased light`}
+      className={`${roboto.variable} ${googleSans.variable} ${facultyGlyphic.variable} h-full antialiased light`}
     >
       <head>
         <Script

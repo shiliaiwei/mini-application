@@ -17,7 +17,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass
       <div className="relative z-10">
         <div className="flex items-center justify-between text-xs text-slate-500 pb-2 border-b border-slate-200/80">
           <span className="text-[#0098ea] font-bold uppercase tracking-wider">@srievibot</span>
-          <span className="text-[10px] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-600 font-semibold">
+          <span className="text-[10px] bg-slate-100 border border-slate-200 px-3 py-1 rounded-full text-slate-600 font-semibold">
             TELEGRAM VERIFICATION
           </span>
         </div>
@@ -25,7 +25,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass
 
       {/* Center Notice */}
       <div className="my-auto text-center space-y-4 relative z-10">
-        <div className="px-5 py-3 rounded-2xl bg-white border-2 border-[#0098ea] mx-auto flex items-center justify-center shadow-lg w-fit">
+        <div className="px-6 py-3 rounded-full bg-white border-2 border-[#0098ea] mx-auto flex items-center justify-center shadow-lg w-fit">
           <ShiliaiweiBrand height={24} colorScheme="blue" />
         </div>
 
@@ -38,7 +38,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass
           </p>
         </div>
 
-        <div className="p-3.5 rounded-xl liquid-glass border border-slate-200/90 text-left text-xs text-slate-700 space-y-1.5 shadow-sm">
+        <div className="p-4 rounded-[32px] liquid-glass border border-slate-200/90 text-left text-xs text-slate-700 space-y-1.5 shadow-sm">
           <div className="flex items-center gap-2 text-[#0098ea] font-bold">
             <CircleAlert size={16} className="w-4 h-4 flex-shrink-0" />
             <span>ACCESS INSTRUCTIONS:</span>
@@ -56,7 +56,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass
             href="https://t.me/srievibot"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full py-3.5 px-4 rounded-xl bg-[#0098ea] hover:bg-[#0088cc] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-md"
+            className="w-full py-3.5 px-4 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors duration-300 ease-out shadow-md"
           >
             <Send className="w-4 h-4" />
             Open in Telegram (@srievibot)
@@ -66,7 +66,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass
             <button
               type="button"
               onClick={onBypass}
-              className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs tracking-wider transition-colors shadow-sm"
+              className="w-full py-2.5 px-4 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs tracking-wider transition-colors duration-300 ease-out shadow-sm cursor-pointer"
             >
               Continue in Browser Preview Mode
             </button>

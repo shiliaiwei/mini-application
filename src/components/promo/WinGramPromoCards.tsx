@@ -133,7 +133,7 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             tabIndex={0}
             onClick={() => handleLaunchGame("wheel")}
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleLaunchGame("wheel")}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all hover:shadow-md group text-left"
+            className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all duration-300 ease-out hover:shadow-md group text-left"
           >
             {/* Scattered / Repeating SHILIAI [WEI] Logo Watermark */}
             <CardWatermarkPattern patternId="wm-spin" />
@@ -159,7 +159,7 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             tabIndex={0}
             onClick={() => handleLaunchGame("word-flash")}
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleLaunchGame("word-flash")}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all hover:shadow-md group text-left"
+            className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all duration-300 ease-out hover:shadow-md group text-left"
           >
             {/* Scattered / Repeating SHILIAI [WEI] Logo Watermark */}
             <CardWatermarkPattern patternId="wm-word" />
@@ -185,7 +185,7 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             tabIndex={0}
             onClick={() => handleLaunchGame("guess-faster")}
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleLaunchGame("guess-faster")}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all hover:shadow-md group text-left"
+            className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all duration-300 ease-out hover:shadow-md group text-left"
           >
             {/* Scattered / Repeating SHILIAI [WEI] Logo Watermark */}
             <CardWatermarkPattern patternId="wm-guess" />
@@ -211,7 +211,7 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             tabIndex={0}
             onClick={() => handleLaunchGame("row5")}
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleLaunchGame("row5")}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all hover:shadow-md group text-left"
+            className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all duration-300 ease-out hover:shadow-md group text-left"
           >
             {/* Scattered / Repeating SHILIAI [WEI] Logo Watermark */}
             <CardWatermarkPattern patternId="wm-row5" />
@@ -236,7 +236,7 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             tabIndex={0}
             onClick={() => handleLaunchGame("number-match")}
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleLaunchGame("number-match")}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all hover:shadow-md group text-left"
+            className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all duration-300 ease-out hover:shadow-md group text-left"
           >
             <CardWatermarkPattern patternId="wm-nmatch" />
             <div className="relative z-10 text-left">
@@ -257,7 +257,7 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             tabIndex={0}
             onClick={() => handleLaunchGame("flip-card")}
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleLaunchGame("flip-card")}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all hover:shadow-md group text-left"
+            className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all duration-300 ease-out hover:shadow-md group text-left"
           >
             <CardWatermarkPattern patternId="wm-flip" />
             <div className="relative z-10 text-left">

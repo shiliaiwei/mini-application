@@ -97,15 +97,15 @@ const ProfileAvatar: React.FC<{ user: TelegramUser | null; size?: number }> = ({
 };
 
 const StatCell: React.FC<{ value: string | number; label: string }> = ({ value, label }) => (
-  <div className="flex flex-col items-center justify-center gap-0.5 flex-1 py-3">
-    <span className="text-lg font-black text-slate-900 leading-none">{value}</span>
-    <span className="text-[11px] text-slate-500 font-semibold leading-none">{label}</span>
+  <div className="flex flex-col items-center justify-center gap-0.5 flex-1 py-3 px-1 text-center font-sans">
+    <span className="text-sm sm:text-base font-black text-slate-900 leading-tight truncate max-w-full">{value}</span>
+    <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium leading-none">{label}</span>
   </div>
 );
 
 const QuickAction: React.FC<{ icon: React.ReactNode; label: string; onClick: () => void; accent?: boolean }> = ({ icon, label, onClick, accent }) => (
-  <button type="button" onClick={onClick} className="flex flex-col items-center gap-1.5 cursor-pointer active:scale-95 transition-all group">
-    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all group-hover:shadow-md ${accent ? "bg-gradient-to-br from-[#0098ea] to-[#005f99] border-blue-400/30 text-white shadow-sm shadow-blue-500/20" : "bg-white border-slate-200/80 text-slate-700 shadow-sm group-hover:border-[#0098ea]/30"}`}>
+  <button type="button" onClick={onClick} className="flex flex-col items-center gap-1.5 cursor-pointer active:scale-95 transition-all duration-300 ease-out group font-sans">
+    <div className={`w-14 h-14 rounded-full flex items-center justify-center border transition-all duration-300 ease-out group-hover:shadow-md ${accent ? "bg-gradient-to-br from-[#0098ea] to-[#005f99] border-blue-400/30 text-white shadow-sm shadow-blue-500/20" : "bg-white border-slate-200/80 text-slate-700 shadow-sm group-hover:border-[#0098ea]/30"}`}>
       {icon}
     </div>
     <span className="text-[11px] font-bold text-slate-600 leading-tight text-center">{label}</span>
@@ -113,10 +113,10 @@ const QuickAction: React.FC<{ icon: React.ReactNode; label: string; onClick: () 
 );
 
 const TaskRow: React.FC<{ title: string; sub: string; badge?: React.ReactNode; right?: React.ReactNode; onClick?: () => void }> = ({ title, sub, badge, right, onClick }) => (
-  <button type="button" onClick={onClick} className="flex items-center justify-between w-full py-3 px-3 cursor-pointer active:bg-slate-50 rounded-xl transition-colors text-left">
+  <button type="button" onClick={onClick} className="flex items-center justify-between w-full py-3 px-3 cursor-pointer active:bg-slate-50 rounded-full transition-colors duration-300 ease-out text-left font-sans">
     <div className="flex items-center gap-3">
       {badge && (
-        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] flex items-center justify-center shadow-sm flex-shrink-0">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] flex items-center justify-center shadow-xs flex-shrink-0">
           {badge}
         </div>
       )}
@@ -130,9 +130,9 @@ const TaskRow: React.FC<{ title: string; sub: string; badge?: React.ReactNode; r
 );
 
 const MenuRow: React.FC<{ icon: React.ReactNode; title: string; sub?: string; onClick: () => void; danger?: boolean }> = ({ icon, title, sub, onClick, danger }) => (
-  <button type="button" onClick={onClick} className="flex items-center justify-between w-full py-3 px-1 cursor-pointer active:bg-slate-50 rounded-xl transition-colors">
+  <button type="button" onClick={onClick} className="flex items-center justify-between w-full py-3 px-2 cursor-pointer active:bg-slate-50 rounded-full transition-colors duration-300 ease-out font-sans">
     <div className="flex items-center gap-3">
-      <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${danger ? "bg-rose-50 border-rose-200 text-rose-500" : "bg-slate-50 border-slate-200/80 text-slate-700"}`}>
+      <div className={`w-9 h-9 rounded-full flex items-center justify-center border ${danger ? "bg-rose-50 border-rose-200 text-rose-500" : "bg-slate-50 border-slate-200/80 text-slate-700"}`}>
         {icon}
       </div>
       <div className="text-left">
@@ -145,8 +145,8 @@ const MenuRow: React.FC<{ icon: React.ReactNode; title: string; sub?: string; on
 );
 
 const BackHeader: React.FC<{ title: string; onBack: () => void; right?: React.ReactNode }> = ({ title, onBack, right }) => (
-  <div className="flex items-center justify-between py-2 border-b border-slate-200/80 mb-4">
-    <button type="button" onClick={onBack} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs shadow-2xs active:scale-95 transition-all cursor-pointer">
+  <div className="flex items-center justify-between py-2 border-b border-slate-200/80 mb-4 font-sans">
+    <button type="button" onClick={onBack} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs shadow-2xs active:scale-95 transition-all duration-300 ease-out cursor-pointer">
       <ChevronLeft size={16} className="text-[#0098ea]" />
       <span>Back</span>
     </button>
@@ -245,14 +245,14 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
     return (
       <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
         <BackHeader title="Token Swap" onBack={() => setView("main")} />
-        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+        <div className="bg-white rounded-[32px] p-6 border border-slate-200 shadow-sm space-y-4">
           <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">SHILIAIWEI DEX — CONVERT</span>
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">From</label>
             <div className="flex gap-2">
-              {(["PTS", "USD", "KHR"] as CurrencyType[]).map((c) => (
+              {(["KHR", "PTS", "USD"] as CurrencyType[]).map((c) => (
                 <button key={c} type="button" onClick={() => setFromCurrency(c)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-black border transition-all cursor-pointer ${fromCurrency === c ? "bg-[#0098ea] text-white border-[#0098ea] shadow-sm" : "bg-slate-50 text-slate-700 border-slate-200"}`}>
+                  className={`flex-1 py-2.5 rounded-full text-xs font-black border transition-all duration-300 ease-out cursor-pointer ${fromCurrency === c ? "bg-[#0098ea] text-white border-[#0098ea] shadow-sm" : "bg-slate-50 text-slate-700 border-slate-200"}`}>
                   {c}
                 </button>
               ))}
@@ -261,35 +261,35 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Amount</label>
             <input type="number" value={inputAmount} onChange={(e) => setInputAmount(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-900 font-black text-lg focus:outline-none focus:border-[#0098ea] focus:bg-white transition-colors" placeholder="100" />
+              className="w-full px-5 py-3 rounded-full border border-slate-200 bg-slate-50 text-slate-900 font-black text-lg focus:outline-none focus:border-[#0098ea] focus:bg-white transition-all duration-300 ease-out" placeholder="100" />
           </div>
           <div className="flex items-center justify-center">
-            <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
               <Repeat size={16} className="text-[#0098ea]" />
             </div>
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">To</label>
             <div className="flex gap-2">
-              {(["PTS", "USD", "KHR"] as CurrencyType[]).map((c) => (
+              {(["KHR", "PTS", "USD"] as CurrencyType[]).map((c) => (
                 <button key={c} type="button" onClick={() => setToCurrency(c)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-black border transition-all cursor-pointer ${toCurrency === c ? "bg-emerald-500 text-white border-emerald-500 shadow-sm" : "bg-slate-50 text-slate-700 border-slate-200"}`}>
+                  className={`flex-1 py-2.5 rounded-full text-xs font-black border transition-all duration-300 ease-out cursor-pointer ${toCurrency === c ? "bg-emerald-500 text-white border-emerald-500 shadow-sm" : "bg-slate-50 text-slate-700 border-slate-200"}`}>
                   {c}
                 </button>
               ))}
             </div>
           </div>
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+          <div className="p-4 rounded-[28px] bg-slate-50 border border-slate-200 text-center">
             <span className="text-xs text-slate-500 font-medium block mb-0.5">You receive</span>
             <span className="text-2xl font-black text-slate-900">{swapConvertedAmount()}</span>
           </div>
           {swapSuccess && (
-            <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold text-center animate-fadeIn">
+            <div className="p-3 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold text-center animate-fadeIn">
               Swap success — received {swapSuccess}
             </div>
           )}
           <button type="button" onClick={handleSwapConfirm}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#0088cc] to-[#0098ea] text-white font-black text-sm tracking-wide shadow-md shadow-blue-500/20 active:scale-98 transition-all cursor-pointer">
+            className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#0088cc] to-[#0098ea] text-white font-black text-sm tracking-wide shadow-md shadow-blue-500/20 active:scale-98 transition-all duration-300 ease-out cursor-pointer">
             CONFIRM SWAP
           </button>
         </div>
@@ -303,17 +303,17 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
       <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
         <BackHeader title="Security" onBack={() => setView("main")} />
         <div className="space-y-3">
-          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+          <div className="bg-white rounded-[32px] p-6 border border-slate-200 shadow-sm space-y-3">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">VAULT WALLET ADDRESS</span>
-            <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-xs font-mono text-slate-700 truncate flex-1">{walletAddress}</span>
+            <div className="flex items-center justify-between gap-3 p-3.5 rounded-full bg-slate-50 border border-slate-200">
+              <span className="text-xs font-mono text-slate-700 truncate flex-1 ml-2">{walletAddress}</span>
               <button type="button" onClick={() => copyToClipboard(walletAddress, setCopiedWallet)}
-                className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-[#0098ea] transition-colors cursor-pointer flex-shrink-0">
+                className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-[#0098ea] flex items-center justify-center transition-all duration-300 ease-out cursor-pointer flex-shrink-0">
                 {copiedWallet ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
               </button>
             </div>
-            <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
-              <div>
+            <div className="flex items-center justify-between gap-3 p-3.5 rounded-full bg-slate-50 border border-slate-200">
+              <div className="ml-2">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block">Telegram Handle</span>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="text-sm font-black text-slate-900">{handle}</span>
@@ -321,23 +321,23 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
                 </div>
               </div>
               {isTelegramUser && (
-                <span className="text-[10px] font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200">
+                <span className="text-[10px] font-bold text-sky-700 bg-sky-50 px-3 py-1 rounded-full border border-sky-200 mr-1">
                   Verified
                 </span>
               )}
             </div>
-            <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
-              <div>
+            <div className="flex items-center justify-between gap-3 p-3.5 rounded-full bg-slate-50 border border-slate-200">
+              <div className="ml-2">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block">Telegram ID</span>
                 <span className="text-sm font-black text-slate-900">{playerId}</span>
               </div>
               <button type="button" onClick={() => copyToClipboard(playerId, setCopiedId)}
-                className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-[#0098ea] transition-colors cursor-pointer flex-shrink-0">
+                className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-[#0098ea] flex items-center justify-center transition-all duration-300 ease-out cursor-pointer flex-shrink-0">
                 {copiedId ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
               </button>
             </div>
           </div>
-          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+          <div className="bg-white rounded-[32px] p-6 border border-slate-200 shadow-sm space-y-3">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">PROTECTION STATUS</span>
             {[
               { label: "Telegram Auth", status: "Active", ok: true },
@@ -475,26 +475,26 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
     return (
       <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
         <BackHeader title="Edit Profile" onBack={() => setView("main")} />
-        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+        <div className="bg-white rounded-[32px] p-6 border border-slate-200 shadow-sm space-y-4">
           <div className="flex justify-center pb-2">
             <ProfileAvatar user={user} size={72} />
           </div>
           <div className="space-y-3">
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Display Name</label>
-              <div className="px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 text-sm font-semibold">
+              <div className="px-5 py-3.5 rounded-full border border-slate-200 bg-slate-50 text-slate-700 text-sm font-semibold">
                 {displayName}<span className="ml-2 text-[10px] text-slate-400">(from Telegram)</span>
               </div>
             </div>
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Handle</label>
-              <div className="px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 text-sm font-mono flex items-center justify-between">
+              <div className="px-5 py-3.5 rounded-full border border-slate-200 bg-slate-50 text-slate-700 text-sm font-mono flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <span>{handle}</span>
                   {isTelegramUser && <TelegramVerifiedBadge size={15} />}
                 </div>
                 {isTelegramUser && (
-                  <span className="text-[10px] font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200">
+                  <span className="text-[10px] font-bold text-sky-700 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
                     Verified
                   </span>
                 )}
@@ -503,14 +503,14 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Bio</label>
               <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3}
-                className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-900 text-sm font-medium focus:outline-none focus:border-[#0098ea] transition-colors resize-none" placeholder="Write a short bio..." />
+                className="w-full px-5 py-3.5 rounded-[28px] border border-slate-200 bg-white text-slate-900 text-sm font-medium focus:outline-none focus:border-[#0098ea] transition-all duration-300 ease-out resize-none" placeholder="Write a short bio..." />
             </div>
           </div>
           {savedSuccess && (
-            <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold text-center animate-fadeIn">Profile saved!</div>
+            <div className="p-3.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold text-center animate-fadeIn">Profile saved!</div>
           )}
           <button type="button" onClick={handleSaveBio}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#0088cc] to-[#0098ea] text-white font-black text-sm tracking-wide shadow-md shadow-blue-500/20 active:scale-98 transition-all cursor-pointer">
+            className="w-full py-4 rounded-full bg-gradient-to-r from-[#0088cc] to-[#0098ea] text-white font-black text-sm tracking-wide shadow-md shadow-blue-500/20 active:scale-98 transition-all duration-300 ease-out cursor-pointer">
             SAVE PROFILE
           </button>
         </div>
@@ -522,8 +522,8 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
   return (
     <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
 
-      {/* HERO HEADER CARD */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-5 text-white mb-4 shadow-md border border-blue-400/20">
+      {/* HERO HEADER CARD (32dp Expressive Roundness) */}
+      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-6 text-white mb-4 shadow-md border border-blue-400/20">
         <ProfileWatermark />
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-4">
@@ -539,7 +539,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
               <p className="text-blue-100/80 text-[11px] font-medium mt-1 leading-snug line-clamp-2">{bio}</p>
             </div>
             <button type="button" onClick={() => setView("edit")}
-              className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-white/15 border border-white/25 text-white text-xs font-bold hover:bg-white/25 transition-all cursor-pointer active:scale-95">
+              className="flex-shrink-0 px-4 py-2 rounded-full bg-white/15 border border-white/25 text-white text-xs font-bold hover:bg-white/25 transition-all duration-300 ease-out cursor-pointer active:scale-95">
               Edit
             </button>
           </div>
@@ -547,7 +547,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
             <ShiliaiweiBrand height={14} colorScheme="white" />
             <span className="text-[9px] font-black text-blue-200 uppercase tracking-widest">VAULT MEMBER</span>
             {isTelegramUser && (
-              <span className="text-[8.5px] font-bold text-sky-100 bg-white/10 px-2 py-0.5 rounded-full border border-white/15 ml-auto flex items-center gap-1">
+              <span className="text-[8.5px] font-bold text-sky-100 bg-white/10 px-3 py-1 rounded-full border border-white/15 ml-auto flex items-center gap-1">
                 <TelegramVerifiedBadge size={11} />
                 <span>Verified Telegram</span>
               </span>
@@ -556,18 +556,18 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         </div>
       </div>
 
-      {/* STATS ROW */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
+      {/* STATS ROW (32dp Expressive Roundness & Primary Currency: Riel KHR) */}
+      <div className="bg-white rounded-[32px] border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
         <div className="flex items-stretch divide-x divide-slate-100">
+          <StatCell value={`${khrValue} ៛`} label="Riel (KHR)" />
           <StatCell value={score.toLocaleString()} label="Points" />
           <StatCell value={`$${usdValue}`} label="USD" />
-          <StatCell value={tapPower} label="Tap Power" />
           <StatCell value={fmtTime(spendSeconds)} label="Online" />
         </div>
       </div>
 
-      {/* QUICK ACTION GRID */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-4 mb-4">
+      {/* QUICK ACTION GRID (32dp Expressive Roundness) */}
+      <div className="bg-white rounded-[32px] border border-slate-200/80 shadow-sm p-5 mb-4">
         <div className="grid grid-cols-4 gap-3">
           <QuickAction icon={<Wallet size={22} />} label="Wallet" onClick={() => setView("wallet-detail")} accent />
           <QuickAction icon={<Repeat size={22} />} label="Swap" onClick={() => setView("swap")} />
@@ -580,31 +580,31 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         </div>
       </div>
 
-      {/* TASK / REWARD ROWS */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
+      {/* TASK / REWARD ROWS (32dp Expressive Roundness) */}
+      <div className="bg-white rounded-[32px] border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
         <div className="grid grid-cols-2 divide-x divide-slate-100">
-          <TaskRow title="Tasks" sub={`${score > 0 ? score.toLocaleString() : 0} Points`} badge={<Coins size={18} className="text-white" />} />
+          <TaskRow title="Tasks" sub={`${khrValue} ៛ (${score > 0 ? score.toLocaleString() : 0} PTS)`} badge={<Coins size={18} className="text-white" />} />
           <TaskRow title="Streak" sub="Tap to Join" badge={<Zap size={18} className="text-white" />} />
         </div>
         <div className="border-t border-slate-100 grid grid-cols-2 divide-x divide-slate-100">
           <TaskRow title="Check-in" sub="Claim daily bonus" badge={<Timer size={18} className="text-white" />}
-            right={<span className="px-3 py-1.5 rounded-full bg-[#0098ea] text-white text-xs font-black">Sign</span>} />
+            right={<span className="px-4 py-1.5 rounded-full bg-[#0098ea] text-white text-xs font-black">Sign</span>} />
           <TaskRow title="Rewards" sub="Updated daily" badge={<Sparkles size={18} className="text-white" />} onClick={() => setView("notifications")} />
         </div>
       </div>
 
-      {/* MENU LIST */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
-        <div className="px-2 py-1">
+      {/* MENU LIST (32dp Expressive Roundness) */}
+      <div className="bg-white rounded-[32px] border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
+        <div className="px-2 py-1.5">
           <MenuRow icon={<User size={17} />} title="Edit Profile" sub="Name, bio, handle" onClick={() => setView("edit")} />
           <MenuRow icon={<ShieldCheck size={17} />} title="Security & Wallet" sub="Keys, 2FA, address" onClick={() => setView("security")} />
-          <MenuRow icon={<Repeat size={17} />} title="Token Swap" sub="PTS → USD / KHR" onClick={() => setView("swap")} />
+          <MenuRow icon={<Repeat size={17} />} title="Token Swap" sub="PTS → KHR / USD" onClick={() => setView("swap")} />
           <MenuRow icon={<Timer size={17} />} title="Activity Log" sub="Login & action history" onClick={() => { setView("audit"); fetchAuditLogs(); }} />
           <MenuRow icon={<Bell size={17} />} title="Notifications" sub="Alerts & rewards" onClick={() => setView("notifications")} />
         </div>
 
         {/* Preference toggles */}
-        <div className="border-t border-slate-100 px-4 py-3 space-y-3">
+        <div className="border-t border-slate-100 px-5 py-3.5 space-y-3">
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Preferences</span>
           {[
             { label: "Haptic Feedback", value: hapticsEnabled, onToggle: () => { const n = !hapticsEnabled; setHapticsEnabled(n); localStorage.setItem("shi_pref_haptics", String(n)); } },
@@ -613,21 +613,21 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
             <div key={pref.label} className="flex items-center justify-between">
               <span className="text-sm font-semibold text-slate-800">{pref.label}</span>
               <button type="button" onClick={pref.onToggle}
-                className={`relative w-11 h-6 rounded-full border transition-all cursor-pointer ${pref.value ? "bg-[#0098ea] border-[#0098ea]" : "bg-slate-200 border-slate-300"}`}>
-                <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-200 ${pref.value ? "left-5" : "left-0.5"}`} />
+                className={`relative w-11 h-6 rounded-full border transition-all duration-300 ease-out cursor-pointer ${pref.value ? "bg-[#0098ea] border-[#0098ea]" : "bg-slate-200 border-slate-300"}`}>
+                <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-300 ease-out ${pref.value ? "left-5" : "left-0.5"}`} />
               </button>
             </div>
           ))}
         </div>
       </div>
 
-      {/* PLAYER ID FOOTER */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-4 mb-3">
+      {/* PLAYER ID FOOTER (32dp Expressive Roundness) */}
+      <div className="bg-white rounded-[32px] border border-slate-200/80 shadow-sm p-5 mb-3">
         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Player ID</span>
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs font-mono text-slate-700 truncate">{playerId}</span>
           <button type="button" onClick={() => copyToClipboard(playerId, setCopiedId)}
-            className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 cursor-pointer flex-shrink-0">
+            className="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 text-slate-600 flex items-center justify-center transition-all duration-300 ease-out cursor-pointer flex-shrink-0">
             {copiedId ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
           </button>
         </div>
@@ -638,7 +638,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
 
       {onBack && (
         <button type="button" onClick={onBack}
-          className="w-full py-3 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-500 font-bold text-xs shadow-2xs active:scale-98 transition-all cursor-pointer">
+          className="w-full py-3.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 font-bold text-xs shadow-2xs active:scale-98 transition-all duration-300 ease-out cursor-pointer">
           Back to Home
         </button>
       )}

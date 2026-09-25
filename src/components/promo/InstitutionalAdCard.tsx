@@ -122,7 +122,7 @@ export const InstitutionalAdCard: React.FC<InstitutionalAdCardProps> = ({
       onClick={() => onOpenDetail(partner.id)}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpenDetail(partner.id)}
       aria-label={fullName}
-      className="sm:col-span-6 relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#0088cc] via-[#006fa7] to-[#004f77] min-h-[255px] sm:min-h-[270px] border border-blue-400/25 shadow-sm cursor-pointer select-none group active:scale-[0.98] transition-transform"
+      className="sm:col-span-6 relative overflow-hidden rounded-[32px] bg-gradient-to-b from-[#0088cc] via-[#006fa7] to-[#004f77] min-h-[255px] sm:min-h-[270px] border border-blue-400/25 shadow-sm cursor-pointer select-none group active:scale-[0.98] transition-transform duration-300 ease-out"
     >
       {/* Dynamic Ambient Background Glow */}
       <div
