@@ -4,19 +4,35 @@ import React from "react";
 
 export type BrandVariant = "full" | "wordmark" | "mark";
 export type BrandColorScheme = "blue" | "white" | "dark";
+export type BrandFormat = "inline" | "svg";
 
 export interface ShiliaiweiBrandProps {
   /**
    * Official SHILIAIWEI Brand Logo
    * Format: "SHILIAI" (bold text) + "[WEI]" (badge at the end, LinkedIn style)
-   * Full word logo always: never use "WEI" alone.
+   * Single-line, tight 2-3px gap, zero excess spacing.
    *
-   * MUTUAL EXCLUSIVITY RULE:
-   * When this logo is displayed, never display extra brand text name in the same place.
-   * When brand text is displayed, never display this logo alongside it.
+   * =========================================================================
+   * MANDATORY SHILIAIWEI BRAND LOGO RULES (NEVER ALTER):
+   * =========================================================================
+   * 1. ZERO ADDITIONS: NEVER add anything before, after, or around the logo.
+   *    - NO prefixes (e.g. "SHILIAIWEI Official", "App", "Platform").
+   *    - NO suffixes (e.g. "Vault", "Gaming", "Casino", "VIP").
+   *    - NO accompanying taglines, subtitle text, or auxiliary labels.
+   *    - NO decorative icons, shields, or marks appended or prepended directly.
+   * 2. ONE LINE ONLY & TIGHT ZERO-SPACE BADGE:
+   *    - The [WEI] badge MUST sit on the exact same line immediately adjacent
+   *      to "SHILIAI" with a tight 2px–3px margin (like LinkedIn's [in] badge).
+   *    - NEVER allow a loose gap, space character, or line wrap.
+   * 3. MUTUAL EXCLUSIVITY:
+   *    - When the logo is displayed, never display extra brand text name in the same place.
+   *    - When brand text is displayed, never display this logo alongside it.
+   *    - Never use "WEI" alone as a standalone mark without "SHILIAI".
+   * =========================================================================
    */
   variant?: BrandVariant;
   colorScheme?: BrandColorScheme;
+  format?: BrandFormat;
   height?: number;
   className?: string;
   onClick?: () => void;
@@ -24,77 +40,115 @@ export interface ShiliaiweiBrandProps {
 
 /**
  * Official SHILIAIWEI Brand Component (LinkedIn style: SHILIAI [WEI])
- *
- * RULES:
- * 1. Full word logo: "SHILIAI" + "[WEI]" badge. Never use "WEI" alone.
- * 2. Logo and text brand never display at the same time in the same place.
  */
 export const ShiliaiweiBrand: React.FC<ShiliaiweiBrandProps> = ({
   colorScheme = "blue",
-  height = 28,
+  format = "inline",
+  height = 24,
   className = "",
   onClick,
 }) => {
   const isWhite = colorScheme === "white";
   const isDark = colorScheme === "dark";
 
-  // Colors
+  // Brand Palette
   const textColor = isWhite ? "#ffffff" : isDark ? "#0f172a" : "#0098ea";
   const badgeBg = isWhite ? "#ffffff" : "#0098ea";
   const badgeTextColor = isWhite ? "#0077b5" : "#ffffff";
 
-  // Aspect ratio: 165 x 36
-  const width = Math.round(height * 4.58);
+  // For SVG format (Android Vector / Canvas exports)
+  if (format === "svg") {
+    // Exact tight vector coordinates: 122 x 32
+    const width = Math.round(height * 3.81);
+    return (
+      <svg
+        width={width}
+        height={height}
+        viewBox="0 0 122 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className={`inline-block flex-shrink-0 select-none whitespace-nowrap ${className}`}
+        onClick={onClick}
+        aria-label="SHILIAIWEI"
+        role="img"
+      >
+        <text
+          x="0"
+          y="24"
+          fill={textColor}
+          fontSize="24"
+          fontFamily="system-ui, -apple-system, 'SF Pro Display', Roboto, sans-serif"
+          fontWeight="900"
+          letterSpacing="-0.03em"
+          textLength="72"
+          lengthAdjust="spacingAndGlyphs"
+        >
+          SHILIAI
+        </text>
+        <rect x="75" y="4" width="44" height="23" rx="6" fill={badgeBg} />
+        <text
+          x="97"
+          y="21"
+          textAnchor="middle"
+          fill={badgeTextColor}
+          fontSize="14"
+          fontFamily="system-ui, -apple-system, 'SF Pro Display', Roboto, sans-serif"
+          fontWeight="900"
+          letterSpacing="-0.01em"
+        >
+          WEI
+        </text>
+      </svg>
+    );
+  }
+
+  // Default Inline-Flex Layout: Zero font-metric drift, tight 2px gap, 100% one-line
+  const fontSizeText = Math.round(height * 0.92);
+  const fontSizeBadge = Math.round(height * 0.52);
+  const badgeHeight = Math.round(height * 0.84);
+  const badgePaddingX = Math.max(4, Math.round(height * 0.22));
+  const badgeRadius = Math.max(3, Math.round(height * 0.2));
+  const badgeMarginLeft = Math.max(2, Math.round(height * 0.1));
 
   return (
-    <svg
-      width={width}
-      height={height}
-      viewBox="0 0 165 36"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={`inline-block flex-shrink-0 select-none ${className}`}
+    <span
+      className={`inline-flex items-center flex-shrink-0 select-none whitespace-nowrap align-middle leading-none ${className}`}
+      style={{ height: `${height}px`, verticalAlign: "middle" }}
       onClick={onClick}
       aria-label="SHILIAIWEI"
       role="img"
     >
-      {/* 1. SHILIAI - Heavy Bold Sans-Serif Capital Text */}
-      <text
-        x="2"
-        y="27"
-        fill={textColor}
-        fontSize="26"
-        fontFamily="system-ui, -apple-system, 'SF Pro Display', Roboto, sans-serif"
-        fontWeight="900"
-        letterSpacing="-0.02em"
+      <span
+        style={{
+          fontSize: `${fontSizeText}px`,
+          color: textColor,
+          fontWeight: 900,
+          fontFamily: "system-ui, -apple-system, 'SF Pro Display', Roboto, sans-serif",
+          letterSpacing: "-0.03em",
+          lineHeight: 1,
+        }}
       >
         SHILIAI
-      </text>
-
-      {/* 2. [WEI] - Rounded Rectangle Badge (LinkedIn-style [in]) */}
-      <rect
-        x="110"
-        y="6"
-        width="50"
-        height="24"
-        rx="6"
-        fill={badgeBg}
-      />
-
-      {/* 3. WEI - Centered Bold Text inside Badge */}
-      <text
-        x="135"
-        y="24"
-        textAnchor="middle"
-        fill={badgeTextColor}
-        fontSize="15"
-        fontFamily="system-ui, -apple-system, 'SF Pro Display', Roboto, sans-serif"
-        fontWeight="900"
-        letterSpacing="-0.01em"
+      </span>
+      <span
+        style={{
+          backgroundColor: badgeBg,
+          color: badgeTextColor,
+          fontSize: `${fontSizeBadge}px`,
+          fontWeight: 900,
+          fontFamily: "system-ui, -apple-system, 'SF Pro Display', Roboto, sans-serif",
+          height: `${badgeHeight}px`,
+          padding: `0 ${badgePaddingX}px`,
+          borderRadius: `${badgeRadius}px`,
+          marginLeft: `${badgeMarginLeft}px`,
+          letterSpacing: "-0.01em",
+          lineHeight: 1,
+        }}
+        className="inline-flex items-center justify-center flex-shrink-0"
       >
         WEI
-      </text>
-    </svg>
+      </span>
+    </span>
   );
 };
 
