@@ -2,8 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
-import { WinGramHeader } from "@/components/navigation/WinGramHeader";
-import { CategoryBar, NavCategory } from "@/components/navigation/CategoryBar";
+import { NavCategory } from "@/components/navigation/CategoryBar";
 import { GameDock, GameTab } from "@/components/dock/GameDock";
 import { TapGameView } from "@/components/views/TapGameView";
 import { EarnTasksView } from "@/components/views/EarnTasksView";
@@ -367,21 +366,6 @@ export default function MiniAppPage() {
     <div className="min-h-dvh flex flex-col justify-between app-bg-white text-slate-900 select-none overflow-x-hidden font-body relative">
       {/* Vector Guilloche Banknote Security Mesh from background.svg */}
       <div className="fixed inset-0 bg-app-guilloche opacity-[0.06] pointer-events-none z-0" />
-
-      {/* 1. WinGram Style Top Navigation Header */}
-      <WinGramHeader
-        score={score}
-        user={user}
-        onSelectMode={(mode) => {
-          if (mode === "lobby") handleTabChange("wallet");
-          else if (mode === "earn") handleTabChange("earn");
-        }}
-        onOpenProfile={() => {
-          setProfileSubTab("profile");
-          handleTabChange("profile");
-        }}
-        onOpenTopUp={() => setActiveTopUpScreen(true)}
-      />
 
       {/* 3. Main SPA View Switcher */}
       <main className="flex-1 w-full max-w-4xl mx-auto px-3 pt-2 pb-safe">
