@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { TelegramWebApp } from "@/types/telegram";
 import { MiniGameType } from "@/components/views/MiniGameFullView";
+import { StatsGraphCard } from "@/components/promo/StatsGraphCard";
 
 interface WinGramPromoCardsProps {
   score?: number;
@@ -15,8 +16,8 @@ interface WinGramPromoCardsProps {
 }
 
 /**
- * Scattered / Repeating Watermark Pattern of SHILIAI [WEI] Logo
- * Diagonal repeated pattern across the background of feature cards
+ * Scattered / Repeating Watermark — single word "SHILIAIWEI"
+ * Brand rule: full word only. No split. No badge alongside text.
  */
 const CardWatermarkPattern: React.FC<{ patternId: string }> = ({ patternId }) => (
   <svg
@@ -26,41 +27,29 @@ const CardWatermarkPattern: React.FC<{ patternId: string }> = ({ patternId }) =>
     <defs>
       <pattern
         id={patternId}
-        width="160"
-        height="80"
+        width="200"
+        height="70"
         patternUnits="userSpaceOnUse"
         patternTransform="rotate(-18)"
       >
-        {/* SHILIAI in Bold Text */}
+        {/* Single continuous word: SHILIAIWEI */}
         <text
           x="5"
           y="28"
           fill="white"
-          fontSize="16"
+          fontSize="15"
           fontWeight="900"
-          letterSpacing="-0.02em"
+          letterSpacing="0.04em"
           fontFamily="system-ui, -apple-system, sans-serif"
         >
-          SHILIAI
-        </text>
-        {/* [WEI] in Rounded Rectangle Badge */}
-        <rect x="76" y="13" width="34" height="20" rx="5" fill="white" />
-        <text
-          x="93"
-          y="28"
-          textAnchor="middle"
-          fill="#0077b5"
-          fontSize="11"
-          fontWeight="900"
-          fontFamily="system-ui, -apple-system, sans-serif"
-        >
-          WEI
+          SHILIAIWEI
         </text>
       </pattern>
     </defs>
     <rect width="100%" height="100%" fill={`url(#${patternId})`} />
   </svg>
 );
+
 
 export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
   score = 0,
@@ -102,32 +91,9 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
       {/* Main Cards Grid (Left Hero Card + Right 2x2 Mini Game Blocks) */}
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
         {/* ======================================================== */}
-        {/* 1. HERO CARD (Title at top, Total Score at bottom-left)  */}
+        {/* 1. HERO CARD — Real-time Vault Stats Graph (Recharts)    */}
         {/* ======================================================== */}
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={handleHeroClick}
-          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleHeroClick()}
-          className="sm:col-span-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-4 text-white shadow-xs flex flex-col justify-between min-h-[140px] sm:min-h-[238px] border border-blue-400/30 cursor-pointer active:scale-98 transition-all hover:shadow-md group text-left"
-        >
-          {/* Scattered / Repeating SHILIAI [WEI] Logo Watermark */}
-          <CardWatermarkPattern patternId="wm-hero" />
-
-          {/* Top: Title Page (Replaces top logo) */}
-          <div className="relative z-10 text-left">
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white whitespace-nowrap truncate block">
-              Sports Bet
-            </h2>
-          </div>
-
-          {/* Bottom Left: Total score owner collected (no signs, just number of stats) */}
-          <div className="relative z-10 text-left mt-auto">
-            <span className="text-2xl sm:text-4xl font-black text-yellow-300 font-mono block leading-none">
-              {score.toLocaleString()}
-            </span>
-          </div>
-        </div>
+        <StatsGraphCard score={score} onClick={handleHeroClick} />
 
         {/* ======================================================== */}
         {/* 2. 2x2 MINI GAME BLOCKS (Title top, Stats number bottom)  */}
@@ -233,6 +199,47 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             <div className="relative z-10 text-left mt-auto">
               <span className="text-lg sm:text-xl font-black text-yellow-300 font-mono block leading-none">
                 25
+              </span>
+            </div>
+          </div>
+          {/* Card 5: Number Match */}
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => handleLaunchGame("number-match")}
+            onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleLaunchGame("number-match")}
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all hover:shadow-md group text-left"
+          >
+            <CardWatermarkPattern patternId="wm-nmatch" />
+            <div className="relative z-10 text-left">
+              <h3 className="text-sm sm:text-base font-black tracking-tight text-white whitespace-nowrap truncate block">
+                Num Match
+              </h3>
+            </div>
+            <div className="relative z-10 text-left mt-auto">
+              <span className="text-lg sm:text-xl font-black text-yellow-300 font-mono block leading-none">
+                50
+              </span>
+            </div>
+          </div>
+
+          {/* Card 6: Flip Card */}
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => handleLaunchGame("flip-card")}
+            onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleLaunchGame("flip-card")}
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all hover:shadow-md group text-left"
+          >
+            <CardWatermarkPattern patternId="wm-flip" />
+            <div className="relative z-10 text-left">
+              <h3 className="text-sm sm:text-base font-black tracking-tight text-white whitespace-nowrap truncate block">
+                Flip Card
+              </h3>
+            </div>
+            <div className="relative z-10 text-left mt-auto">
+              <span className="text-lg sm:text-xl font-black text-yellow-300 font-mono block leading-none">
+                60
               </span>
             </div>
           </div>

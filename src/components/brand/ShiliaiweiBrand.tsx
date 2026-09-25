@@ -7,9 +7,9 @@ export type BrandColorScheme = "blue" | "white" | "dark";
 
 export interface ShiliaiweiBrandProps {
   /**
-   * Brand Asset Mutual Exclusivity:
-   * - "wordmark": Brand name only (SHILIAI [WEI]). Zero logo icon.
-   * - "mark": Logo badge only ([WEI] or emblem). Zero brand text.
+   * Brand Asset Mutual Exclusivity (RULE: logo mark and brand text name NEVER appear together):
+   * - "wordmark": Renders "SHILIAIWEI" as ONE continuous word. Zero logo icon.
+   * - "mark":     Renders pure geometric emblem only. Zero text of any kind.
    */
   variant?: BrandVariant;
   colorScheme?: BrandColorScheme;
@@ -20,8 +20,12 @@ export interface ShiliaiweiBrandProps {
 
 /**
  * Official SHILIAIWEI Brand Component
- * Strictly enforces Brand Asset Mutual Exclusivity Rule:
- * Never displays logo mark and brand text name simultaneously.
+ *
+ * BRAND RULES (strictly enforced):
+ * 1. Full word only: "SHILIAIWEI" — never split as "SHILIAI" + "WEI"
+ * 2. Mark only OR wordmark only — never both in the same place
+ * 3. If using logo mark → zero brand text name alongside it
+ * 4. If using text wordmark → zero logo icon alongside it
  */
 export const ShiliaiweiBrand: React.FC<ShiliaiweiBrandProps> = ({
   variant = "wordmark",
@@ -37,18 +41,8 @@ export const ShiliaiweiBrand: React.FC<ShiliaiweiBrandProps> = ({
       ? "#0f172a"
       : "#0098ea";
 
-  const badgeTextColor =
-    colorScheme === "white"
-      ? "#0098ea"
-      : "#ffffff";
-
-  const badgeBgColor =
-    colorScheme === "white"
-      ? "#ffffff"
-      : primaryColor;
-
+  /* ── MODE 1: MARK — Pure geometric emblem. ZERO text. ── */
   if (variant === "mark") {
-    // Mode 1: Logo Mark Only (Zero Brand Text Name)
     const size = height;
     return (
       <svg
@@ -59,44 +53,26 @@ export const ShiliaiweiBrand: React.FC<ShiliaiweiBrandProps> = ({
         xmlns="http://www.w3.org/2000/svg"
         className={`inline-block flex-shrink-0 select-none ${className}`}
         onClick={onClick}
-        aria-label="SHILIAIWEI Logo Mark"
+        aria-label="SHILIAIWEI Mark"
         role="img"
       >
-        {/* Solid Rounded Badge Container */}
-        <rect
-          x="2"
-          y="2"
-          width="44"
-          height="44"
-          rx="11"
-          fill={badgeBgColor}
-        />
-        {/* White Monogram WEI Core */}
-        <text
-          x="24"
-          y="32"
-          textAnchor="middle"
-          fill={badgeTextColor}
-          fontSize="20"
-          fontFamily="system-ui, -apple-system, 'SF Pro Display', Roboto, sans-serif"
-          fontWeight="900"
-          letterSpacing="-0.03em"
-        >
-          WEI
-        </text>
+        <rect x="2" y="2" width="44" height="44" rx="11" fill={primaryColor} />
+        {/* Three geometric bars — brand emblem, no text */}
+        <rect x="12" y="11" width="24" height="6" rx="3" fill="white" />
+        <rect x="17" y="21" width="19" height="6" rx="3" fill="white" />
+        <rect x="12" y="31" width="24" height="6" rx="3" fill="white" />
       </svg>
     );
   }
 
-  // Mode 2: Brand Name Only / Wordmark (Zero Logo Icon)
-  // Calculates width based on standard 4.4 : 1 aspect ratio
-  const width = Math.round(height * 4.4);
+  /* ── MODE 2: WORDMARK — "SHILIAIWEI" as one continuous word. ZERO icon. ── */
+  const width = Math.round(height * 5.8);
 
   return (
     <svg
       width={width}
       height={height}
-      viewBox="0 0 220 50"
+      viewBox="0 0 290 50"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={`inline-block flex-shrink-0 select-none ${className}`}
@@ -104,41 +80,16 @@ export const ShiliaiweiBrand: React.FC<ShiliaiweiBrandProps> = ({
       aria-label="SHILIAIWEI"
       role="img"
     >
-      {/* SHILIAI Base Text */}
       <text
         x="2"
-        y="37"
+        y="39"
         fill={primaryColor}
-        fontSize="36"
+        fontSize="38"
         fontFamily="system-ui, -apple-system, 'SF Pro Display', Roboto, sans-serif"
         fontWeight="900"
-        letterSpacing="0.02em"
+        letterSpacing="-0.01em"
       >
-        SHILIAI
-      </text>
-
-      {/* WEI Solid Badge Block */}
-      <rect
-        x="146"
-        y="6"
-        width="70"
-        height="39"
-        rx="8"
-        fill={badgeBgColor}
-      />
-
-      {/* WEI Inverted Text */}
-      <text
-        x="181"
-        y="36"
-        textAnchor="middle"
-        fill={badgeTextColor}
-        fontSize="31"
-        fontFamily="system-ui, -apple-system, 'SF Pro Display', Roboto, sans-serif"
-        fontWeight="900"
-        letterSpacing="0.04em"
-      >
-        WEI
+        SHILIAIWEI
       </text>
     </svg>
   );

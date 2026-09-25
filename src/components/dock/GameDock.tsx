@@ -155,7 +155,7 @@ export const GameDock: React.FC<GameDockProps> = ({
                 <User size={19} className="text-slate-500 group-hover:text-slate-900" />
               )}
               <span className="text-[10px] mt-0.5 tracking-tight font-bold text-slate-500 group-hover:text-slate-900 leading-none">
-                Settings
+                Profile
               </span>
             </div>
           )}

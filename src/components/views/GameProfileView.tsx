@@ -1,29 +1,31 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
-import { LevelCircleProfile } from "@/components/common/LevelCircleProfile";
-import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 import {
   ChevronLeft,
+  ChevronRight,
   Copy,
   Check,
-  ChevronDown,
-  Send,
-  ShieldCheck,
   Timer,
   RefreshCw,
   Zap,
   Repeat,
   Wallet,
   Coins,
+  ShieldCheck,
+  Send,
   Sparkles,
-  ArrowUpRight,
-  Eye,
-  EyeOff,
   User,
+  Bell,
+  Gift,
 } from "@/components/icons/KeylineIcons";
+import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 
+/* ──────────────────────────────────────────────────────────── */
+/* Types                                                        */
+/* ──────────────────────────────────────────────────────────── */
 interface AuditLogEntry {
   id: number;
   telegram_id: number | string;
@@ -38,6 +40,8 @@ interface AuditLogEntry {
 export type ProfileSubTab = "profile" | "swap" | "security" | "audit";
 export type CurrencyType = "PTS" | "USD" | "KHR";
 
+type InnerView = "main" | "edit" | "swap" | "security" | "audit" | "notifications" | "wallet-detail";
+
 interface GameProfileViewProps {
   user: TelegramUser | null;
   tgApp: TelegramWebApp | null;
@@ -50,903 +54,551 @@ interface GameProfileViewProps {
   onBack?: () => void;
 }
 
+const fmtTime = (s: number) => {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m`;
+  return `${s}s`;
+};
+
+const ProfileWatermark: React.FC = () => (
+  <svg
+    className="absolute inset-0 w-full h-full pointer-events-none select-none opacity-[0.055]"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      <pattern id="pm-wm" width="200" height="70" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)">
+        {/* Single continuous word: SHILIAIWEI — no split, no badge */}
+        <text x="5" y="28" fill="#0098ea" fontSize="15" fontWeight="900" letterSpacing="0.04em" fontFamily="system-ui,-apple-system,sans-serif">SHILIAIWEI</text>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#pm-wm)" />
+  </svg>
+);
+
+const ProfileAvatar: React.FC<{ user: TelegramUser | null; size?: number }> = ({ user, size = 64 }) => {
+  if (user?.photo_url) {
+    return (
+      <div className="rounded-full overflow-hidden border-[3px] border-white shadow-lg flex-shrink-0" style={{ width: size, height: size }}>
+        <Image src={user.photo_url} alt="avatar" width={size} height={size} className="w-full h-full object-cover" unoptimized />
+      </div>
+    );
+  }
+  const initials = `${user?.first_name?.[0] || "S"}${user?.last_name?.[0] || "W"}`;
+  return (
+    <div className="rounded-full border-[3px] border-white shadow-lg bg-gradient-to-br from-[#0098ea] to-[#005f99] flex items-center justify-center flex-shrink-0" style={{ width: size, height: size }}>
+      <span className="text-white font-black" style={{ fontSize: size * 0.35 }}>{initials}</span>
+    </div>
+  );
+};
+
+const StatCell: React.FC<{ value: string | number; label: string }> = ({ value, label }) => (
+  <div className="flex flex-col items-center justify-center gap-0.5 flex-1 py-3">
+    <span className="text-lg font-black text-slate-900 leading-none">{value}</span>
+    <span className="text-[11px] text-slate-500 font-semibold leading-none">{label}</span>
+  </div>
+);
+
+const QuickAction: React.FC<{ icon: React.ReactNode; label: string; onClick: () => void; accent?: boolean }> = ({ icon, label, onClick, accent }) => (
+  <button type="button" onClick={onClick} className="flex flex-col items-center gap-1.5 cursor-pointer active:scale-95 transition-all group">
+    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all group-hover:shadow-md ${accent ? "bg-gradient-to-br from-[#0098ea] to-[#005f99] border-blue-400/30 text-white shadow-sm shadow-blue-500/20" : "bg-white border-slate-200/80 text-slate-700 shadow-sm group-hover:border-[#0098ea]/30"}`}>
+      {icon}
+    </div>
+    <span className="text-[11px] font-bold text-slate-600 leading-tight text-center">{label}</span>
+  </button>
+);
+
+const TaskRow: React.FC<{ title: string; sub: string; badge?: React.ReactNode; right?: React.ReactNode; onClick?: () => void }> = ({ title, sub, badge, right, onClick }) => (
+  <button type="button" onClick={onClick} className="flex items-center justify-between w-full py-3 px-3 cursor-pointer active:bg-slate-50 rounded-xl transition-colors text-left">
+    <div className="flex items-center gap-3">
+      {badge && (
+        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] flex items-center justify-center shadow-sm flex-shrink-0">
+          {badge}
+        </div>
+      )}
+      <div>
+        <p className="text-sm font-black text-slate-900 leading-tight">{title}</p>
+        <p className="text-xs text-[#0098ea] font-semibold leading-tight mt-0.5">{sub}</p>
+      </div>
+    </div>
+    {right && <div className="flex-shrink-0">{right}</div>}
+  </button>
+);
+
+const MenuRow: React.FC<{ icon: React.ReactNode; title: string; sub?: string; onClick: () => void; danger?: boolean }> = ({ icon, title, sub, onClick, danger }) => (
+  <button type="button" onClick={onClick} className="flex items-center justify-between w-full py-3 px-1 cursor-pointer active:bg-slate-50 rounded-xl transition-colors">
+    <div className="flex items-center gap-3">
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${danger ? "bg-rose-50 border-rose-200 text-rose-500" : "bg-slate-50 border-slate-200/80 text-slate-700"}`}>
+        {icon}
+      </div>
+      <div className="text-left">
+        <p className={`text-sm font-bold leading-tight ${danger ? "text-rose-600" : "text-slate-900"}`}>{title}</p>
+        {sub && <p className="text-[11px] text-slate-400 font-medium leading-tight">{sub}</p>}
+      </div>
+    </div>
+    <ChevronRight size={16} className="text-slate-400" />
+  </button>
+);
+
+const BackHeader: React.FC<{ title: string; onBack: () => void; right?: React.ReactNode }> = ({ title, onBack, right }) => (
+  <div className="flex items-center justify-between py-2 border-b border-slate-200/80 mb-4">
+    <button type="button" onClick={onBack} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs shadow-2xs active:scale-95 transition-all cursor-pointer">
+      <ChevronLeft size={16} className="text-[#0098ea]" />
+      <span>Back</span>
+    </button>
+    <span className="text-sm font-black text-slate-900">{title}</span>
+    <div className="w-16 flex justify-end">{right}</div>
+  </div>
+);
+
 export const GameProfileView: React.FC<GameProfileViewProps> = ({
   user,
   tgApp,
   score,
   spendSeconds,
-  initialSubTab = "profile",
+  tapPower = 1,
+  passiveRate = 0,
   onSetScore,
   onBack,
 }) => {
-  const [subTab, setSubTab] = useState<ProfileSubTab>(initialSubTab);
+  const [view, setView] = useState<InnerView>("main");
   const [copiedId, setCopiedId] = useState(false);
   const [copiedWallet, setCopiedWallet] = useState(false);
-
-  // Form State (Editable Profile Config)
-  const [firstName, setFirstName] = useState(user?.first_name || "");
-  const [lastName, setLastName] = useState(user?.last_name || "");
-  const [usernameInput, setUsernameInput] = useState(user?.username || "");
   const [bio, setBio] = useState("SHILIAIWEI Web3 Vault Member");
-  const [dob, setDob] = useState("2000-01-01");
-  const [gender, setGender] = useState("Male");
   const [savedSuccess, setSavedSuccess] = useState(false);
-
-  // Telegram Settings & Config State (Preferences)
-  const [hapticsEnabled, setHapticsEnabled] = useState(true);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [hideBalancesDefault, setHideBalancesDefault] = useState(false);
-  const [cloudSyncEnabled, setCloudSyncEnabled] = useState(true);
-  const [cacheCleared, setCacheCleared] = useState(false);
-
-  // Embedded DEX Swap State
   const [fromCurrency, setFromCurrency] = useState<CurrencyType>("PTS");
   const [toCurrency, setToCurrency] = useState<CurrencyType>("USD");
-  const [inputAmount, setInputAmount] = useState<string>("100");
+  const [inputAmount, setInputAmount] = useState("100");
   const [swapSuccess, setSwapSuccess] = useState<string | null>(null);
-
-  // Audit Logs State
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [loadingAudit, setLoadingAudit] = useState(false);
+  const [hapticsEnabled, setHapticsEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
-  const telegramUsername = user?.username ? `@${user.username}` : user?.first_name || "shiliaiwei";
-  const playerId = user?.id ? String(user.id) : "a50caa57";
+  const displayName = [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "SHILIAIWEI";
+  const handle = user?.username ? `@${user.username}` : `@uid_${user?.id || "0"}`;
+  const playerId = user?.id ? String(user.id) : "--------";
   const walletAddress = user?.id
     ? `shi_0x${Number(user.id).toString(16).padStart(8, "0")}...${String(user.id).slice(-4)}`
     : "shi_0x78a19bc3...82f1";
+  const usdValue = (score / 100).toFixed(2);
+  const khrValue = Math.floor(score * 41).toLocaleString();
 
-  // Load preferences from localStorage
+  const swapConvertedAmount = () => {
+    const amt = parseFloat(inputAmount) || 0;
+    if (fromCurrency === "PTS" && toCurrency === "USD") return `$${(amt / 100).toFixed(2)}`;
+    if (fromCurrency === "PTS" && toCurrency === "KHR") return `${Math.floor(amt * 41).toLocaleString()} ៛`;
+    if (fromCurrency === "USD" && toCurrency === "PTS") return `${(amt * 100).toFixed(0)} PTS`;
+    if (fromCurrency === "KHR" && toCurrency === "PTS") return `${(amt / 41).toFixed(0)} PTS`;
+    return `${amt} ${toCurrency}`;
+  };
+
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedHaptics = localStorage.getItem("shi_pref_haptics");
-      if (savedHaptics !== null) setHapticsEnabled(savedHaptics === "true");
-
-      const savedSound = localStorage.getItem("shi_pref_sound");
-      if (savedSound !== null) setSoundEnabled(savedSound === "true");
-
-      const savedHide = localStorage.getItem("shi_pref_hide_balances");
-      if (savedHide !== null) setHideBalancesDefault(savedHide === "true");
-
-      const savedSync = localStorage.getItem("shi_pref_cloud_sync");
-      if (savedSync !== null) setCloudSyncEnabled(savedSync === "true");
-
-      const savedBio = localStorage.getItem("shi_profile_bio");
-      if (savedBio) setBio(savedBio);
-
-      const savedFirst = localStorage.getItem("shi_profile_first_name");
-      if (savedFirst) setFirstName(savedFirst);
-
-      const savedLast = localStorage.getItem("shi_profile_last_name");
-      if (savedLast) setLastName(savedLast);
-    }
+    if (typeof window === "undefined") return;
+    const h = localStorage.getItem("shi_pref_haptics");
+    if (h !== null) setHapticsEnabled(h === "true");
+    const s = localStorage.getItem("shi_pref_sound");
+    if (s !== null) setSoundEnabled(s === "true");
+    const b = localStorage.getItem("shi_profile_bio");
+    if (b) setBio(b);
   }, []);
 
-  // Real client platform data from Telegram WebApp SDK
-  const realPlatform = tgApp?.platform
-    ? tgApp.platform.toUpperCase()
-    : typeof navigator !== "undefined"
-    ? (navigator.platform || "CLIENT").toUpperCase()
-    : "TELEGRAM";
-
-  const realLanguage = (
-    user?.language_code ||
-    (typeof navigator !== "undefined" ? navigator.language : "en")
-  ).toUpperCase();
-
-  const formatSessionTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}m ${s}s active`;
-  };
-
-  const handleCopyId = () => {
-    navigator.clipboard.writeText(playerId);
-    setCopiedId(true);
-    try {
-      tgApp?.HapticFeedback?.notificationOccurred("success");
-    } catch {}
-    setTimeout(() => setCopiedId(false), 2000);
-  };
-
-  const handleCopyWallet = () => {
-    navigator.clipboard.writeText(walletAddress);
-    setCopiedWallet(true);
-    try {
-      tgApp?.HapticFeedback?.notificationOccurred("success");
-    } catch {}
-    setTimeout(() => setCopiedWallet(false), 2000);
-  };
-
-  const handleSaveProfile = () => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("shi_profile_first_name", firstName);
-      localStorage.setItem("shi_profile_last_name", lastName);
-      localStorage.setItem("shi_profile_bio", bio);
-    }
-    try {
-      tgApp?.HapticFeedback?.notificationOccurred("success");
-    } catch {}
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 2500);
-  };
-
-  const handleToggleHaptics = () => {
-    const next = !hapticsEnabled;
-    setHapticsEnabled(next);
-    if (typeof window !== "undefined") localStorage.setItem("shi_pref_haptics", String(next));
-    if (next) {
-      try {
-        tgApp?.HapticFeedback?.impactOccurred("medium");
-      } catch {}
-    }
-  };
-
-  const handleToggleSound = () => {
-    const next = !soundEnabled;
-    setSoundEnabled(next);
-    if (typeof window !== "undefined") localStorage.setItem("shi_pref_sound", String(next));
-    try {
-      tgApp?.HapticFeedback?.selectionChanged();
-    } catch {}
-  };
-
-  const handleToggleHideBalances = () => {
-    const next = !hideBalancesDefault;
-    setHideBalancesDefault(next);
-    if (typeof window !== "undefined") localStorage.setItem("shi_pref_hide_balances", String(next));
-    try {
-      tgApp?.HapticFeedback?.selectionChanged();
-    } catch {}
-  };
-
-  const handleToggleCloudSync = () => {
-    const next = !cloudSyncEnabled;
-    setCloudSyncEnabled(next);
-    if (typeof window !== "undefined") localStorage.setItem("shi_pref_cloud_sync", String(next));
-    try {
-      tgApp?.HapticFeedback?.selectionChanged();
-    } catch {}
-  };
-
-  const handleClearCache = () => {
-    try {
-      sessionStorage.clear();
-      tgApp?.HapticFeedback?.notificationOccurred("success");
-    } catch {}
-    setCacheCleared(true);
-    setTimeout(() => setCacheCleared(false), 2000);
-  };
-
-  // Embedded DEX Swap Calculations (100 PTS = $1.00 USD = 4,100 KHR)
-  const getOutputAmount = (amount: number, from: CurrencyType, to: CurrencyType): number => {
-    if (from === to) return amount;
-    let pts = 0;
-    if (from === "PTS") pts = amount;
-    else if (from === "USD") pts = amount * 100;
-    else if (from === "KHR") pts = amount / 41;
-
-    if (to === "PTS") return pts;
-    if (to === "USD") return pts / 100;
-    if (to === "KHR") return pts * 41;
-    return 0;
-  };
-
-  const getAvailableBalance = (curr: CurrencyType): number => {
-    if (curr === "PTS") return score;
-    if (curr === "USD") return score / 100;
-    if (curr === "KHR") return Math.floor(score * 41);
-    return 0;
-  };
-
-  const currentAvailable = getAvailableBalance(fromCurrency);
-  const parsedInput = parseFloat(inputAmount) || 0;
-  const calculatedOutput = getOutputAmount(parsedInput, fromCurrency, toCurrency);
-
-  const handleFlipSwap = () => {
-    try {
-      tgApp?.HapticFeedback?.selectionChanged();
-    } catch {}
-    setFromCurrency(toCurrency);
-    setToCurrency(fromCurrency);
-  };
-
-  const handleQuickPercent = (pct: number) => {
-    const calculated = (currentAvailable * pct) / 100;
-    setInputAmount(
-      calculated > 0
-        ? fromCurrency === "KHR" || fromCurrency === "PTS"
-          ? Math.floor(calculated).toString()
-          : calculated.toFixed(2)
-        : "0"
-    );
-  };
-
-  const handleExecuteSwap = async () => {
-    if (parsedInput <= 0 || parsedInput > currentAvailable) return;
-
-    let pointsSpent = 0;
-    if (fromCurrency === "PTS") pointsSpent = parsedInput;
-    else if (fromCurrency === "USD") pointsSpent = parsedInput * 100;
-    else if (fromCurrency === "KHR") pointsSpent = parsedInput / 41;
-
-    let pointsGained = 0;
-    if (toCurrency === "PTS") pointsGained = calculatedOutput;
-    else if (toCurrency === "USD") pointsGained = calculatedOutput * 100;
-    else if (toCurrency === "KHR") pointsGained = calculatedOutput / 41;
-
-    const newScore = Math.max(0, Math.round(score - pointsSpent + pointsGained));
-    onSetScore?.(newScore);
-
-    const outputText =
-      toCurrency === "KHR"
-        ? `${Math.floor(calculatedOutput).toLocaleString()} KHR`
-        : toCurrency === "USD"
-        ? `$${calculatedOutput.toFixed(2)} USD`
-        : `${Math.round(calculatedOutput).toLocaleString()} PTS`;
-
-    setSwapSuccess(`Exchanged to ${outputText}!`);
-    try {
-      tgApp?.HapticFeedback?.notificationOccurred("success");
-    } catch {}
-
-    // Record swap in Neon DB audit log
-    if (user?.id) {
-      try {
-        await fetch("/api/audit/log", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            telegram_id: user.id,
-            action: "CURRENCY_SWAP",
-            details: `Swapped ${inputAmount} ${fromCurrency} -> ${outputText}`,
-            platform: tgApp?.platform || "SETTINGS_DEX",
-          }),
-        });
-      } catch {}
-    }
-
-    setTimeout(() => {
-      setSwapSuccess(null);
-      setInputAmount("100");
-    }, 3000);
-  };
-
-  // Fetch Login Audit from Neon Database
   const fetchAuditLogs = useCallback(async () => {
-    if (!user?.id) {
-      setAuditLogs([
-        {
-          id: 1,
-          telegram_id: "preview_user",
-          action: "LOGIN",
-          ip_address: "127.0.0.1",
-          platform: realPlatform,
-          city_country: "Phnom Penh, Cambodia",
-          details: "Authenticated via Telegram WebApp Client Session",
-          created_at: new Date().toISOString(),
-        },
-      ]);
-      return;
-    }
-
+    if (!user?.id) return;
     setLoadingAudit(true);
     try {
-      const res = await fetch(`/api/audit/list?telegram_id=${user.id}`);
+      const res = await fetch(`/api/audit/log?telegram_id=${user.id}&limit=20`);
       const data = await res.json();
-      if (data && data.logs) {
-        setAuditLogs(data.logs);
-      }
-    } catch (err) {
-      console.error("Failed to load audit logs:", err);
-    } finally {
-      setLoadingAudit(false);
-    }
-  }, [user?.id, realPlatform]);
+      if (Array.isArray(data?.logs)) setAuditLogs(data.logs);
+    } catch {}
+    setLoadingAudit(false);
+  }, [user?.id]);
 
-  useEffect(() => {
-    if (subTab === "audit") {
-      fetchAuditLogs();
-    }
-  }, [subTab, fetchAuditLogs]);
+  const copyToClipboard = (text: string, setter: (v: boolean) => void) => {
+    navigator.clipboard?.writeText(text).catch(() => {});
+    setter(true);
+    setTimeout(() => setter(false), 1800);
+    try { tgApp?.HapticFeedback?.notificationOccurred("success"); } catch {}
+  };
 
-  return (
-    <div className="space-y-3.5 pb-28 select-none font-body text-slate-900 max-w-xl mx-auto w-full px-1">
-      {/* Top Header with Back Arrow */}
-      <div className="flex items-center gap-3 pt-1">
-        <button
-          type="button"
-          onClick={onBack}
-          aria-label="Back to main vault"
-          className="w-10 h-10 rounded-full bg-white hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 hover:text-slate-900 transition-colors shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <div>
-          <h1 className="text-lg font-black tracking-tight text-slate-900 font-sans leading-tight">
-            Telegram Settings & Profile
-          </h1>
-          <span className="text-[11px] text-slate-500 font-medium block">
-            Account Preferences, Currency Swap & Security
-          </span>
+  const handleSaveBio = () => {
+    localStorage.setItem("shi_profile_bio", bio);
+    setSavedSuccess(true);
+    setTimeout(() => setSavedSuccess(false), 2000);
+    try { tgApp?.HapticFeedback?.notificationOccurred("success"); } catch {}
+  };
+
+  const handleSwapConfirm = () => {
+    const out = swapConvertedAmount();
+    setSwapSuccess(out);
+    setTimeout(() => setSwapSuccess(null), 3000);
+    try { tgApp?.HapticFeedback?.notificationOccurred("success"); } catch {}
+  };
+
+  /* ── SWAP ── */
+  if (view === "swap") {
+    return (
+      <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
+        <BackHeader title="Token Swap" onBack={() => setView("main")} />
+        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+          <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">SHILIAIWEI DEX — CONVERT</span>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">From</label>
+            <div className="flex gap-2">
+              {(["PTS", "USD", "KHR"] as CurrencyType[]).map((c) => (
+                <button key={c} type="button" onClick={() => setFromCurrency(c)}
+                  className={`flex-1 py-2 rounded-xl text-xs font-black border transition-all cursor-pointer ${fromCurrency === c ? "bg-[#0098ea] text-white border-[#0098ea] shadow-sm" : "bg-slate-50 text-slate-700 border-slate-200"}`}>
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Amount</label>
+            <input type="number" value={inputAmount} onChange={(e) => setInputAmount(e.target.value)}
+              className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-900 font-black text-lg focus:outline-none focus:border-[#0098ea] focus:bg-white transition-colors" placeholder="100" />
+          </div>
+          <div className="flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
+              <Repeat size={16} className="text-[#0098ea]" />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">To</label>
+            <div className="flex gap-2">
+              {(["PTS", "USD", "KHR"] as CurrencyType[]).map((c) => (
+                <button key={c} type="button" onClick={() => setToCurrency(c)}
+                  className={`flex-1 py-2 rounded-xl text-xs font-black border transition-all cursor-pointer ${toCurrency === c ? "bg-emerald-500 text-white border-emerald-500 shadow-sm" : "bg-slate-50 text-slate-700 border-slate-200"}`}>
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+            <span className="text-xs text-slate-500 font-medium block mb-0.5">You receive</span>
+            <span className="text-2xl font-black text-slate-900">{swapConvertedAmount()}</span>
+          </div>
+          {swapSuccess && (
+            <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold text-center animate-fadeIn">
+              Swap success — received {swapSuccess}
+            </div>
+          )}
+          <button type="button" onClick={handleSwapConfirm}
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#0088cc] to-[#0098ea] text-white font-black text-sm tracking-wide shadow-md shadow-blue-500/20 active:scale-98 transition-all cursor-pointer">
+            CONFIRM SWAP
+          </button>
         </div>
       </div>
+    );
+  }
 
-      {/* Telegram User Summary Card */}
-      <div className="liquid-glass p-3.5 flex items-center justify-between gap-3 border border-slate-200 shadow-xs">
-        <LevelCircleProfile score={score} user={user} size="md" showDetails={true} />
-
-        <button
-          type="button"
-          onClick={handleCopyId}
-          aria-label="Copy Player ID"
-          className="flex flex-col items-end text-right flex-shrink-0 cursor-pointer min-h-[44px] justify-center p-1 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea]"
-        >
-          <span className="text-[10px] text-slate-600 font-bold uppercase block">
-            ID {playerId.slice(0, 8)}
-          </span>
-          <span className="flex items-center gap-1 text-xs text-[#0077b5] hover:text-[#0088cc] mt-0.5 transition-colors font-bold">
-            {copiedId ? (
-              <>
-                <Check size={16} className="text-[#14532d]" />
-                <span className="text-[#14532d]">Copied</span>
-              </>
-            ) : (
-              <>
-                <Copy size={16} />
-                <span>Copy ID</span>
-              </>
-            )}
-          </span>
-        </button>
-      </div>
-
-      {/* Sub-Tab Navigation Bar (Telegram-Style 4 Categories) */}
-      <div className="grid grid-cols-4 gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold shadow-xs">
-        <button
-          type="button"
-          onClick={() => setSubTab("profile")}
-          className={`py-2 rounded-lg transition-all text-center min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] flex items-center justify-center gap-1 ${
-            subTab === "profile"
-              ? "bg-white text-slate-900 shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
-        >
-          <User size={15} />
-          <span>Config</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setSubTab("swap")}
-          className={`py-2 rounded-lg transition-all text-center min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] flex items-center justify-center gap-1 ${
-            subTab === "swap"
-              ? "bg-white text-slate-900 shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
-        >
-          <Repeat size={15} className="text-emerald-600" />
-          <span>Swap</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setSubTab("security")}
-          className={`py-2 rounded-lg transition-all text-center min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] flex items-center justify-center gap-1 ${
-            subTab === "security"
-              ? "bg-white text-slate-900 shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
-        >
-          <ShieldCheck size={15} className="text-blue-600" />
-          <span>Security</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setSubTab("audit")}
-          className={`py-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] ${
-            subTab === "audit"
-              ? "bg-white text-slate-900 shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
-        >
-          <Timer size={15} className="text-[#0098ea]" />
-          <span>Audit</span>
-        </button>
-      </div>
-
-      {/* 1. TELEGRAM SETTINGS & PROFILE CONFIG */}
-      {subTab === "profile" && (
-        <div className="space-y-3.5">
-          {/* Section 1: Telegram Identity & Editable Profile Fields */}
-          <div className="space-y-1.5">
-            <h2 className="text-xs font-bold text-slate-800 tracking-wide uppercase">
-              Telegram Account & Profile
-            </h2>
-            <div className="liquid-glass p-3.5 space-y-3 border border-slate-200 shadow-xs">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-[10px] text-slate-600 font-bold block mb-1">First Name</label>
-                  <input
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="First Name"
-                    className="wingram-input w-full px-3 py-2 text-xs min-h-[44px]"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-600 font-bold block mb-1">Last Name</label>
-                  <input
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Last Name"
-                    className="wingram-input w-full px-3 py-2 text-xs min-h-[44px]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[10px] text-slate-600 font-bold block mb-1">Username</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">@</span>
-                  <input
-                    type="text"
-                    value={usernameInput}
-                    onChange={(e) => setUsernameInput(e.target.value)}
-                    placeholder="username"
-                    className="wingram-input w-full pl-7 pr-3 py-2 text-xs min-h-[44px]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[10px] text-slate-600 font-bold block mb-1">Bio / Status</label>
-                <input
-                  type="text"
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Short bio or status"
-                  className="wingram-input w-full px-3 py-2 text-xs min-h-[44px]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-[10px] text-slate-600 font-bold block mb-1">Date of Birth</label>
-                  <input
-                    type="date"
-                    value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                    className="wingram-input w-full px-3 py-2 text-xs min-h-[44px]"
-                  />
-                </div>
-                <div className="relative">
-                  <label className="text-[10px] text-slate-600 font-bold block mb-1">Gender</label>
-                  <div className="relative">
-                    <select
-                      value={gender}
-                      onChange={(e) => setGender(e.target.value)}
-                      className="wingram-input w-full px-3 py-2 text-xs appearance-none pr-8 cursor-pointer min-h-[44px]"
-                    >
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                    <ChevronDown size={16} className="text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleSaveProfile}
-                className="w-full py-3 rounded-xl bg-[#0098ea] hover:bg-[#0088cc] text-white text-xs font-bold transition-all shadow-xs active:scale-98 cursor-pointer min-h-[44px]"
-              >
-                {savedSuccess ? "Saved Successfully!" : "Save Profile Details"}
-              </button>
-            </div>
-          </div>
-
-          {/* Section 2: Telegram App Preferences (Haptics, Sounds, Balances, Cloud Sync) */}
-          <div className="space-y-1.5">
-            <h2 className="text-xs font-bold text-slate-800 tracking-wide uppercase">
-              Telegram Mini-App Preferences
-            </h2>
-            <div className="liquid-glass p-3.5 space-y-3 border border-slate-200 shadow-xs divide-y divide-slate-100">
-              {/* Toggle 1: Haptic Feedback */}
-              <div className="flex items-center justify-between pt-1 first:pt-0">
-                <div>
-                  <span className="text-xs font-bold text-slate-900 block">Haptic Feedback</span>
-                  <span className="text-[10px] text-slate-500">Vibration pulses on tap and action</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleToggleHaptics}
-                  className={`w-12 h-7 rounded-full p-1 transition-colors cursor-pointer ${
-                    hapticsEnabled ? "bg-[#0098ea]" : "bg-slate-300"
-                  }`}
-                  aria-label="Toggle haptic feedback"
-                >
-                  <div
-                    className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                      hapticsEnabled ? "translate-x-5" : "translate-x-0"
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {/* Toggle 2: Sound Effects */}
-              <div className="flex items-center justify-between pt-3">
-                <div>
-                  <span className="text-xs font-bold text-slate-900 block">Sound Effects</span>
-                  <span className="text-[10px] text-slate-500">Audio feedback on minting & rewards</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleToggleSound}
-                  className={`w-12 h-7 rounded-full p-1 transition-colors cursor-pointer ${
-                    soundEnabled ? "bg-[#0098ea]" : "bg-slate-300"
-                  }`}
-                  aria-label="Toggle sound effects"
-                >
-                  <div
-                    className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                      soundEnabled ? "translate-x-5" : "translate-x-0"
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {/* Toggle 3: Hide Balances by Default */}
-              <div className="flex items-center justify-between pt-3">
-                <div>
-                  <span className="text-xs font-bold text-slate-900 block">Hide Balances</span>
-                  <span className="text-[10px] text-slate-500">Obscure monetary figures by default</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleToggleHideBalances}
-                  className={`w-12 h-7 rounded-full p-1 transition-colors cursor-pointer ${
-                    hideBalancesDefault ? "bg-[#0098ea]" : "bg-slate-300"
-                  }`}
-                  aria-label="Toggle hide balances"
-                >
-                  <div
-                    className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                      hideBalancesDefault ? "translate-x-5" : "translate-x-0"
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {/* Toggle 4: Neon Cloud Auto-Sync */}
-              <div className="flex items-center justify-between pt-3">
-                <div>
-                  <span className="text-xs font-bold text-slate-900 block">Cloud Auto-Sync</span>
-                  <span className="text-[10px] text-slate-500">Live PostgreSQL database persistence</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleToggleCloudSync}
-                  className={`w-12 h-7 rounded-full p-1 transition-colors cursor-pointer ${
-                    cloudSyncEnabled ? "bg-[#0098ea]" : "bg-slate-300"
-                  }`}
-                  aria-label="Toggle cloud sync"
-                >
-                  <div
-                    className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                      cloudSyncEnabled ? "translate-x-5" : "translate-x-0"
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Section 3: Data & Storage Settings */}
-          <div className="space-y-1.5">
-            <h2 className="text-xs font-bold text-slate-800 tracking-wide uppercase">
-              Data & Storage
-            </h2>
-            <div className="liquid-glass p-3.5 space-y-2 border border-slate-200 shadow-xs flex items-center justify-between">
-              <div>
-                <span className="text-xs font-bold text-slate-900 block">App Local Cache</span>
-                <span className="text-[10px] text-slate-500">Cached media & temporary session assets</span>
-              </div>
-              <button
-                type="button"
-                onClick={handleClearCache}
-                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-200 transition-colors cursor-pointer"
-              >
-                {cacheCleared ? "Cache Cleared!" : "Clear Cache"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 2. DEX SWAP & CURRENCY EXCHANGE (Moved into Settings as requested) */}
-      {subTab === "swap" && (
-        <div className="space-y-3.5">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-xs font-bold text-slate-900 tracking-wide flex items-center gap-1.5 uppercase">
-              <Repeat size={18} className="text-emerald-600" />
-              <span>Instant DEX & Currency Swap</span>
-            </h2>
-            <span className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
-              0% Fee
-            </span>
-          </div>
-
-          {/* Swap Box */}
-          <div className="liquid-glass p-4 space-y-3 border border-slate-200 shadow-xs">
-            {/* From Card */}
-            <div className="bg-slate-50/90 rounded-xl p-3 border border-slate-200 space-y-1.5">
-              <div className="flex items-center justify-between text-xs text-slate-600 font-bold">
-                <span>You Pay:</span>
-                <span>
-                  Available: {getAvailableBalance(fromCurrency).toLocaleString()}{" "}
-                  {fromCurrency}
-                </span>
-              </div>
-              <div className="flex items-center justify-between gap-2">
-                <input
-                  type="number"
-                  value={inputAmount}
-                  onChange={(e) => setInputAmount(e.target.value)}
-                  placeholder="0.00"
-                  className="bg-transparent text-xl font-black text-slate-900 w-full focus:outline-none"
-                />
-                <select
-                  value={fromCurrency}
-                  onChange={(e) => setFromCurrency(e.target.value as CurrencyType)}
-                  className="bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-900 cursor-pointer shadow-2xs"
-                >
-                  <option value="PTS">PTS</option>
-                  <option value="USD">USD ($)</option>
-                  <option value="KHR">KHR (៛)</option>
-                </select>
-              </div>
-
-              {/* Quick Percent Buttons */}
-              <div className="flex items-center gap-1.5 pt-1">
-                {[25, 50, 75, 100].map((pct) => (
-                  <button
-                    key={pct}
-                    type="button"
-                    onClick={() => handleQuickPercent(pct)}
-                    className="flex-1 py-1 rounded bg-white hover:bg-slate-200 border border-slate-200 text-[10px] font-bold text-slate-700 transition-colors"
-                  >
-                    {pct === 100 ? "MAX" : `${pct}%`}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Flip Button */}
-            <div className="flex justify-center -my-1">
-              <button
-                type="button"
-                onClick={handleFlipSwap}
-                aria-label="Invert currencies"
-                className="w-9 h-9 rounded-full bg-white hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 shadow-xs active:rotate-180 transition-all cursor-pointer"
-              >
-                <Repeat size={16} />
-              </button>
-            </div>
-
-            {/* To Card */}
-            <div className="bg-slate-50/90 rounded-xl p-3 border border-slate-200 space-y-1.5">
-              <div className="flex items-center justify-between text-xs text-slate-600 font-bold">
-                <span>You Receive (Estimated):</span>
-                <span>
-                  Current: {getAvailableBalance(toCurrency).toLocaleString()}{" "}
-                  {toCurrency}
-                </span>
-              </div>
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xl font-black text-emerald-600 truncate">
-                  {toCurrency === "KHR"
-                    ? Math.floor(calculatedOutput).toLocaleString()
-                    : toCurrency === "USD"
-                    ? calculatedOutput.toFixed(2)
-                    : Math.round(calculatedOutput).toLocaleString()}
-                </span>
-                <select
-                  value={toCurrency}
-                  onChange={(e) => setToCurrency(e.target.value as CurrencyType)}
-                  className="bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-900 cursor-pointer shadow-2xs"
-                >
-                  <option value="USD">USD ($)</option>
-                  <option value="KHR">KHR (៛)</option>
-                  <option value="PTS">PTS</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Exchange Rate pill */}
-            <div className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-900 flex items-center justify-between font-medium">
-              <span>Official Peg Rate:</span>
-              <span className="font-bold">100 PTS = $1.00 USD = 4,100 KHR</span>
-            </div>
-
-            {/* Success Banner */}
-            {swapSuccess && (
-              <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-300 text-xs text-emerald-900 font-bold text-center flex items-center justify-center gap-1.5 animate-fadeIn">
-                <Check size={16} className="text-emerald-700" />
-                <span>{swapSuccess}</span>
-              </div>
-            )}
-
-            {/* Swap Button */}
-            <button
-              type="button"
-              disabled={parsedInput <= 0 || parsedInput > currentAvailable}
-              onClick={handleExecuteSwap}
-              className={`w-full py-3 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 min-h-[44px] ${
-                parsedInput <= 0 || parsedInput > currentAvailable
-                  ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-                  : "bg-emerald-600 hover:bg-emerald-700 text-white active:scale-98 cursor-pointer"
-              }`}
-            >
-              <Repeat size={16} />
-              <span>
-                {parsedInput > currentAvailable ? "Insufficient Balance" : "Confirm & Execute Swap"}
-              </span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 3. SECURITY TAB CONTENT */}
-      {subTab === "security" && (
-        <div className="space-y-3.5">
-          {/* TON Connected Wallet Card */}
-          <div className="space-y-1.5">
-            <h2 className="text-xs font-bold text-slate-800 tracking-wide uppercase">
-              Web3 Vault & TON Address
-            </h2>
-            <div className="liquid-glass p-3.5 space-y-3 border border-slate-200 shadow-xs">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <Wallet size={20} className="text-[#0098ea] flex-shrink-0" />
-                  <div>
-                    <span className="text-[10px] text-slate-600 block">SHILIAIWEI Web3 Vault</span>
-                    <span className="text-xs font-mono font-bold text-slate-900 block">
-                      {walletAddress}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleCopyWallet}
-                  className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-800 border border-slate-200 flex items-center gap-1 cursor-pointer"
-                >
-                  {copiedWallet ? (
-                    <>
-                      <Check size={14} className="text-[#14532d]" />
-                      <span className="text-[#14532d]">Copied</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy size={14} />
-                      <span>Copy</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Security Status Card */}
-          <div className="space-y-1.5">
-            <h2 className="text-xs font-bold text-slate-800 tracking-wide uppercase">Account Security</h2>
-            <div className="liquid-glass p-3.5 space-y-2 border border-slate-200 shadow-xs">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <ShieldCheck size={20} className="text-[#14532d] flex-shrink-0" />
-                  <div>
-                    <span className="text-[10px] text-slate-600 block">Authentication Protocol</span>
-                    <span className="text-xs font-bold text-slate-900 block">
-                      Telegram Cryptographic Signature Verification
-                    </span>
-                  </div>
-                </div>
-                <span className="text-xs text-[#14532d] bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full font-bold">
-                  Verified
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Real Device Sessions Card */}
-          <div className="space-y-1.5">
-            <h2 className="text-xs font-bold text-slate-800 tracking-wide uppercase">Active Device Session</h2>
-            <div className="liquid-glass p-3.5 space-y-3 border border-slate-200 shadow-xs">
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="flex items-center gap-2.5">
-                  <Zap size={20} className="text-[#0098ea] flex-shrink-0" />
-                  <div>
-                    <span className="text-xs font-bold text-slate-900 block">
-                      Telegram {realPlatform}
-                    </span>
-                    <span className="text-[10px] text-slate-600 block">
-                      Language: {realLanguage} • Session: {formatSessionTime(spendSeconds)}
-                    </span>
-                  </div>
-                </div>
-                <span className="text-xs text-[#14532d] bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 rounded-full font-bold">
-                  Online
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 4. LOGIN & ACTIVITY AUDIT TAB CONTENT */}
-      {subTab === "audit" && (
+  /* ── SECURITY ── */
+  if (view === "security") {
+    return (
+      <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
+        <BackHeader title="Security" onBack={() => setView("main")} />
         <div className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-xs font-bold text-slate-900 tracking-wide flex items-center gap-1.5 uppercase">
-              <Timer size={18} className="text-[#0098ea]" />
-              <span>Database Login & Session Audit Trail</span>
-            </h2>
-            <button
-              type="button"
-              onClick={fetchAuditLogs}
-              disabled={loadingAudit}
-              aria-label="Refresh audit logs"
-              className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-1 text-xs font-bold cursor-pointer border border-slate-200 bg-white"
-            >
-              <RefreshCw size={14} className={loadingAudit ? "animate-spin text-[#0098ea]" : ""} />
-              <span>Refresh</span>
-            </button>
+          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">VAULT WALLET ADDRESS</span>
+            <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
+              <span className="text-xs font-mono text-slate-700 truncate flex-1">{walletAddress}</span>
+              <button type="button" onClick={() => copyToClipboard(walletAddress, setCopiedWallet)}
+                className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-[#0098ea] transition-colors cursor-pointer flex-shrink-0">
+                {copiedWallet ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+              </button>
+            </div>
+            <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block">Telegram ID</span>
+                <span className="text-sm font-black text-slate-900">{playerId}</span>
+              </div>
+              <button type="button" onClick={() => copyToClipboard(playerId, setCopiedId)}
+                className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-[#0098ea] transition-colors cursor-pointer flex-shrink-0">
+                {copiedId ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+              </button>
+            </div>
           </div>
-
-          <div className="liquid-glass p-3 space-y-2 border border-slate-200 shadow-xs">
-            {auditLogs.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-500">
-                {loadingAudit ? "Loading audit logs from database..." : "No recent activity recorded."}
+          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">PROTECTION STATUS</span>
+            {[
+              { label: "Telegram Auth", status: "Active", ok: true },
+              { label: "2FA Verification", status: user?.id ? "Verified" : "Pending", ok: !!user?.id },
+              { label: "End-to-End Encrypted", status: "Enabled", ok: true },
+              { label: "Session Lock", status: "Auto 15 min", ok: true },
+            ].map((row) => (
+              <div key={row.label} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck size={16} className={row.ok ? "text-emerald-500" : "text-amber-500"} />
+                  <span className="text-sm font-semibold text-slate-800">{row.label}</span>
+                </div>
+                <span className={`text-xs font-black ${row.ok ? "text-emerald-600" : "text-amber-600"}`}>{row.status}</span>
               </div>
-            ) : (
-              <div className="divide-y divide-slate-100">
-                {auditLogs.map((log) => {
-                  const dateStr = log.created_at
-                    ? new Date(log.created_at).toLocaleString()
-                    : "Recent";
-
-                  return (
-                    <div key={log.id} className="py-2.5 first:pt-0 last:pb-0 space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-1.5">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-sky-50 text-[#0077b5] border border-sky-200">
-                            {log.action}
-                          </span>
-                          <span className="font-mono text-[11px] text-slate-800 font-semibold">
-                            {log.ip_address || "127.0.0.1"}
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-slate-500 font-medium">{dateStr}</span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-[11px] text-slate-600">
-                        <span className="truncate max-w-[260px]">
-                          {log.details || `Platform: ${log.platform}`}
-                        </span>
-                        <span className="text-[10px] font-semibold text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">
-                          {log.city_country || "Cambodia"}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            ))}
           </div>
         </div>
+      </div>
+    );
+  }
+
+  /* ── AUDIT LOG ── */
+  if (view === "audit") {
+    return (
+      <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
+        <BackHeader title="Activity Log" onBack={() => setView("main")}
+          right={<button type="button" onClick={fetchAuditLogs} className="p-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 cursor-pointer"><RefreshCw size={14} /></button>}
+        />
+        {loadingAudit ? (
+          <div className="text-center py-12 text-sm text-slate-400 font-medium animate-pulse">Loading activity...</div>
+        ) : auditLogs.length === 0 ? (
+          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm text-center space-y-2">
+            <Timer size={28} className="text-slate-300 mx-auto" />
+            <p className="text-sm font-bold text-slate-500">No activity recorded yet.</p>
+            <button type="button" onClick={fetchAuditLogs} className="px-4 py-2 rounded-xl bg-[#0098ea] text-white font-bold text-xs cursor-pointer">Load Activity</button>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {auditLogs.map((log) => (
+              <div key={log.id} className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-[#0098ea] uppercase tracking-wide">{log.action}</span>
+                  <span className="text-[10px] text-slate-400 font-medium">{new Date(log.created_at).toLocaleString()}</span>
+                </div>
+                <p className="text-xs text-slate-600 font-medium leading-snug">{log.details}</p>
+                <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                  <span>{log.platform}</span>
+                  {log.city_country && <span>• {log.city_country}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ── NOTIFICATIONS ── */
+  if (view === "notifications") {
+    return (
+      <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
+        <BackHeader title="Notifications" onBack={() => setView("main")} />
+        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-1">
+          {[
+            { t: "Vault Sync Complete", s: "Your score has been saved to the cloud.", time: "Just now" },
+            { t: "Daily Spin Available", s: "Spin the lucky wheel today for bonus PTS!", time: "2h ago" },
+            { t: "Leaderboard Update", s: "Your rank has been refreshed.", time: "5h ago" },
+            { t: "Welcome Bonus", s: "You received 50 PTS as a welcome reward.", time: "Yesterday" },
+          ].map((n, i) => (
+            <div key={i} className="py-3 border-b border-slate-100 last:border-0">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-sm font-black text-slate-900">{n.t}</span>
+                <span className="text-[10px] text-slate-400 font-medium">{n.time}</span>
+              </div>
+              <p className="text-xs text-slate-500 font-medium">{n.s}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  /* ── WALLET DETAIL ── */
+  if (view === "wallet-detail") {
+    return (
+      <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
+        <BackHeader title="My Wallet" onBack={() => setView("main")} />
+        <div className="space-y-3">
+          <div className="bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] rounded-3xl p-5 text-white relative overflow-hidden shadow-md">
+            <ProfileWatermark />
+            <div className="relative z-10 space-y-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-blue-200 block">Total Balance</span>
+              <div>
+                <span className="text-4xl font-black leading-none">{score.toLocaleString()}</span>
+                <span className="text-sm text-blue-200 font-bold ml-2">PTS</span>
+              </div>
+              <div className="flex items-center gap-4 pt-1">
+                <div>
+                  <span className="text-[10px] text-blue-300 font-medium block">USD Value</span>
+                  <span className="text-base font-black">${usdValue}</span>
+                </div>
+                <div className="w-px h-8 bg-white/20" />
+                <div>
+                  <span className="text-[10px] text-blue-300 font-medium block">KHR Value</span>
+                  <span className="text-base font-black">{khrValue} ៛</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">Wallet Address</span>
+            <div className="flex items-center gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-200">
+              <span className="text-xs font-mono text-slate-700 truncate flex-1">{walletAddress}</span>
+              <button type="button" onClick={() => copyToClipboard(walletAddress, setCopiedWallet)} className="p-1.5 rounded-lg bg-white border border-slate-200 cursor-pointer">
+                {copiedWallet ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+              </button>
+            </div>
+          </div>
+          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">Exchange Rates</span>
+            {[{ from: "100 PTS", to: "$1.00 USD" }, { from: "100 PTS", to: "4,100 ៛ KHR" }, { from: "500 PTS", to: "~1 TON" }].map((r, i) => (
+              <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                <span className="text-sm font-bold text-slate-800">{r.from}</span>
+                <span className="text-xs font-black text-[#0098ea]">= {r.to}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── EDIT PROFILE ── */
+  if (view === "edit") {
+    return (
+      <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
+        <BackHeader title="Edit Profile" onBack={() => setView("main")} />
+        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+          <div className="flex justify-center pb-2">
+            <ProfileAvatar user={user} size={72} />
+          </div>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Display Name</label>
+              <div className="px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 text-sm font-semibold">
+                {displayName}<span className="ml-2 text-[10px] text-slate-400">(from Telegram)</span>
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Handle</label>
+              <div className="px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 text-sm font-mono">{handle}</div>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Bio</label>
+              <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3}
+                className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-900 text-sm font-medium focus:outline-none focus:border-[#0098ea] transition-colors resize-none" placeholder="Write a short bio..." />
+            </div>
+          </div>
+          {savedSuccess && (
+            <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold text-center animate-fadeIn">Profile saved!</div>
+          )}
+          <button type="button" onClick={handleSaveBio}
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#0088cc] to-[#0098ea] text-white font-black text-sm tracking-wide shadow-md shadow-blue-500/20 active:scale-98 transition-all cursor-pointer">
+            SAVE PROFILE
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── MAIN PROFILE ── */
+  return (
+    <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
+
+      {/* HERO HEADER CARD */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-5 text-white mb-4 shadow-md border border-blue-400/20">
+        <ProfileWatermark />
+        <div className="relative z-10">
+          <div className="flex items-center gap-4 mb-4">
+            <ProfileAvatar user={user} size={68} />
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg font-black text-white leading-tight truncate">{displayName}</h1>
+              <p className="text-blue-200 text-xs font-semibold mt-0.5">{handle}</p>
+              <p className="text-blue-100/80 text-[11px] font-medium mt-1 leading-snug line-clamp-2">{bio}</p>
+            </div>
+            <button type="button" onClick={() => setView("edit")}
+              className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-white/15 border border-white/25 text-white text-xs font-bold hover:bg-white/25 transition-all cursor-pointer active:scale-95">
+              Edit
+            </button>
+          </div>
+          {/* Wordmark only — no mark icon alongside text (brand mutual exclusivity rule) */}
+          <div className="flex items-center">
+            <ShiliaiweiBrand variant="wordmark" height={13} colorScheme="white" />
+          </div>
+        </div>
+      </div>
+
+      {/* STATS ROW */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
+        <div className="flex items-stretch divide-x divide-slate-100">
+          <StatCell value={score.toLocaleString()} label="Points" />
+          <StatCell value={`$${usdValue}`} label="USD" />
+          <StatCell value={tapPower} label="Tap Power" />
+          <StatCell value={fmtTime(spendSeconds)} label="Online" />
+        </div>
+      </div>
+
+      {/* QUICK ACTION GRID */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-4 mb-4">
+        <div className="grid grid-cols-4 gap-3">
+          <QuickAction icon={<Wallet size={22} />} label="Wallet" onClick={() => setView("wallet-detail")} accent />
+          <QuickAction icon={<Repeat size={22} />} label="Swap" onClick={() => setView("swap")} />
+          <QuickAction icon={<ShieldCheck size={22} />} label="Security" onClick={() => setView("security")} />
+          <QuickAction icon={<Timer size={22} />} label="Activity" onClick={() => { setView("audit"); fetchAuditLogs(); }} />
+          <QuickAction icon={<Bell size={22} />} label="Alerts" onClick={() => setView("notifications")} />
+          <QuickAction icon={<Sparkles size={22} />} label="Rewards" onClick={() => setView("notifications")} />
+          <QuickAction icon={<Send size={22} />} label="Send" onClick={() => setView("swap")} />
+          <QuickAction icon={<Gift size={22} />} label="Missions" onClick={() => {}} />
+        </div>
+      </div>
+
+      {/* TASK / REWARD ROWS */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
+        <div className="grid grid-cols-2 divide-x divide-slate-100">
+          <TaskRow title="Tasks" sub={`${score > 0 ? score.toLocaleString() : 0} Points`} badge={<Coins size={18} className="text-white" />} />
+          <TaskRow title="Streak" sub="Tap to Join" badge={<Zap size={18} className="text-white" />} />
+        </div>
+        <div className="border-t border-slate-100 grid grid-cols-2 divide-x divide-slate-100">
+          <TaskRow title="Check-in" sub="Claim daily bonus" badge={<Timer size={18} className="text-white" />}
+            right={<span className="px-3 py-1.5 rounded-full bg-[#0098ea] text-white text-xs font-black">Sign</span>} />
+          <TaskRow title="Rewards" sub="Updated daily" badge={<Sparkles size={18} className="text-white" />} onClick={() => setView("notifications")} />
+        </div>
+      </div>
+
+      {/* MENU LIST */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm mb-4 overflow-hidden">
+        <div className="px-2 py-1">
+          <MenuRow icon={<User size={17} />} title="Edit Profile" sub="Name, bio, handle" onClick={() => setView("edit")} />
+          <MenuRow icon={<ShieldCheck size={17} />} title="Security & Wallet" sub="Keys, 2FA, address" onClick={() => setView("security")} />
+          <MenuRow icon={<Repeat size={17} />} title="Token Swap" sub="PTS → USD / KHR" onClick={() => setView("swap")} />
+          <MenuRow icon={<Timer size={17} />} title="Activity Log" sub="Login & action history" onClick={() => { setView("audit"); fetchAuditLogs(); }} />
+          <MenuRow icon={<Bell size={17} />} title="Notifications" sub="Alerts & rewards" onClick={() => setView("notifications")} />
+        </div>
+
+        {/* Preference toggles */}
+        <div className="border-t border-slate-100 px-4 py-3 space-y-3">
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Preferences</span>
+          {[
+            { label: "Haptic Feedback", value: hapticsEnabled, onToggle: () => { const n = !hapticsEnabled; setHapticsEnabled(n); localStorage.setItem("shi_pref_haptics", String(n)); } },
+            { label: "Game Sounds", value: soundEnabled, onToggle: () => { const n = !soundEnabled; setSoundEnabled(n); localStorage.setItem("shi_pref_sound", String(n)); } },
+          ].map((pref) => (
+            <div key={pref.label} className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-800">{pref.label}</span>
+              <button type="button" onClick={pref.onToggle}
+                className={`relative w-11 h-6 rounded-full border transition-all cursor-pointer ${pref.value ? "bg-[#0098ea] border-[#0098ea]" : "bg-slate-200 border-slate-300"}`}>
+                <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-200 ${pref.value ? "left-5" : "left-0.5"}`} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* PLAYER ID FOOTER */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-4 mb-3">
+        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Player ID</span>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs font-mono text-slate-700 truncate">{playerId}</span>
+          <button type="button" onClick={() => copyToClipboard(playerId, setCopiedId)}
+            className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 cursor-pointer flex-shrink-0">
+            {copiedId ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+          </button>
+        </div>
+      </div>
+
+      {onBack && (
+        <button type="button" onClick={onBack}
+          className="w-full py-3 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-500 font-bold text-xs shadow-2xs active:scale-98 transition-all cursor-pointer">
+          Back to Home
+        </button>
       )}
     </div>
   );

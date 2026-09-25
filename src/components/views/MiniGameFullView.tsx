@@ -28,7 +28,7 @@ import {
   Coins,
 } from "@/components/icons/KeylineIcons";
 
-export type MiniGameType = "wheel" | "word-flash" | "guess-faster" | "row5";
+export type MiniGameType = "wheel" | "word-flash" | "guess-faster" | "row5" | "number-match" | "flip-card";
 
 interface MiniGameFullViewProps {
   game: MiniGameType;
@@ -93,6 +93,65 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
   const [row5WinningCells, setRow5WinningCells] = useState<number[]>([]);
   const [row5Claimed, setRow5Claimed] = useState(false);
   const [currentCountryHintIdx, setCurrentCountryHintIdx] = useState(0);
+
+  // -------------------------------------------------------------
+  // GAME 5: NUMBER MATCH STATE
+  // -------------------------------------------------------------
+  const NM_PAIRS = 8; // 8 pairs = 16 tiles
+  const generateNMTiles = () => {
+    const nums = Array.from({ length: NM_PAIRS }, (_, i) => i + 1);
+    const doubled = [...nums, ...nums];
+    for (let i = doubled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [doubled[i], doubled[j]] = [doubled[j], doubled[i]];
+    }
+    return doubled.map((v, i) => ({ id: i, value: v, matched: false, flipped: false }));
+  };
+  type NMTile = { id: number; value: number; matched: boolean; flipped: boolean };
+  const [nmTiles, setNmTiles] = useState<NMTile[]>(generateNMTiles);
+  const [nmSelected, setNmSelected] = useState<number[]>([]);
+  const [nmMatched, setNmMatched] = useState(0);
+  const [nmLocked, setNmLocked] = useState(false);
+  const [nmWon, setNmWon] = useState(false);
+
+  // -------------------------------------------------------------
+  // GAME 6: FLIP CARD MEMORY STATE
+  // -------------------------------------------------------------
+  const FC_SYMBOLS = ["★", "♦", "♠", "♥", "▲", "●", "■", "✿"];
+  type FCCard = { id: number; symbol: string; matched: boolean; flipped: boolean };
+  const generateFCCards = () => {
+    const pairs = [...FC_SYMBOLS, ...FC_SYMBOLS];
+    for (let i = pairs.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pairs[i], pairs[j]] = [pairs[j], pairs[i]];
+    }
+    return pairs.map((s, i) => ({ id: i, symbol: s, matched: false, flipped: false }));
+  };
+  const [fcCards, setFcCards] = useState<FCCard[]>(generateFCCards);
+  const [fcSelected, setFcSelected] = useState<number[]>([]);
+  const [fcMatched, setFcMatched] = useState(0);
+  const [fcLocked, setFcLocked] = useState(false);
+  const [fcWon, setFcWon] = useState(false);
+
+  // Track per-game earnings into localStorage for the bar chart
+  const GAME_KEY_MAP: Record<MiniGameType, string> = {
+    "wheel": "Spin",
+    "word-flash": "Word",
+    "guess-faster": "Guess",
+    "row5": "Row5",
+    "number-match": "NMatch",
+    "flip-card": "Flip",
+  };
+  const trackGameEarning = (game: MiniGameType, pts: number) => {
+    try {
+      const raw = localStorage.getItem("shi_game_breakdown");
+      const data: Record<string, number> = raw ? JSON.parse(raw) : {};
+      const key = GAME_KEY_MAP[game] || "Other";
+      data[key] = (data[key] || 0) + pts;
+      localStorage.setItem("shi_game_breakdown", JSON.stringify(data));
+    } catch {}
+    onAddScore(pts);
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -181,6 +240,26 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
     setCurrentCountryHintIdx((prev) => (prev + 1) % COUNTRY_HINTS_LIST.length);
   };
 
+  // Init Game 5: Number Match
+  const startNumberMatch = () => {
+    setNmTiles(generateNMTiles());
+    setNmSelected([]);
+    setNmMatched(0);
+    setNmLocked(false);
+    setNmWon(false);
+    gameAudio.playGameStart("number-match" as MiniGameType);
+  };
+
+  // Init Game 6: Flip Card
+  const startFlipCard = () => {
+    setFcCards(generateFCCards());
+    setFcSelected([]);
+    setFcMatched(0);
+    setFcLocked(false);
+    setFcWon(false);
+    gameAudio.playGameStart("flip-card" as MiniGameType);
+  };
+
   // Lifecycle on mount / tab change
   useEffect(() => {
     if (activeTab === "word-flash") {
@@ -189,6 +268,10 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
       startGuessFaster(0);
     } else if (activeTab === "row5") {
       startTicTac();
+    } else if (activeTab === "number-match") {
+      startNumberMatch();
+    } else if (activeTab === "flip-card") {
+      startFlipCard();
     }
   }, [activeTab]);
 
@@ -215,7 +298,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
       setWheelSpinning(false);
       setWheelResult(pickedReward);
       setSpinHistory((prev) => [pickedReward, ...prev.slice(0, 4)]);
-      onAddScore(pickedReward);
+      trackGameEarning("wheel", pickedReward);
       gameAudio.playVictory();
       showToast(`Won +${pickedReward} Vault Points!`);
       try {
@@ -246,7 +329,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
       if (nextProg.length === targetWord.length) {
         setWordGameWon(true);
         const reward = currentWordItem.charCount;
-        onAddScore(reward);
+        trackGameEarning("word-flash", reward);
         gameAudio.playVictory();
         showToast(`Solved "${targetWord}"! Claimed +${reward} PTS!`);
         try {
@@ -279,7 +362,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
     if (nextProg.join("") === item.word) {
       setGuessWon(true);
       const reward = item.points;
-      onAddScore(reward);
+      trackGameEarning("guess-faster", reward);
       gameAudio.playVictory();
       showToast(`Faster! Claimed +${reward} PTS!`);
       try {
@@ -311,7 +394,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
     if (playerMoveState.winner === "X" && !ticTacClaimed) {
       setTicTacClaimed(true);
       const reward = calculateTicTacReward(playerMoveState);
-      onAddScore(reward);
+      trackGameEarning("row5", reward);
       gameAudio.playVictory();
       showToast(`Tic Tac Victory! +${reward} PTS Claimed!`);
       return;
@@ -347,7 +430,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
       setRow5Winner("X");
       setRow5WinningCells(winCheck.winningCells);
       setRow5Claimed(true);
-      onAddScore(25);
+      trackGameEarning("row5", 25);
       gameAudio.playVictory();
       showToast("Row 5 Champion! +25 PTS Claimed!");
       return;
@@ -368,6 +451,98 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
         }
       }
     }, 250);
+  };
+
+  // -------------------------------------------------------------
+  // NUMBER MATCH ACTIONS
+  // -------------------------------------------------------------
+  const handleNMTileTap = (idx: number) => {
+    if (nmLocked || nmTiles[idx].matched || nmTiles[idx].flipped) return;
+    gameAudio.playTap();
+    try { tgApp?.HapticFeedback?.impactOccurred("light"); } catch {}
+
+    const newTiles = nmTiles.map((t, i) => i === idx ? { ...t, flipped: true } : t);
+    const newSelected = [...nmSelected, idx];
+    setNmTiles(newTiles);
+    setNmSelected(newSelected);
+
+    if (newSelected.length === 2) {
+      setNmLocked(true);
+      const [a, b] = newSelected;
+      if (newTiles[a].value === newTiles[b].value) {
+        // Match!
+        const matched = newTiles.map((t, i) =>
+          i === a || i === b ? { ...t, matched: true } : t
+        );
+        setNmTiles(matched);
+        setNmSelected([]);
+        setNmLocked(false);
+        const newCount = nmMatched + 1;
+        setNmMatched(newCount);
+        gameAudio.playVictory();
+        if (newCount === NM_PAIRS) {
+          setNmWon(true);
+          trackGameEarning("number-match", 50);
+          showToast("Number Match Complete! +50 PTS Claimed!");
+          try { tgApp?.HapticFeedback?.notificationOccurred("success"); } catch {}
+        }
+      } else {
+        // No match — flip back after 900ms
+        gameAudio.playWrong();
+        setTimeout(() => {
+          setNmTiles(prev => prev.map((t, i) =>
+            i === a || i === b ? { ...t, flipped: false } : t
+          ));
+          setNmSelected([]);
+          setNmLocked(false);
+        }, 900);
+      }
+    }
+  };
+
+  // -------------------------------------------------------------
+  // FLIP CARD ACTIONS
+  // -------------------------------------------------------------
+  const handleFCCardTap = (idx: number) => {
+    if (fcLocked || fcCards[idx].matched || fcCards[idx].flipped) return;
+    gameAudio.playTap();
+    try { tgApp?.HapticFeedback?.impactOccurred("light"); } catch {}
+
+    const newCards = fcCards.map((c, i) => i === idx ? { ...c, flipped: true } : c);
+    const newSelected = [...fcSelected, idx];
+    setFcCards(newCards);
+    setFcSelected(newSelected);
+
+    if (newSelected.length === 2) {
+      setFcLocked(true);
+      const [a, b] = newSelected;
+      if (newCards[a].symbol === newCards[b].symbol) {
+        const matched = newCards.map((c, i) =>
+          i === a || i === b ? { ...c, matched: true } : c
+        );
+        setFcCards(matched);
+        setFcSelected([]);
+        setFcLocked(false);
+        const newCount = fcMatched + 1;
+        setFcMatched(newCount);
+        gameAudio.playVictory();
+        if (newCount === FC_SYMBOLS.length) {
+          setFcWon(true);
+          trackGameEarning("flip-card", 60);
+          showToast("Flip Card Master! +60 PTS Claimed!");
+          try { tgApp?.HapticFeedback?.notificationOccurred("success"); } catch {}
+        }
+      } else {
+        gameAudio.playWrong();
+        setTimeout(() => {
+          setFcCards(prev => prev.map((c, i) =>
+            i === a || i === b ? { ...c, flipped: false } : c
+          ));
+          setFcSelected([]);
+          setFcLocked(false);
+        }, 900);
+      }
+    }
   };
 
   return (
@@ -406,6 +581,8 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
             {activeTab === "word-flash" && "Word Flash Memory"}
             {activeTab === "guess-faster" && "Guess Faster Challenge"}
             {activeTab === "row5" && "Row 5 & Tic Tac"}
+            {activeTab === "number-match" && "Number Match"}
+            {activeTab === "flip-card" && "Flip Card Memory"}
           </h1>
         </div>
 
@@ -416,64 +593,44 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
         </div>
       </div>
 
-      {/* TOP TAB SWITCHER: Direct SPA Links to all 4 games */}
-      <div className="grid grid-cols-4 gap-1.5 bg-slate-200/60 p-1 rounded-2xl mb-4 text-center">
-        <button
-          type="button"
-          onClick={() => {
-            setActiveTab("wheel");
-            gameAudio.playGameStart("wheel");
-          }}
-          className={`py-2 px-1 rounded-xl text-[11px] font-extrabold transition-all cursor-pointer truncate ${
-            activeTab === "wheel"
-              ? "bg-white text-[#0098ea] shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
-        >
-          Daily Spin
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setActiveTab("word-flash");
-            gameAudio.playGameStart("word-flash");
-          }}
-          className={`py-2 px-1 rounded-xl text-[11px] font-extrabold transition-all cursor-pointer truncate ${
-            activeTab === "word-flash"
-              ? "bg-white text-[#0098ea] shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
-        >
-          Word Flash
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setActiveTab("guess-faster");
-            gameAudio.playGameStart("guess-faster");
-          }}
-          className={`py-2 px-1 rounded-xl text-[11px] font-extrabold transition-all cursor-pointer truncate ${
-            activeTab === "guess-faster"
-              ? "bg-white text-[#0098ea] shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
-        >
-          Guess Faster
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setActiveTab("row5");
-            gameAudio.playGameStart("row5");
-          }}
-          className={`py-2 px-1 rounded-xl text-[11px] font-extrabold transition-all cursor-pointer truncate ${
-            activeTab === "row5"
-              ? "bg-white text-[#0098ea] shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
-        >
-          Row 5
-        </button>
+      {/* TOP TAB SWITCHER: Direct SPA Links to all 6 games (2 rows x 3) */}
+      <div className="flex flex-col gap-1 mb-4">
+        <div className="grid grid-cols-3 gap-1.5 bg-slate-200/60 p-1 rounded-2xl text-center">
+          {([
+            { key: "wheel", label: "Daily Spin" },
+            { key: "word-flash", label: "Word Flash" },
+            { key: "guess-faster", label: "Guess Faster" },
+          ] as { key: MiniGameType; label: string }[]).map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => { setActiveTab(key); gameAudio.playGameStart(key); }}
+              className={`py-2 px-1 rounded-xl text-[11px] font-extrabold transition-all cursor-pointer truncate ${
+                activeTab === key ? "bg-white text-[#0098ea] shadow-xs" : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="grid grid-cols-3 gap-1.5 bg-slate-200/60 p-1 rounded-2xl text-center">
+          {([
+            { key: "row5", label: "Row 5" },
+            { key: "number-match", label: "Num Match" },
+            { key: "flip-card", label: "Flip Card" },
+          ] as { key: MiniGameType; label: string }[]).map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => { setActiveTab(key); gameAudio.playGameStart(key); }}
+              className={`py-2 px-1 rounded-xl text-[11px] font-extrabold transition-all cursor-pointer truncate ${
+                activeTab === key ? "bg-white text-[#0098ea] shadow-xs" : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ======================================================== */}
@@ -922,6 +1079,134 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
                   </button>
                 </div>
               )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* 5. FULL PAGE: NUMBER MATCH                               */}
+      {/* ======================================================== */}
+      {activeTab === "number-match" && (
+        <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm space-y-4 animate-fadeIn">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">
+                PAIR MEMORY GRID
+              </span>
+              <h2 className="text-base font-black text-slate-900">Number Match</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-500">{nmMatched}/{NM_PAIRS} pairs</span>
+              <button
+                type="button"
+                onClick={startNumberMatch}
+                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
+              >
+                <RefreshCw size={16} />
+              </button>
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-500 font-medium">
+            Tap tiles to reveal numbers. Match all 8 pairs to claim +50 PTS.
+          </p>
+
+          {/* 4x4 Number Grid */}
+          <div className="grid grid-cols-4 gap-2 max-w-[300px] mx-auto p-2 rounded-2xl bg-slate-100 border border-slate-200">
+            {nmTiles.map((tile, idx) => (
+              <button
+                key={tile.id}
+                type="button"
+                disabled={tile.matched || nmLocked}
+                onClick={() => handleNMTileTap(idx)}
+                className={`aspect-square rounded-xl font-mono text-base font-black flex items-center justify-center border transition-all cursor-pointer ${
+                  tile.matched
+                    ? "bg-emerald-500 text-white border-emerald-600 shadow-sm"
+                    : tile.flipped
+                    ? "bg-[#0098ea] text-white border-blue-600 shadow-sm"
+                    : "bg-white text-slate-300 border-slate-200 hover:bg-sky-50 active:scale-95"
+                }`}
+              >
+                {tile.flipped || tile.matched ? tile.value : "?"}
+              </button>
+            ))}
+          </div>
+
+          {nmWon && (
+            <div className="text-center space-y-2 pt-1 animate-fadeIn">
+              <span className="text-sm font-black text-emerald-600 block">All Pairs Found! +50 PTS Claimed!</span>
+              <button
+                type="button"
+                onClick={startNumberMatch}
+                className="px-5 py-2.5 rounded-2xl bg-[#0098ea] text-white font-extrabold text-xs shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
+              >
+                PLAY AGAIN
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* 6. FULL PAGE: FLIP CARD MEMORY                           */}
+      {/* ======================================================== */}
+      {activeTab === "flip-card" && (
+        <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm space-y-4 animate-fadeIn">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">
+                SYMBOL PAIR FLIP
+              </span>
+              <h2 className="text-base font-black text-slate-900">Flip Card Memory</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-500">{fcMatched}/{FC_SYMBOLS.length} pairs</span>
+              <button
+                type="button"
+                onClick={startFlipCard}
+                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
+              >
+                <RefreshCw size={16} />
+              </button>
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-500 font-medium">
+            Flip cards to find matching symbol pairs. Complete all 8 pairs to claim +60 PTS.
+          </p>
+
+          {/* 4x4 Flip Card Grid */}
+          <div className="grid grid-cols-4 gap-2 max-w-[300px] mx-auto p-2 rounded-2xl bg-slate-100 border border-slate-200">
+            {fcCards.map((card, idx) => (
+              <button
+                key={card.id}
+                type="button"
+                disabled={card.matched || fcLocked}
+                onClick={() => handleFCCardTap(idx)}
+                className={`aspect-square rounded-xl text-xl font-black flex items-center justify-center border transition-all duration-200 cursor-pointer ${
+                  card.matched
+                    ? "bg-emerald-500 text-white border-emerald-600 shadow-sm"
+                    : card.flipped
+                    ? "bg-[#0098ea] text-white border-blue-600 shadow-sm scale-105"
+                    : "bg-gradient-to-br from-slate-700 to-slate-900 text-slate-700 border-slate-600 hover:from-slate-600 active:scale-95"
+                }`}
+              >
+                {card.flipped || card.matched ? card.symbol : ""}
+              </button>
+            ))}
+          </div>
+
+          {fcWon && (
+            <div className="text-center space-y-2 pt-1 animate-fadeIn">
+              <span className="text-sm font-black text-emerald-600 block">Memory Master! +60 PTS Claimed!</span>
+              <button
+                type="button"
+                onClick={startFlipCard}
+                className="px-5 py-2.5 rounded-2xl bg-[#0098ea] text-white font-extrabold text-xs shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
+              >
+                PLAY AGAIN
+              </button>
             </div>
           )}
         </div>
