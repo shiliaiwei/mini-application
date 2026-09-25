@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { TelegramWebApp } from "@/types/telegram";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
-import { gameAudio } from "@/lib/audio/gameAudio";
 import { MiniGameType } from "@/components/views/MiniGameFullView";
 
 interface WinGramPromoCardsProps {
@@ -34,7 +33,6 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
   };
 
   const handleHeroClick = () => {
-    gameAudio.playTap();
     try {
       tgApp?.HapticFeedback?.impactOccurred("medium");
     } catch {}
@@ -50,7 +48,6 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
 
     onAddScore(1000);
     setClaimedHero(true);
-    gameAudio.playVictory();
     showToast("Bonus Claimed! +1,000 PTS!");
     try {
       tgApp?.HapticFeedback?.notificationOccurred("success");
@@ -58,7 +55,6 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
   };
 
   const handleLaunchGame = (game: MiniGameType) => {
-    gameAudio.playTap();
     try {
       tgApp?.HapticFeedback?.impactOccurred("medium");
     } catch {}
@@ -79,7 +75,7 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
       {/* Main Cards Grid (Left Card + Right 2x2 Mini Game Blocks) */}
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
         {/* ======================================================== */}
-        {/* 1. HERO CARD (Logo Watermark, 1-Line Title, Stats, No Icons) */}
+        {/* 1. HERO CARD (Centered Full Italic Logo Watermark, No Icons) */}
         {/* ======================================================== */}
         <div
           role="button"
@@ -88,22 +84,11 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
           onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleHeroClick()}
           className="sm:col-span-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-4 text-white shadow-xs flex flex-col justify-between min-h-[175px] sm:min-h-[238px] border border-blue-400/30 cursor-pointer active:scale-98 transition-all hover:shadow-md group"
         >
-          {/* Logo Watermark in Background (White at 12% opacity on brand blue, never gray) */}
-          <div className="absolute -right-4 -bottom-4 pointer-events-none select-none opacity-15">
-            <svg width="170" height="170" viewBox="0 0 48 48" fill="none">
-              <rect x="2" y="2" width="44" height="44" rx="11" fill="white" />
-              <text
-                x="24"
-                y="32"
-                textAnchor="middle"
-                fill="#0077b5"
-                fontSize="20"
-                fontFamily="system-ui, -apple-system, sans-serif"
-                fontWeight="900"
-              >
-                WEI
-              </text>
-            </svg>
+          {/* Full Italic Logo Watermark Spanning Across Center (Not one side, not too big, white on brand blue) */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+            <span className="text-2xl sm:text-3xl font-black italic tracking-widest text-white/[0.08] uppercase whitespace-nowrap transform -rotate-6">
+              SHILIAIWEI
+            </span>
           </div>
 
           {/* Top: Brand Wordmark (Zero icon per mutual exclusivity rule) */}
@@ -134,7 +119,7 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
         </div>
 
         {/* ======================================================== */}
-        {/* 2. 2x2 MINI GAME BLOCKS (Logo Watermarks, Zero Icons)     */}
+        {/* 2. 2x2 MINI GAME BLOCKS (Centered Full Italic Watermarks) */}
         {/* ======================================================== */}
         <div className="sm:col-span-6 grid grid-cols-2 gap-2 sm:gap-2.5">
           {/* Card 1: Daily Spin */}
@@ -145,22 +130,11 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleLaunchGame("wheel")}
             className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all hover:shadow-md group"
           >
-            {/* Logo Watermark Background (White on brand blue, never gray) */}
-            <div className="absolute -right-2 -bottom-2 pointer-events-none select-none opacity-12">
-              <svg width="80" height="80" viewBox="0 0 48 48" fill="none">
-                <rect x="2" y="2" width="44" height="44" rx="11" fill="white" />
-                <text
-                  x="24"
-                  y="32"
-                  textAnchor="middle"
-                  fill="#0077b5"
-                  fontSize="20"
-                  fontFamily="system-ui, -apple-system, sans-serif"
-                  fontWeight="900"
-                >
-                  WEI
-                </text>
-              </svg>
+            {/* Full Italic Logo Watermark Centered across card (Not one side, not too big) */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+              <span className="text-sm sm:text-base font-black italic tracking-widest text-white/[0.08] uppercase whitespace-nowrap transform -rotate-6">
+                SHILIAIWEI
+              </span>
             </div>
 
             {/* Top: Brand Wordmark */}
@@ -190,22 +164,11 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleLaunchGame("word-flash")}
             className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all hover:shadow-md group"
           >
-            {/* Logo Watermark Background (White on brand blue, never gray) */}
-            <div className="absolute -right-2 -bottom-2 pointer-events-none select-none opacity-12">
-              <svg width="80" height="80" viewBox="0 0 48 48" fill="none">
-                <rect x="2" y="2" width="44" height="44" rx="11" fill="white" />
-                <text
-                  x="24"
-                  y="32"
-                  textAnchor="middle"
-                  fill="#0077b5"
-                  fontSize="20"
-                  fontFamily="system-ui, -apple-system, sans-serif"
-                  fontWeight="900"
-                >
-                  WEI
-                </text>
-              </svg>
+            {/* Full Italic Logo Watermark Centered across card */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+              <span className="text-sm sm:text-base font-black italic tracking-widest text-white/[0.08] uppercase whitespace-nowrap transform -rotate-6">
+                SHILIAIWEI
+              </span>
             </div>
 
             {/* Top: Brand Wordmark */}
@@ -235,22 +198,11 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleLaunchGame("guess-faster")}
             className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all hover:shadow-md group"
           >
-            {/* Logo Watermark Background (White on brand blue, never gray) */}
-            <div className="absolute -right-2 -bottom-2 pointer-events-none select-none opacity-12">
-              <svg width="80" height="80" viewBox="0 0 48 48" fill="none">
-                <rect x="2" y="2" width="44" height="44" rx="11" fill="white" />
-                <text
-                  x="24"
-                  y="32"
-                  textAnchor="middle"
-                  fill="#0077b5"
-                  fontSize="20"
-                  fontFamily="system-ui, -apple-system, sans-serif"
-                  fontWeight="900"
-                >
-                  WEI
-                </text>
-              </svg>
+            {/* Full Italic Logo Watermark Centered across card */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+              <span className="text-sm sm:text-base font-black italic tracking-widest text-white/[0.08] uppercase whitespace-nowrap transform -rotate-6">
+                SHILIAIWEI
+              </span>
             </div>
 
             {/* Top: Brand Wordmark */}
@@ -280,22 +232,11 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleLaunchGame("row5")}
             className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between h-[115px] border border-blue-400/30 cursor-pointer active:scale-95 transition-all hover:shadow-md group"
           >
-            {/* Logo Watermark Background (White on brand blue, never gray) */}
-            <div className="absolute -right-2 -bottom-2 pointer-events-none select-none opacity-12">
-              <svg width="80" height="80" viewBox="0 0 48 48" fill="none">
-                <rect x="2" y="2" width="44" height="44" rx="11" fill="white" />
-                <text
-                  x="24"
-                  y="32"
-                  textAnchor="middle"
-                  fill="#0077b5"
-                  fontSize="20"
-                  fontFamily="system-ui, -apple-system, sans-serif"
-                  fontWeight="900"
-                >
-                  WEI
-                </text>
-              </svg>
+            {/* Full Italic Logo Watermark Centered across card */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+              <span className="text-sm sm:text-base font-black italic tracking-widest text-white/[0.08] uppercase whitespace-nowrap transform -rotate-6">
+                SHILIAIWEI
+              </span>
             </div>
 
             {/* Top: Brand Wordmark */}

@@ -99,9 +99,10 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Sync tab with props
+  // Sync tab with props and trigger style-based game start sound
   useEffect(() => {
     setActiveTab(game);
+    gameAudio.playGameStart(game);
   }, [game]);
 
   // Init Game 2: Word Flash
@@ -113,13 +114,13 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
     setCurrentProgress([]);
     setWordGameWon(false);
     setShakeError(false);
+    gameAudio.playGameStart("word-flash");
 
     const tiles = generateChessboardGrid(word.word);
     setChessboardTiles(tiles);
 
     setTimeout(() => {
       setIsWordVisible(false);
-      gameAudio.playClick();
     }, 3500);
   };
 
@@ -132,6 +133,7 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
     setGuessWon(false);
     setGuessTimeUp(false);
     setGuessSecondsLeft(10);
+    gameAudio.playGameStart("guess-faster");
 
     const chars = item.word.split("").map((c: string, i: number) => ({ id: i, char: c }));
     for (let i = chars.length - 1; i > 0; i--) {
@@ -383,7 +385,6 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
         <button
           type="button"
           onClick={() => {
-            gameAudio.playClick();
             onBack();
           }}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs shadow-2xs active:scale-95 transition-all cursor-pointer"
@@ -420,8 +421,8 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
         <button
           type="button"
           onClick={() => {
-            gameAudio.playTap();
             setActiveTab("wheel");
+            gameAudio.playGameStart("wheel");
           }}
           className={`py-2 px-1 rounded-xl text-[11px] font-extrabold transition-all cursor-pointer truncate ${
             activeTab === "wheel"
@@ -434,8 +435,8 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
         <button
           type="button"
           onClick={() => {
-            gameAudio.playTap();
             setActiveTab("word-flash");
+            gameAudio.playGameStart("word-flash");
           }}
           className={`py-2 px-1 rounded-xl text-[11px] font-extrabold transition-all cursor-pointer truncate ${
             activeTab === "word-flash"
@@ -448,8 +449,8 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
         <button
           type="button"
           onClick={() => {
-            gameAudio.playTap();
             setActiveTab("guess-faster");
+            gameAudio.playGameStart("guess-faster");
           }}
           className={`py-2 px-1 rounded-xl text-[11px] font-extrabold transition-all cursor-pointer truncate ${
             activeTab === "guess-faster"
@@ -462,8 +463,8 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
         <button
           type="button"
           onClick={() => {
-            gameAudio.playTap();
             setActiveTab("row5");
+            gameAudio.playGameStart("row5");
           }}
           className={`py-2 px-1 rounded-xl text-[11px] font-extrabold transition-all cursor-pointer truncate ${
             activeTab === "row5"
@@ -931,7 +932,6 @@ export const MiniGameFullView: React.FC<MiniGameFullViewProps> = ({
         <button
           type="button"
           onClick={() => {
-            gameAudio.playClick();
             onBack();
           }}
           className="w-full py-3 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 font-bold text-xs shadow-2xs active:scale-98 transition-all cursor-pointer"

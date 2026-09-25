@@ -161,6 +161,79 @@ class GameAudioSynthesizer {
       });
     } catch {}
   }
+
+  // Game start sound effects tailored strictly to each game style
+  playGameStart(style: string) {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      if (style === "wheel") {
+        // Playful carnival spin-up chime for Lucky Wheel
+        const freqs = [392, 523.25, 659.25, 783.99, 1046.5];
+        freqs.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const t = ctx.currentTime + idx * 0.07;
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(freq, t);
+          gain.gain.setValueAtTime(0.18, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.16);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.16);
+        });
+      } else if (style === "word-flash") {
+        // Fast electronic arcade countdown pulse for Word Flash
+        const freqs = [523.25, 659.25, 783.99];
+        freqs.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const t = ctx.currentTime + idx * 0.05;
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq, t);
+          gain.gain.setValueAtTime(0.16, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.12);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.12);
+        });
+      } else if (style === "guess-faster") {
+        // Mystery puzzle chime for Guess Words
+        const freqs = [440, 554.37, 659.25, 880];
+        freqs.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const t = ctx.currentTime + idx * 0.06;
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(freq, t);
+          gain.gain.setValueAtTime(0.18, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.2);
+        });
+      } else {
+        // Tactical strategy start chord for Row 5 / Grid
+        const freqs = [329.63, 392, 493.88, 659.25];
+        freqs.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const t = ctx.currentTime + idx * 0.06;
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(freq, t);
+          gain.gain.setValueAtTime(0.2, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.25);
+        });
+      }
+    } catch {}
+  }
 }
 
 export const gameAudio = new GameAudioSynthesizer();
