@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { TelegramWebApp } from "@/types/telegram";
 import { MiniGameType } from "@/components/views/MiniGameFullView";
 import { StatsGraphCard } from "@/components/promo/StatsGraphCard";
+import { HighlightSportsCard } from "@/components/promo/HighlightSportsCard";
+import { AdItem } from "@/data/adsRegistry";
 
 interface WinGramPromoCardsProps {
   score?: number;
@@ -12,6 +14,7 @@ interface WinGramPromoCardsProps {
   onOpenDeposit?: () => void;
   onOpenTapVault?: () => void;
   onOpenStats?: () => void;
+  onOpenAdDetail?: (ad: AdItem) => void;
   onSelectGame?: (game: MiniGameType) => void;
   tgApp: TelegramWebApp | null;
 }
@@ -68,10 +71,12 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
   score = 0,
   onOpenTapVault,
   onOpenStats,
+  onOpenAdDetail,
   onSelectGame,
   tgApp,
 }) => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [heroMode, setHeroMode] = useState<"ads" | "stats">("ads");
 
   const handleHeroClick = () => {
     try {
@@ -106,9 +111,37 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
       {/* Main Cards Grid (Left Hero Card + Right 2x2 Mini Game Blocks) */}
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
         {/* ======================================================== */}
-        {/* 1. HERO CARD — Real-time Vault Stats Graph (Recharts)    */}
+        {/* 1. HERO CARD — Collectible Sports Ad Highlight & Stats    */}
         {/* ======================================================== */}
-        <StatsGraphCard score={score} onClick={handleHeroClick} />
+        {heroMode === "ads" ? (
+          <div className="sm:col-span-6 relative flex flex-col justify-between">
+            <HighlightSportsCard onOpenAdDetail={onOpenAdDetail} />
+            <div className="flex items-center justify-between px-1 pt-1 text-[10px] select-none">
+              <span className="text-slate-400 font-bold">Featured Official Highlights</span>
+              <button
+                type="button"
+                onClick={() => setHeroMode("stats")}
+                className="text-[#0098ea] hover:underline font-bold cursor-pointer"
+              >
+                View Vault Stats →
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="sm:col-span-6 relative flex flex-col justify-between">
+            <StatsGraphCard score={score} onClick={handleHeroClick} />
+            <div className="flex items-center justify-between px-1 pt-1 text-[10px] select-none">
+              <span className="text-slate-400 font-bold">Live Performance Trend</span>
+              <button
+                type="button"
+                onClick={() => setHeroMode("ads")}
+                className="text-amber-500 hover:underline font-bold cursor-pointer"
+              >
+                View Partner Highlights →
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ======================================================== */}
         {/* 2. 2x2 MINI GAME BLOCKS (Title top, Stats number bottom)  */}

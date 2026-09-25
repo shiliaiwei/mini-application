@@ -27,6 +27,9 @@ import { BanknoteCreditCards } from "@/components/cards/BanknoteCreditCards";
 import { NavCategory } from "@/components/navigation/CategoryBar";
 import { MiniGameType } from "@/components/views/MiniGameFullView";
 
+import { LiveActivityTicker } from "@/components/promo/LiveActivityTicker";
+import { AdItem } from "@/data/adsRegistry";
+
 interface FloatingPoint {
   id: number;
   x: number;
@@ -51,6 +54,7 @@ interface TapGameViewProps {
   onSelectCategory?: (cat: NavCategory) => void;
   onSelectGame?: (game: MiniGameType) => void;
   onOpenStats?: () => void;
+  onOpenAdDetail?: (ad: AdItem) => void;
   user: TelegramUser | null;
   tgApp: TelegramWebApp | null;
 }
@@ -70,6 +74,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
   onSelectCategory,
   onSelectGame,
   onOpenStats,
+  onOpenAdDetail,
   user,
   tgApp,
 }) => {
@@ -574,48 +579,9 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
   // ==============================================================
   return (
     <div className="flex flex-col items-center justify-between min-h-[calc(100dvh-150px)] pb-28 select-none font-sans text-slate-900 max-w-xl mx-auto w-full px-1">
-      {/* 1. Top Brand & Visibility Status Bar */}
-      <div className="w-full space-y-2.5 pt-0.5">
-        <div className="flex items-center justify-between px-1 pt-8">
-          {/* Brand Logo (Full word logo: SHILIAI [WEI], no duplicate text alongside) */}
-          <div className="flex items-center">
-            <ShiliaiweiBrand height={22} colorScheme="blue" />
-          </div>
-
-          {/* Top Actions: Eye Toggle, Notifications, User Avatar */}
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => setShowBalances(!showBalances)}
-              className="w-10 h-10 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 flex items-center justify-center transition-colors shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] cursor-pointer"
-              aria-label={showBalances ? "Hide Balances" : "Show Balances"}
-              title={showBalances ? "Hide Balances" : "Show Balances"}
-            >
-              {showBalances ? (
-                <Eye size={20} className="text-slate-700" />
-              ) : (
-                <EyeOff size={20} className="text-slate-500" />
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSubView("receive")}
-              className="w-10 h-10 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 flex items-center justify-center transition-colors shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] cursor-pointer"
-              aria-label="Vault Notifications and Address"
-              title="Vault Address"
-            >
-              <Bell size={20} className="text-slate-700" />
-            </button>
-
-            <div className="flex items-center gap-1 pl-1">
-              <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-800">
-                {user?.first_name ? user.first_name.slice(0, 2).toUpperCase() : "VS"}
-              </div>
-              {user && <TelegramVerifiedBadge size={14} />}
-            </div>
-          </div>
-        </div>
+      {/* 1. Live Notification Stream & Activity Ticker */}
+      <div className="w-full space-y-2 pt-1">
+        <LiveActivityTicker className="mb-1" />
 
         {/* 2. DUAL KHMER & DOLLAR BANKNOTE CREDIT CARDS */}
         <BanknoteCreditCards
@@ -633,7 +599,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           onOpenAddress={() => setSubView("receive")}
         />
 
-        {/* 3. WINGRAM HERO PROMO & BONUS CARDS (No icons, pure typography, no guide text!) */}
+        {/* 3. WINGRAM HERO PROMO & BONUS CARDS (Highlight Sports Ads + Stats) */}
         <WinGramPromoCards
           score={score}
           totalPlayed={spendSeconds * 5 + Math.floor(score * 0.4)}
@@ -641,6 +607,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           onOpenDeposit={() => setSubView("deposit")}
           onOpenTapVault={() => setSubView("tap-vault")}
           onOpenStats={onOpenStats}
+          onOpenAdDetail={onOpenAdDetail}
           onSelectGame={onSelectGame}
           tgApp={tgApp}
         />
