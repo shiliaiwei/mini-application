@@ -35,6 +35,216 @@ export async function answerInlineQuery(inlineQueryId: string, results: unknown[
   });
 }
 
+export function getAppUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL || "https://app.kesararamwithdigital.tech";
+}
+
+// Interactive Welcome & App Description Menu
+export async function sendStartMenu(chatId: number, firstName?: string) {
+  const appUrl = getAppUrl();
+  const greeting = firstName ? `Hello, ${firstName}!` : "Welcome!";
+
+  const welcomeText = `*${greeting} Welcome to SHILIAIWEI (សិលាអាយវ៉ី)*
+
+*What this app is used for:*
+SHILIAIWEI is an all-in-one Web3 Mini App and Tap-to-Earn gaming vault built natively inside Telegram.
+
+*Core Features:*
+- *Tap Vault & Multi-Currency:* Earn PTS points and manage live balances across USD, KHR (Riel), TON, and SHI tokens.
+- *6 Interactive Mini-Games:* Play Lucky Wheel, Word Flash, Guess Faster, Row 5 Gomoku, Number Match, and Flip Cards to win daily point rewards.
+- *33 Verified Institutional Partners:* Explore official Cambodian ministries and institutions, access public digital services, and claim rewards.
+- *Live Leaderboard & Claims:* Compete nationwide with real-time player claims and earn hourly bonuses.
+
+Tap the button below to open the app:`;
+
+  const replyMarkup = {
+    inline_keyboard: [
+      [
+        {
+          text: "Open App / បើកកម្មវិធី",
+          web_app: { url: appUrl },
+        },
+      ],
+      [
+        {
+          text: "About App",
+          callback_data: "menu_about",
+        },
+        {
+          text: "How to Earn PTS",
+          callback_data: "menu_earn",
+        },
+      ],
+      [
+        {
+          text: "Institutional Partners",
+          callback_data: "menu_partners",
+        },
+        {
+          text: "Bot Commands",
+          callback_data: "menu_help",
+        },
+      ],
+    ],
+  };
+
+  // Configure chat menu button
+  try {
+    await sendTelegramApi("setChatMenuButton", {
+      chat_id: chatId,
+      menu_button: {
+        type: "web_app",
+        text: "Open App",
+        web_app: { url: appUrl },
+      },
+    });
+  } catch {}
+
+  return sendMessage(chatId, welcomeText, replyMarkup);
+}
+
+export async function sendAboutDetails(chatId: number) {
+  const appUrl = getAppUrl();
+  const text = `*About SHILIAIWEI Mini App*
+
+SHILIAIWEI is a high-performance Web3 Mini App and Tap-to-Earn gaming ecosystem on Telegram.
+
+*Technology:*
+- Built with Next.js 16, React 19, and Tailwind CSS.
+- Real-time data persistence with Neon PostgreSQL and Telegram WebApp integration.
+- Liquid glass aesthetic with responsive auto-fitting and dual-language support (Khmer and English).
+
+*Mission:*
+To provide a smooth, engaging platform combining digital multi-currency asset tracking, casual mini-games, and access to verified Cambodian public sector services.
+
+Direct WebApp Link: ${appUrl}`;
+
+  const replyMarkup = {
+    inline_keyboard: [
+      [
+        {
+          text: "Launch App Now",
+          web_app: { url: appUrl },
+        },
+      ],
+      [
+        {
+          text: "How to Earn",
+          callback_data: "menu_earn",
+        },
+        {
+          text: "Back to Menu",
+          callback_data: "menu_start",
+        },
+      ],
+    ],
+  };
+
+  return sendMessage(chatId, text, replyMarkup);
+}
+
+export async function sendEarnDetails(chatId: number) {
+  const appUrl = getAppUrl();
+  const text = `*How to Earn PTS & Rewards in SHILIAIWEI:*
+
+1. *Tap Vault:*
+   Tap the central vault on the home screen to harvest PTS continuously. Upgrade your tier to increase tap capacity.
+
+2. *Interactive Mini-Games:*
+   - *Daily Spin Wheel:* Test your luck to win high-multiplier PTS payouts.
+   - *Word Flash:* Fast reflex word recognition game.
+   - *Guess Faster:* Rapid quiz game testing speed and knowledge.
+   - *Row 5 Gomoku:* Classic tactical 5-in-a-row board challenge.
+   - *Number Match:* Pattern matching logic game.
+   - *Flip Card:* Memory matching challenge with bonus rounds.
+
+3. *Institutional Services:*
+   Explore any of the 33 verified Cambodian ministry pages in the app and claim +100 to +300 PTS per verified public service.
+
+4. *Daily Check-ins & Streaks:*
+   Log in daily to claim escalating streak multipliers.`;
+
+  const replyMarkup = {
+    inline_keyboard: [
+      [
+        {
+          text: "Start Earning (Open App)",
+          web_app: { url: appUrl },
+        },
+      ],
+      [
+        {
+          text: "Institutional Partners",
+          callback_data: "menu_partners",
+        },
+        {
+          text: "Back to Menu",
+          callback_data: "menu_start",
+        },
+      ],
+    ],
+  };
+
+  return sendMessage(chatId, text, replyMarkup);
+}
+
+export async function sendPartnersDetails(chatId: number) {
+  const appUrl = getAppUrl();
+  const text = `*Verified Institutional Partners:*
+
+SHILIAIWEI features 33 official Cambodian ministries, government bodies, and public institutions, including:
+- Ministry of Public Works and Transport
+- Ministry of Economy and Finance
+- National Bank of Cambodia
+- Ministry of Interior
+- Ministry of Education, Youth and Sport
+- Ministry of Health
+- ...and 27 additional verified national institutions.
+
+Each partner card displays the official emblem, full titles in Khmer and English, and links to official public e-services where users earn PTS rewards for exploring national digital infrastructure.`;
+
+  const replyMarkup = {
+    inline_keyboard: [
+      [
+        {
+          text: "Explore Partners in App",
+          web_app: { url: appUrl },
+        },
+      ],
+      [
+        {
+          text: "Back to Menu",
+          callback_data: "menu_start",
+        },
+      ],
+    ],
+  };
+
+  return sendMessage(chatId, text, replyMarkup);
+}
+
+export async function sendHelpMenu(chatId: number) {
+  const appUrl = getAppUrl();
+  const replyMarkup = {
+    inline_keyboard: [
+      [
+        {
+          text: "Open App / បើកកម្មវិធី",
+          web_app: { url: appUrl },
+        },
+      ],
+      [
+        {
+          text: "Back to Menu",
+          callback_data: "menu_start",
+        },
+      ],
+    ],
+  };
+
+  return sendMessage(chatId, HELP_TEXT, replyMarkup);
+}
+
 // Help Menu
 export const HELP_TEXT = `*SHILIAIWEI Bot Manager (Official BotFather-Standard)*
 
@@ -103,6 +313,22 @@ export async function processTelegramUpdate(update: TelegramUpdate) {
 
     await sendTelegramApi("answerCallbackQuery", { callback_query_id: cq.id });
 
+    if (data === "menu_start") {
+      return sendStartMenu(chatId, cq.from.first_name);
+    }
+    if (data === "menu_about") {
+      return sendAboutDetails(chatId);
+    }
+    if (data === "menu_earn") {
+      return sendEarnDetails(chatId);
+    }
+    if (data === "menu_partners") {
+      return sendPartnersDetails(chatId);
+    }
+    if (data === "menu_help") {
+      return sendHelpMenu(chatId);
+    }
+
     if (data.startsWith("bot_select:")) {
       const parts = data.split(":");
       const targetAction = parts[1];
@@ -156,13 +382,43 @@ export async function processTelegramUpdate(update: TelegramUpdate) {
   // Cancel Command
   if (lowerText === "/cancel") {
     await db.clearConversationState(userId);
-    return sendMessage(chatId, "Current action cancelled.\n\nType /help to view all available commands.");
+    return sendMessage(chatId, "Current action cancelled.\n\nType /menu to view the main menu or /help for commands.");
   }
 
-  // Help & Start
-  if (lowerText === "/start" || lowerText === "/help") {
+  // Start & Main Menu (replies with launch button and short description of app)
+  if (
+    lowerText === "/start" ||
+    lowerText === "/menu" ||
+    lowerText === "menu" ||
+    lowerText === "start" ||
+    lowerText === "main menu"
+  ) {
     await db.clearConversationState(userId);
-    return sendMessage(chatId, HELP_TEXT);
+    return sendStartMenu(chatId, msg.from?.first_name);
+  }
+
+  // About App
+  if (lowerText === "/about" || lowerText === "about") {
+    await db.clearConversationState(userId);
+    return sendAboutDetails(chatId);
+  }
+
+  // How to Earn
+  if (lowerText === "/earn" || lowerText === "earn" || lowerText === "how to earn") {
+    await db.clearConversationState(userId);
+    return sendEarnDetails(chatId);
+  }
+
+  // Institutional Partners
+  if (lowerText === "/partners" || lowerText === "partners") {
+    await db.clearConversationState(userId);
+    return sendPartnersDetails(chatId);
+  }
+
+  // Help
+  if (lowerText === "/help" || lowerText === "help") {
+    await db.clearConversationState(userId);
+    return sendHelpMenu(chatId);
   }
 
   // Check Active State Machine
