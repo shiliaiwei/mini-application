@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 
 interface BanknoteCreditCardsProps {
   score: number;
@@ -52,10 +51,8 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = ({
           </span>
         </div>
 
-        {/* Left Side: Brand Wordmark */}
-        <div className="relative z-20 flex items-center justify-center">
-          <ShiliaiweiBrand variant="wordmark" height={20} colorScheme="white" />
-        </div>
+        {/* Left Side: Empty spacer */}
+        <div className="relative z-20" />
 
         {/* Right Side: Riel Balance */}
         <div
@@ -95,10 +92,8 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = ({
           </span>
         </div>
 
-        {/* Left Side: Brand Wordmark */}
-        <div className="relative z-20 flex items-center justify-center">
-          <ShiliaiweiBrand variant="wordmark" height={20} colorScheme="white" />
-        </div>
+        {/* Left Side: Empty spacer */}
+        <div className="relative z-20" />
 
         {/* Right Side: Dollar Balance */}
         <div
