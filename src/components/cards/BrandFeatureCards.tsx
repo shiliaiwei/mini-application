@@ -12,6 +12,7 @@ import {
   Repeat,
   ChevronDown,
   ArrowUpRight,
+  Check,
   Sparkles,
 } from "@/components/icons/KeylineIcons";
 import { NavCategory } from "@/components/navigation/CategoryBar";
@@ -348,38 +349,45 @@ export const BrandFeatureCards: React.FC<BrandFeatureCardsProps> = ({
 
   return (
     <section className="w-full space-y-2.5 select-none font-sans pt-1">
-      {/* Header with Drag & Drop Controls */}
+      {/* Header with ONE Clean Edit/Order Icon Button */}
       <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-            Feature Cards
-          </span>
-          <span className="text-[10px] bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded text-slate-500 font-medium">
-            Drag to Reorder
-          </span>
-        </div>
+        <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+          Feature Cards
+        </span>
 
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => setReorderMode(!reorderMode)}
-            className={`text-[11px] font-bold px-2 py-0.5 rounded-lg border transition-colors ${
-              reorderMode
-                ? "bg-[#0098ea] text-white border-[#0098ea]"
-                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-            }`}
-          >
-            {reorderMode ? "Done" : "Adjust Order"}
-          </button>
-          <button
-            type="button"
-            onClick={handleResetOrder}
-            className="text-[11px] text-slate-400 hover:text-slate-700 px-1 font-medium"
-            title="Reset to default card layout"
-          >
-            Reset
-          </button>
-        </div>
+        {/* ONE Icon for Edit / Order */}
+        <button
+          type="button"
+          onClick={() => {
+            setReorderMode(!reorderMode);
+            tgApp?.HapticFeedback?.selectionChanged();
+          }}
+          className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all active:scale-90 shadow-2xs ${
+            reorderMode
+              ? "bg-[#0098ea] text-white border-[#0098ea]"
+              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+          }`}
+          title={reorderMode ? "Done Reordering" : "Reorder Cards"}
+          aria-label={reorderMode ? "Done Reordering" : "Reorder Cards"}
+        >
+          {reorderMode ? (
+            <Check size={16} />
+          ) : (
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M7 15l5 5 5-5" />
+              <path d="M7 9l5-5 5 5" />
+            </svg>
+          )}
+        </button>
       </div>
 
       {/* Stacked Horizontal Card Blocks List (Matching Reference Block Style) */}
@@ -402,6 +410,8 @@ export const BrandFeatureCards: React.FC<BrandFeatureCardsProps> = ({
                   ? "opacity-50 scale-95 border-[#0098ea] shadow-lg"
                   : isOver
                   ? "border-[#0098ea] ring-2 ring-[#0098ea]/20 scale-[1.01]"
+                  : reorderMode
+                  ? "border-sky-300 shadow-xs"
                   : "border-slate-200/90 hover:border-slate-300 hover:shadow-sm active:scale-[0.99]"
               }`}
             >
@@ -463,39 +473,43 @@ export const BrandFeatureCards: React.FC<BrandFeatureCardsProps> = ({
                 </div>
               </div>
 
-              {/* Right Column: Graphic Preview Showcase Box */}
+              {/* Right Column: Graphic Preview or Reorder Controls in Edit Mode */}
               <div className="relative z-10 flex-shrink-0 w-24 sm:w-28 h-20 flex items-center justify-center">
-                {renderGraphicPreview(card)}
+                {reorderMode ? (
+                  <div
+                    className="w-full h-full rounded-xl bg-slate-50 border border-slate-200 p-1.5 flex flex-col justify-between items-center"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-center gap-1.5 w-full">
+                      <button
+                        type="button"
+                        disabled={idx === 0}
+                        onClick={() => handleMoveCard(idx, "up")}
+                        className="w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-700 flex items-center justify-center hover:bg-slate-100 disabled:opacity-25 active:scale-95 transition-all shadow-2xs"
+                        title="Move Up"
+                        aria-label={`Move ${card.title} up`}
+                      >
+                        <ChevronDown size={14} className="rotate-180" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={idx === cards.length - 1}
+                        onClick={() => handleMoveCard(idx, "down")}
+                        className="w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-700 flex items-center justify-center hover:bg-slate-100 disabled:opacity-25 active:scale-95 transition-all shadow-2xs"
+                        title="Move Down"
+                        aria-label={`Move ${card.title} down`}
+                      >
+                        <ChevronDown size={14} />
+                      </button>
+                    </div>
+                    <span className="text-[9px] font-black text-[#0098ea] tracking-wider uppercase">
+                      Pos #{idx + 1}
+                    </span>
+                  </div>
+                ) : (
+                  renderGraphicPreview(card)
+                )}
               </div>
-
-              {/* Mobile Touch Reorder Buttons (Visible in Reorder Mode) */}
-              {reorderMode && (
-                <div
-                  className="absolute right-2 top-2 z-20 flex flex-col gap-1 bg-white/95 p-1 rounded-xl border border-slate-200 shadow-md"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    type="button"
-                    disabled={idx === 0}
-                    onClick={() => handleMoveCard(idx, "up")}
-                    className="p-1 rounded hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="Move Up"
-                    aria-label={`Move ${card.title} up`}
-                  >
-                    <ChevronDown size={16} className="rotate-180" />
-                  </button>
-                  <button
-                    type="button"
-                    disabled={idx === cards.length - 1}
-                    onClick={() => handleMoveCard(idx, "down")}
-                    className="p-1 rounded hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="Move Down"
-                    aria-label={`Move ${card.title} down`}
-                  >
-                    <ChevronDown size={16} />
-                  </button>
-                </div>
-              )}
             </div>
           );
         })}

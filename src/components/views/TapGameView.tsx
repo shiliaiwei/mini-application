@@ -29,7 +29,7 @@ import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 import { WinGramPromoCards } from "@/components/promo/WinGramPromoCards";
 import { BanknoteCreditCards } from "@/components/cards/BanknoteCreditCards";
-import { BrandFeatureCards } from "@/components/cards/BrandFeatureCards";
+import { ClaimPointsGameHub } from "@/components/games/ClaimPointsGameHub";
 import { NavCategory } from "@/components/navigation/CategoryBar";
 
 interface FloatingPoint {
@@ -242,41 +242,20 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           onOpenAddress={() => setShowAddressModal(true)}
         />
 
-        {/* 3. WINGRAM HERO PROMO & BONUS CARDS (Sports free bet + Turbine of Fortune 2x2 grid) */}
+        {/* 3. WINGRAM HERO PROMO & BONUS CARDS (Sports free bet + Fortune 2x2 grid) */}
         <WinGramPromoCards
           onAddScore={onAddScore || (() => {})}
           onOpenDeposit={() => setShowDepositModal(true)}
-          tgApp={tgApp}
-        />
-
-
-
-
-        {/* 3. REORDERABLE BRAND FEATURE CARDS (Tap Vault, Missions, Tournaments, Popular, Favorites, Settings, Swap) */}
-        <BrandFeatureCards
-          score={score}
-          energy={energy}
-          maxEnergy={maxEnergy}
-          tapPower={tapPower}
-          onQuickTap={onTap}
           onOpenTapVault={() => setShowTapVaultModal(true)}
-          onSelectCategory={(cat) => {
-            if (cat === "swap") {
-              onGoToSwap?.();
-            } else if (onSelectCategory) {
-              onSelectCategory(cat);
-            } else if (cat === "earn") {
-              onGoToEarn?.();
-            } else if (cat === "settings") {
-              onGoToSettings?.();
-            }
-          }}
           tgApp={tgApp}
         />
 
-
-
-
+        {/* 4. CLAIM POINTS GAMES CARD BLOCK (Word Flash, Guess Faster, Tic Tac & Row 5 Winner) */}
+        <ClaimPointsGameHub
+          score={score}
+          onAddScore={onAddScore || (() => {})}
+          tgApp={tgApp}
+        />
       </div>
 
       {/* MODAL: Tap Vault Medallion & Energy Minting */}

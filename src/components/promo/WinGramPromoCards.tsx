@@ -15,12 +15,14 @@ import {
 interface WinGramPromoCardsProps {
   onAddScore: (amount: number) => void;
   onOpenDeposit?: () => void;
+  onOpenTapVault?: () => void;
   tgApp: TelegramWebApp | null;
 }
 
 export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
   onAddScore,
   onOpenDeposit,
+  onOpenTapVault,
   tgApp,
 }) => {
   const [heroSlide, setHeroSlide] = useState(0);
@@ -37,17 +39,17 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
 
   const heroSlides = [
     {
-      title: "Sports free bet up to 1,000 $",
+      title: "Sports Free Bet up to $1,000",
       reward: 1000,
       badge: "HOT PROMO",
     },
     {
-      title: "Vault free bonus up to 2,500 $",
+      title: "Vault Bonus up to $2,500",
       reward: 2500,
       badge: "VIP VAULT",
     },
     {
-      title: "Daily crypto yield up to 15%",
+      title: "Daily Yield up to 15%",
       reward: 1500,
       badge: "EXCLUSIVE",
     },
@@ -60,7 +62,11 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
 
   const handleHeroGet = () => {
     if (claimedHero) {
-      showToast("Hero bonus already claimed for today!");
+      if (heroSlide === 1 && onOpenTapVault) {
+        onOpenTapVault();
+      } else {
+        showToast("Hero bonus already claimed for today!");
+      }
       return;
     }
     const amount = heroSlides[heroSlide].reward;
@@ -70,6 +76,9 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
       tgApp?.HapticFeedback?.notificationOccurred("success");
     } catch {}
     showToast(`Bonus Claimed! +${amount.toLocaleString()} PTS added to Vault!`);
+    if (heroSlide === 1 && onOpenTapVault) {
+      setTimeout(() => onOpenTapVault(), 800);
+    }
   };
 
   const handlePrevSlide = (e: React.MouseEvent) => {
@@ -170,11 +179,11 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
       )}
 
       {/* Main Promo Grid: Left Big Banner + Right 2x2 Bonus Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
         {/* ======================================================== */}
-        {/* 1. LARGE HERO PROMO BANNER (Sports Free Bet up to 1,000 $) */}
+        {/* 1. LARGE HERO PROMO BANNER (Sports Free Bet up to $1,000) */}
         {/* ======================================================== */}
-        <div className="lg:col-span-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-4 text-white shadow-sm flex flex-col justify-between min-h-[175px] sm:min-h-[190px] border border-blue-400/30">
+        <div className="sm:col-span-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3.5 sm:p-4 text-white shadow-xs flex flex-col justify-between min-h-[175px] sm:min-h-[195px] border border-blue-400/30">
           {/* Subtle Telegram Paper Plane Watermark Pattern in Background */}
           <div className="absolute inset-0 pointer-events-none opacity-10 flex flex-wrap gap-6 p-2 overflow-hidden select-none">
             {[...Array(12)].map((_, i) => (
@@ -189,17 +198,17 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
           </div>
 
           {/* Top Left: Title & Headline */}
-          <div className="relative z-10 max-w-[210px] sm:max-w-[250px]">
+          <div className="relative z-10 max-w-[170px] sm:max-w-[210px]">
             <h2 className="text-xl sm:text-2xl font-black leading-tight tracking-tight text-white drop-shadow-xs">
               {heroSlides[heroSlide].title}
             </h2>
           </div>
 
           {/* 3D Mascot Character (Diamond Mascot with Shoes & Sports Ball) */}
-          <div className="absolute right-2.5 sm:right-6 bottom-0 top-1 pointer-events-none flex items-center justify-end z-10">
+          <div className="absolute right-0 sm:right-2 bottom-0 top-1 pointer-events-none flex items-center justify-end z-10">
             <svg
               viewBox="0 0 160 170"
-              className="w-36 h-36 sm:w-44 sm:h-44 filter drop-shadow-xl"
+              className="w-32 h-32 sm:w-38 sm:h-38 filter drop-shadow-xl"
             >
               {/* Circular blue glowing platform */}
               <ellipse
@@ -349,16 +358,16 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
         </div>
 
         {/* ======================================================== */}
-        {/* 2. 2x2 BONUS CARDS GRID (Turbine, Weekly, Monthly, Deposit) */}
+        {/* 2. 2x2 BONUS CARDS GRID (Fortune, Weekly, Monthly, Deposit) */}
         {/* ======================================================== */}
-        <div className="lg:col-span-6 grid grid-cols-2 gap-2.5">
-          {/* Card 1: Daily Turbine of Fortune */}
+        <div className="sm:col-span-6 grid grid-cols-2 gap-2 sm:gap-2.5">
+          {/* Card 1: Daily Spin */}
           <div
             role="button"
             tabIndex={0}
             onClick={() => setShowWheelModal(true)}
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setShowWheelModal(true)}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-sm flex flex-col justify-between min-h-[88px] sm:min-h-[92px] border border-blue-400/30 cursor-pointer active:scale-[0.98] transition-all hover:shadow-md"
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between min-h-[92px] sm:min-h-[96px] border border-blue-400/30 cursor-pointer active:scale-[0.98] transition-all hover:shadow-md"
           >
             {/* Watermark Planes */}
             <div className="absolute inset-0 pointer-events-none opacity-10 flex gap-4 p-1 overflow-hidden select-none">
@@ -367,16 +376,16 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
               </svg>
             </div>
 
-            {/* Title */}
-            <div className="relative z-10 max-w-[100px] sm:max-w-[120px]">
+            {/* Short Title on Left */}
+            <div className="relative z-10 max-w-[78px] sm:max-w-[95px]">
               <span className="text-xs sm:text-[13px] font-bold leading-tight block text-white drop-shadow-xs">
-                Daily Turbine of Fortune
+                Daily Spin
               </span>
             </div>
 
-            {/* 3D Wheel of Fortune Graphic */}
-            <div className="absolute right-1 -top-1 bottom-0 pointer-events-none flex items-center z-10">
-              <svg viewBox="0 0 100 100" className="w-20 h-20 filter drop-shadow-md">
+            {/* 3D Wheel of Fortune Graphic on Right */}
+            <div className="absolute -right-0.5 -top-1 pointer-events-none flex items-center z-10">
+              <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-16 sm:h-16 filter drop-shadow-md">
                 <circle cx="50" cy="50" r="44" fill="#ffd166" stroke="#f4a261" strokeWidth="3" />
                 <path d="M50 50 L50 8 A42 42 0 0 1 80 20 Z" fill="#4361ee" />
                 <path d="M50 50 L80 20 A42 42 0 0 1 92 50 Z" fill="#7209b7" />
@@ -395,14 +404,14 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             </div>
 
             {/* Pill Button: [1] Spin */}
-            <div className="relative z-20 pt-2">
+            <div className="relative z-20 pt-1.5">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowWheelModal(true);
                 }}
-                className="bg-white hover:bg-slate-100 text-slate-900 font-bold text-[11px] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer"
+                className="bg-white hover:bg-slate-100 text-slate-900 font-bold text-[11px] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
               >
                 <span className="w-4 h-4 rounded-full bg-[#ff5500] text-white text-[9px] font-black flex items-center justify-center flex-shrink-0">
                   1
@@ -418,7 +427,7 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             tabIndex={0}
             onClick={handleWeeklyActivate}
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleWeeklyActivate()}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-sm flex flex-col justify-between min-h-[88px] sm:min-h-[92px] border border-blue-400/30 cursor-pointer active:scale-[0.98] transition-all hover:shadow-md"
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between min-h-[92px] sm:min-h-[96px] border border-blue-400/30 cursor-pointer active:scale-[0.98] transition-all hover:shadow-md"
           >
             {/* Watermark Planes */}
             <div className="absolute inset-0 pointer-events-none opacity-10 flex gap-4 p-1 overflow-hidden select-none">
@@ -427,16 +436,16 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
               </svg>
             </div>
 
-            {/* Title */}
-            <div className="relative z-10 max-w-[100px] sm:max-w-[120px]">
+            {/* Short Title on Left */}
+            <div className="relative z-10 max-w-[78px] sm:max-w-[95px]">
               <span className="text-xs sm:text-[13px] font-bold leading-tight block text-white drop-shadow-xs">
-                Weekly bonus
+                Weekly Bonus
               </span>
             </div>
 
-            {/* 3D Calendar with "7" Graphic */}
-            <div className="absolute right-1.5 -top-1 bottom-0 pointer-events-none flex items-center z-10">
-              <svg viewBox="0 0 100 100" className="w-20 h-20 filter drop-shadow-md">
+            {/* 3D Calendar with "7" Graphic on Right */}
+            <div className="absolute -right-0.5 -top-1 pointer-events-none flex items-center z-10">
+              <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-16 sm:h-16 filter drop-shadow-md">
                 {/* 3D Calendar Body */}
                 <rect x="18" y="24" width="64" height="60" rx="8" fill="#ffffff" stroke="#005f99" strokeWidth="2" />
                 <rect x="18" y="24" width="64" height="18" rx="6" fill="#0088cc" />
@@ -455,14 +464,14 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             </div>
 
             {/* Pill Button: [1] Activate */}
-            <div className="relative z-20 pt-2">
+            <div className="relative z-20 pt-1.5">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleWeeklyActivate();
                 }}
-                className="bg-white hover:bg-slate-100 text-slate-900 font-bold text-[11px] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer"
+                className="bg-white hover:bg-slate-100 text-slate-900 font-bold text-[11px] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
               >
                 <span className="w-4 h-4 rounded-full bg-[#ff5500] text-white text-[9px] font-black flex items-center justify-center flex-shrink-0">
                   {claimedWeekly ? "✓" : "1"}
@@ -478,7 +487,7 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             tabIndex={0}
             onClick={handleMonthlyActivate}
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleMonthlyActivate()}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-sm flex flex-col justify-between min-h-[88px] sm:min-h-[92px] border border-blue-400/30 cursor-pointer active:scale-[0.98] transition-all hover:shadow-md"
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between min-h-[92px] sm:min-h-[96px] border border-blue-400/30 cursor-pointer active:scale-[0.98] transition-all hover:shadow-md"
           >
             {/* Watermark Planes */}
             <div className="absolute inset-0 pointer-events-none opacity-10 flex gap-4 p-1 overflow-hidden select-none">
@@ -487,16 +496,16 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
               </svg>
             </div>
 
-            {/* Title */}
-            <div className="relative z-10 max-w-[100px] sm:max-w-[120px]">
+            {/* Short Title on Left */}
+            <div className="relative z-10 max-w-[78px] sm:max-w-[95px]">
               <span className="text-xs sm:text-[13px] font-bold leading-tight block text-white drop-shadow-xs">
-                Monthly bonus
+                Monthly Bonus
               </span>
             </div>
 
-            {/* 3D Calendar with Gold Vault Graphic */}
-            <div className="absolute right-1.5 -top-1 bottom-0 pointer-events-none flex items-center z-10">
-              <svg viewBox="0 0 100 100" className="w-20 h-20 filter drop-shadow-md">
+            {/* 3D Calendar with Gold Vault Graphic on Right */}
+            <div className="absolute -right-0.5 -top-1 pointer-events-none flex items-center z-10">
+              <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-16 sm:h-16 filter drop-shadow-md">
                 <rect x="18" y="24" width="64" height="60" rx="8" fill="#ffffff" stroke="#005f99" strokeWidth="2" />
                 <rect x="18" y="24" width="64" height="18" rx="6" fill="#0088cc" />
                 <rect x="30" y="16" width="6" height="14" rx="3" fill="#ffd166" />
@@ -513,14 +522,14 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             </div>
 
             {/* Pill Button: [1] Activate */}
-            <div className="relative z-20 pt-2">
+            <div className="relative z-20 pt-1.5">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleMonthlyActivate();
                 }}
-                className="bg-white hover:bg-slate-100 text-slate-900 font-bold text-[11px] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer"
+                className="bg-white hover:bg-slate-100 text-slate-900 font-bold text-[11px] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
               >
                 <span className="w-4 h-4 rounded-full bg-[#ff5500] text-white text-[9px] font-black flex items-center justify-center flex-shrink-0">
                   {claimedMonthly ? "✓" : "1"}
@@ -530,13 +539,13 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             </div>
           </div>
 
-          {/* Card 4: Daily +5% Deposit Bonus */}
+          {/* Card 4: +5% Deposit */}
           <div
             role="button"
             tabIndex={0}
             onClick={handleDepositActivate}
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleDepositActivate()}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-sm flex flex-col justify-between min-h-[88px] sm:min-h-[92px] border border-blue-400/30 cursor-pointer active:scale-[0.98] transition-all hover:shadow-md"
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-3 text-white shadow-xs flex flex-col justify-between min-h-[92px] sm:min-h-[96px] border border-blue-400/30 cursor-pointer active:scale-[0.98] transition-all hover:shadow-md"
           >
             {/* Watermark Planes */}
             <div className="absolute inset-0 pointer-events-none opacity-10 flex gap-4 p-1 overflow-hidden select-none">
@@ -545,16 +554,16 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
               </svg>
             </div>
 
-            {/* Title */}
-            <div className="relative z-10 max-w-[100px] sm:max-w-[120px]">
+            {/* Short Title on Left */}
+            <div className="relative z-10 max-w-[78px] sm:max-w-[95px]">
               <span className="text-xs sm:text-[13px] font-bold leading-tight block text-white drop-shadow-xs">
-                Daily +5% deposit bonus
+                +5% Deposit
               </span>
             </div>
 
-            {/* 3D Horseshoe Magnet with TON Coins */}
-            <div className="absolute right-1 -top-1 bottom-0 pointer-events-none flex items-center z-10">
-              <svg viewBox="0 0 100 100" className="w-20 h-20 filter drop-shadow-md">
+            {/* 3D Horseshoe Magnet with TON Coins on Right */}
+            <div className="absolute -right-0.5 -top-1 pointer-events-none flex items-center z-10">
+              <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-16 sm:h-16 filter drop-shadow-md">
                 {/* Horseshoe Magnet */}
                 <path
                   d="M40 30 C40 15, 75 15, 75 30 L75 60 C75 75, 40 75, 40 60 Z"
@@ -575,14 +584,14 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
             </div>
 
             {/* Pill Button: [1] Activate */}
-            <div className="relative z-20 pt-2">
+            <div className="relative z-20 pt-1.5">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDepositActivate();
                 }}
-                className="bg-white hover:bg-slate-100 text-slate-900 font-bold text-[11px] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer"
+                className="bg-white hover:bg-slate-100 text-slate-900 font-bold text-[11px] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
               >
                 <span className="w-4 h-4 rounded-full bg-[#ff5500] text-white text-[9px] font-black flex items-center justify-center flex-shrink-0">
                   {claimedDeposit ? "✓" : "1"}

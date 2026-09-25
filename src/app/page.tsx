@@ -64,14 +64,8 @@ export default function MiniAppPage() {
     return () => clearInterval(energyTimer);
   }, [maxEnergy]);
 
-  // Passive Auto-Miner Yield
-  useEffect(() => {
-    if (passiveRate <= 0) return;
-    const passiveTimer = setInterval(() => {
-      setScore((prev) => prev + passiveRate);
-    }, 1000);
-    return () => clearInterval(passiveTimer);
-  }, [passiveRate]);
+  // Passive Auto-Miner Yield: Auto-increase is disabled to prevent dollar and Khmer currency from auto-ticking in Telegram.
+  // Points must be explicitly claimed through playing games or tapping.
 
   // Load initial score, upgrades, and cached Telegram user from localStorage for instant start
   useEffect(() => {

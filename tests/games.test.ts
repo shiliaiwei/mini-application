@@ -128,3 +128,55 @@ test("TicTac: detects line wins, AI defense blocks, and rewards", () => {
   const reward = calculateTicTacReward(victoryState, 2.0);
   assert.ok(reward > 0);
 });
+
+test("Word Games: verifies 2-8 char words, chessboard grid, and Cambodia hints", async () => {
+  const {
+    WORD_FLASH_POOL,
+    GUESS_FASTER_POOL,
+    COUNTRY_HINTS_LIST,
+    generateChessboardGrid,
+    checkRow5Winner,
+    getRow5AIMove,
+  } = await import("../src/lib/games/wordGames.js");
+
+  // Verify pool has words with lengths spanning 2 to 8
+  const lengths = new Set(WORD_FLASH_POOL.map((w) => w.charCount));
+  for (let len = 2; len <= 8; len++) {
+    assert.ok(lengths.has(len), `Missing word length ${len}`);
+  }
+
+  // Verify chessboard grid generation
+  const grid = generateChessboardGrid("CAMBODIA", 16);
+  assert.equal(grid.length, 16);
+  const chars = grid.map((t) => t.char);
+  for (const c of "CAMBODIA") {
+    assert.ok(chars.includes(c));
+  }
+
+  // Verify Guess Faster pool includes "YOU"
+  const hasYou = GUESS_FASTER_POOL.some((item) => item.word === "YOU");
+  assert.ok(hasYou, "Guess Faster pool must include word 'YOU'");
+
+  // Verify Country Hints start with Cambodia
+  assert.equal(COUNTRY_HINTS_LIST[0].country, "CAMBODIA");
+  assert.ok(COUNTRY_HINTS_LIST[0].hint.includes("Angkor Wat"));
+
+  // Verify 5-in-a-row (Row 5 Winner) detection
+  const board = Array(64).fill(null);
+  // Horizontal 5-in-a-row on row 2: indices 16, 17, 18, 19, 20
+  [16, 17, 18, 19, 20].forEach((idx) => {
+    board[idx] = "X";
+  });
+  const winCheck = checkRow5Winner(board, 8);
+  assert.equal(winCheck.winner, "X");
+  assert.equal(winCheck.winningCells.length, 5);
+
+  // Verify AI blocks 4-in-a-row
+  const blockBoard = Array(64).fill(null);
+  [0, 1, 2, 3].forEach((idx) => {
+    blockBoard[idx] = "X";
+  });
+  const aiMove = getRow5AIMove(blockBoard, 8);
+  assert.equal(aiMove, 4, "AI should block 5th cell at index 4");
+});
+

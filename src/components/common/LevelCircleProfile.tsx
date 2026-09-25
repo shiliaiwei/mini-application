@@ -73,12 +73,16 @@ export const LevelCircleProfile: React.FC<LevelCircleProfileProps> = ({
           />
         </svg>
 
-        {/* Circular Avatar Container */}
+        {/* Circular Avatar Container with Dynamic Level Color Styling (No label text) */}
         <div
-          className="rounded-full overflow-hidden flex items-center justify-center bg-slate-50 border border-slate-200 relative shadow-inner"
-          style={{ width: avatar, height: avatar }}
+          className="rounded-full overflow-hidden flex items-center justify-center bg-slate-50 border-2 relative shadow-inner transition-all duration-300"
+          style={{
+            width: avatar,
+            height: avatar,
+            borderColor: levelInfo.color,
+            boxShadow: `0 0 0 2px ${levelInfo.color}35, 0 0 12px ${levelInfo.color}25`,
+          }}
         >
-
           {user?.photo_url ? (
             <Image
               src={user.photo_url}
@@ -98,16 +102,15 @@ export const LevelCircleProfile: React.FC<LevelCircleProfileProps> = ({
           )}
         </div>
 
-        {/* Level Badge Pill (Pinned to Bottom of Circle) */}
+        {/* Small Level Indicator Color Dot (Zero Label Text) */}
         <div
-          className="absolute -bottom-1 px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase tracking-wider text-black flex items-center gap-0.5 border border-black/20 shadow-sm z-20"
+          className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white shadow-2xs z-20"
           style={{ backgroundColor: levelInfo.color }}
-        >
-          <span>L{levelInfo.level}</span>
-        </div>
+          title="Profile Level Tier"
+        />
       </div>
 
-      {/* Profile Details & Level Status (Optional) */}
+      {/* Profile Details (Zero Level Text Label per user requirement) */}
       {showDetails && (
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
@@ -115,12 +118,6 @@ export const LevelCircleProfile: React.FC<LevelCircleProfileProps> = ({
               {displayName}
             </span>
             {user && <TelegramVerifiedBadge size={14} className="ml-0.5" />}
-            <span
-              className="text-[10px] font-bold px-1.5 py-0.2 rounded flex items-center gap-1 bg-slate-100 border border-slate-200 text-slate-800"
-            >
-              <Shield size={10} className="w-2.5 h-2.5" style={{ color: levelInfo.color }} />
-              <span>{levelInfo.title}</span>
-            </span>
           </div>
 
           <div className="flex items-center justify-between text-[10px] text-slate-500 mt-1 font-semibold">
