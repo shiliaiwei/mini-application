@@ -3,32 +3,67 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { VERIFIED_ADS_PARTNERS, AdPartnerItem } from "@/data/adsData";
-import { Sparkles, ShieldCheck, ChevronLeft, ChevronRight, TrendingUp } from "@/components/icons/KeylineIcons";
+
+export type AdCardLanguage = "km" | "en";
 
 interface InstitutionalAdCardProps {
   onOpenDetail: (partnerId: string) => void;
   onOpenStats?: () => void;
+  lang?: AdCardLanguage;
 }
 
-const AD_DURATION_SECONDS = 31;
+const AD_DURATION_SECONDS = 15;
+type AnimationDirection = "left" | "right" | "up" | "down";
+const DIRECTIONS: AnimationDirection[] = ["left", "right", "up", "down"];
 
 export const InstitutionalAdCard: React.FC<InstitutionalAdCardProps> = ({
   onOpenDetail,
-  onOpenStats,
+  lang,
 }) => {
   // Random initial selection from verified partners
   const [currentIndex, setCurrentIndex] = useState(() =>
     Math.floor(Math.random() * VERIFIED_ADS_PARTNERS.length)
   );
-  const [secondsRemaining, setSecondsRemaining] = useState(AD_DURATION_SECONDS);
-  const [fadeAnim, setFadeAnim] = useState(true);
+  const [direction, setDirection] = useState<AnimationDirection>("right");
+  const [animStage, setAnimStage] = useState<"idle" | "entering" | "exiting">("idle");
+  const [flash, setFlash] = useState(false);
 
-  const prevIndexRef = useRef(currentIndex);
-  prevIndexRef.current = currentIndex;
+  // Active language detection (strictly single language, no bilingual text)
+  const [currentLang, setCurrentLang] = useState<AdCardLanguage>(() => {
+    if (lang) return lang;
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("shi_app_lang");
+      if (saved === "en" || saved === "km") return saved;
+      const navLang = navigator.language?.toLowerCase() || "";
+      if (navLang.startsWith("en")) return "en";
+    }
+    return "km";
+  });
 
-  // Pick a random DIFFERENT partner (never the same logo consecutively)
+  // Listen for language changes from user switch
+  useEffect(() => {
+    if (lang) {
+      setCurrentLang(lang);
+      return;
+    }
+    const handleLangChange = () => {
+      const saved = localStorage.getItem("shi_app_lang");
+      if (saved === "en" || saved === "km") {
+        setCurrentLang(saved);
+      }
+    };
+    window.addEventListener("storage", handleLangChange);
+    window.addEventListener("shi_lang_change", handleLangChange);
+    return () => {
+      window.removeEventListener("storage", handleLangChange);
+      window.removeEventListener("shi_lang_change", handleLangChange);
+    };
+  }, [lang]);
+
+  // Pick a random DIFFERENT partner with random direction and flash effect (fast to slow)
   const pickNextRandomPartner = () => {
-    setFadeAnim(false);
+    setAnimStage("exiting");
+
     setTimeout(() => {
       setCurrentIndex((prev) => {
         let next: number;
@@ -37,43 +72,48 @@ export const InstitutionalAdCard: React.FC<InstitutionalAdCardProps> = ({
         } while (next === prev && VERIFIED_ADS_PARTNERS.length > 1);
         return next;
       });
-      setSecondsRemaining(AD_DURATION_SECONDS);
-      setFadeAnim(true);
+
+      const nextDir = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+      setDirection(nextDir);
+      setAnimStage("entering");
+      setFlash(true);
+
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          setAnimStage("idle");
+          setFlash(false);
+        }, 35);
+      });
     }, 200);
   };
 
-  const handlePrev = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setFadeAnim(false);
-    setTimeout(() => {
-      setCurrentIndex((prev) => (prev - 1 + VERIFIED_ADS_PARTNERS.length) % VERIFIED_ADS_PARTNERS.length);
-      setSecondsRemaining(AD_DURATION_SECONDS);
-      setFadeAnim(true);
-    }, 150);
-  };
-
-  const handleNext = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    pickNextRandomPartner();
-  };
-
-  // 31-Second Countdown Timer and Auto-rotation
+  // 15-Second Auto-rotation interval (cut from 31s to 15s)
   useEffect(() => {
     const timer = setInterval(() => {
-      setSecondsRemaining((prev) => {
-        if (prev <= 1) {
-          pickNextRandomPartner();
-          return AD_DURATION_SECONDS;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+      pickNextRandomPartner();
+    }, AD_DURATION_SECONDS * 1000);
 
     return () => clearInterval(timer);
   }, []);
 
   const partner: AdPartnerItem = VERIFIED_ADS_PARTNERS[currentIndex] || VERIFIED_ADS_PARTNERS[0];
-  const progressPercent = (secondsRemaining / AD_DURATION_SECONDS) * 100;
+  const fullName = currentLang === "en" ? partner.nameEn : partner.nameKm;
+
+  // Compute transform classes for random direction flash animation (fast to slow deceleration)
+  const getTransformClass = () => {
+    if (animStage === "exiting") {
+      return "opacity-0 scale-95 transition-all duration-200 ease-in";
+    }
+    if (animStage === "entering") {
+      let offset = "";
+      if (direction === "left") offset = "-translate-x-14 translate-y-0";
+      else if (direction === "right") offset = "translate-x-14 translate-y-0";
+      else if (direction === "up") offset = "translate-y-14 translate-x-0";
+      else if (direction === "down") offset = "-translate-y-14 translate-x-0";
+      return `opacity-0 scale-90 ${offset} duration-0`;
+    }
+    return "opacity-100 scale-100 translate-x-0 translate-y-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]";
+  };
 
   return (
     <div
@@ -81,122 +121,48 @@ export const InstitutionalAdCard: React.FC<InstitutionalAdCardProps> = ({
       tabIndex={0}
       onClick={() => onOpenDetail(partner.id)}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpenDetail(partner.id)}
-      aria-label={`Open details for ${partner.nameEn}`}
-      className="sm:col-span-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-4 text-white shadow-xs flex flex-col justify-between min-h-[235px] border border-blue-400/30 cursor-pointer active:scale-[0.98] transition-all hover:shadow-lg group text-left select-none"
+      aria-label={fullName}
+      className="sm:col-span-6 relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#0088cc] via-[#006fa7] to-[#004f77] min-h-[255px] sm:min-h-[270px] border border-blue-400/25 shadow-sm cursor-pointer select-none group active:scale-[0.98] transition-transform"
     >
       {/* Dynamic Ambient Background Glow */}
       <div
-        className="absolute -top-12 -right-12 w-44 h-44 rounded-full opacity-20 pointer-events-none filter blur-2xl transition-all duration-700"
+        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full opacity-25 pointer-events-none filter blur-2xl transition-colors duration-1000"
         style={{ backgroundColor: partner.officialColor || "#38bdf8" }}
       />
 
-      {/* ── TOP HEADER ROW: Sponsored Badge + 31s Countdown + Feature Detail Callout ── */}
-      <div className="relative z-10 flex items-center justify-between gap-2 mb-2">
-        <div className="flex items-center gap-1.5">
-          <span className="px-2 py-0.5 rounded-full bg-black/25 border border-white/20 text-yellow-300 text-[9px] font-black uppercase tracking-wider flex items-center gap-1">
-            <ShieldCheck size={12} className="text-yellow-300" />
-            <span>ដៃគូផ្លូវការ (Partner)</span>
-          </span>
-          {/* 31-Second Active Ad Timer Pill */}
-          <span className="px-2 py-0.5 rounded-full bg-white/15 border border-white/20 text-white font-mono text-[9px] font-bold">
-            ⏱ {secondsRemaining}s
-          </span>
-        </div>
-
-        {/* Action Button */}
-        <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 text-white text-[10px] font-black uppercase tracking-wider transition-all group-hover:bg-white group-hover:text-[#0077b5]">
-          <span>Feature Detail</span>
-          <span className="text-xs transition-transform group-hover:translate-x-0.5">→</span>
-        </div>
-      </div>
-
-      {/* ── CENTER LOGO SHOWCASE (Highlight style) ── */}
+      {/* Momentary Flash Overlay on ad rotation (fast to slow) */}
       <div
-        className={`relative z-10 flex flex-col items-center justify-center my-auto text-center transition-all duration-300 transform ${
-          fadeAnim ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        className={`absolute inset-0 bg-white/40 pointer-events-none transition-opacity duration-500 ease-out z-30 ${
+          flash ? "opacity-100" : "opacity-0"
         }`}
-      >
-        {/* Centered Logo Badge */}
-        <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-white/95 border-2 border-white/60 shadow-lg flex items-center justify-center p-2 mb-2 relative group-hover:scale-105 transition-transform duration-300">
-          <div className="relative w-full h-full flex items-center justify-center">
-            <Image
-              src={`/ads/${partner.filename}`}
-              alt={partner.nameEn}
-              fill
-              sizes="88px"
-              className="object-contain filter drop-shadow-sm select-none pointer-events-none"
-              priority
-            />
-          </div>
-        </div>
+      />
 
-        {/* Institution Full Names (Khmer & English - Capture fullname only per rule) */}
-        <div className="space-y-0.5 max-w-[280px] sm:max-w-xs">
-          <h2 className="text-sm sm:text-base font-black text-white leading-tight drop-shadow-sm truncate">
-            {partner.nameKm}
-          </h2>
-          <h3 className="text-[10px] sm:text-[11px] font-bold text-sky-100 tracking-wide truncate">
-            {partner.nameEn}
-          </h3>
-        </div>
-
-        {/* Sector Tag */}
-        <span className="mt-1 text-[8.5px] font-bold text-sky-200 tracking-wider bg-black/20 px-2.5 py-0.5 rounded-full border border-white/10 truncate max-w-[240px]">
-          {partner.sectorKm}
-        </span>
-      </div>
-
-      {/* ── BOTTOM PROGRESS & STATS CONTROLS ── */}
-      <div className="relative z-10 pt-2 space-y-2">
-        {/* 31-Second Depleting Linear Progress Bar */}
-        <div className="w-full h-1 bg-black/25 rounded-full overflow-hidden p-[0.5px]">
-          <div
-            className="h-full bg-yellow-300 rounded-full transition-all duration-1000 ease-linear"
-            style={{ width: `${progressPercent}%` }}
+      {/* ── BIG CENTERED LOGO SHOWCASE (Transparent background, no box) ── */}
+      <div className="absolute inset-0 flex items-center justify-center pb-12 pt-3 px-4 z-10 pointer-events-none">
+        <div
+          className={`relative w-44 h-44 sm:w-48 sm:h-48 flex items-center justify-center transform ${getTransformClass()}`}
+        >
+          <Image
+            src={`/ads/${partner.filename}`}
+            alt={fullName}
+            fill
+            sizes="(max-width: 640px) 192px, 220px"
+            className="object-contain filter drop-shadow-2xl select-none pointer-events-none"
+            priority
           />
         </div>
+      </div>
 
-        {/* Footer Row: Prev/Next Quick Navigation + Alternate Analytics Link */}
-        <div className="flex items-center justify-between text-[9px] text-sky-100 font-medium">
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={handlePrev}
-              className="p-1 rounded-md bg-white/10 hover:bg-white/20 border border-white/15 cursor-pointer active:scale-90 transition-transform"
-              title="Previous Partner"
-              aria-label="Previous Partner"
-            >
-              <ChevronLeft size={12} />
-            </button>
-            <span className="font-mono text-[9px]">
-              {currentIndex + 1}/{VERIFIED_ADS_PARTNERS.length}
-            </span>
-            <button
-              type="button"
-              onClick={handleNext}
-              className="p-1 rounded-md bg-white/10 hover:bg-white/20 border border-white/15 cursor-pointer active:scale-90 transition-transform"
-              title="Next Random Partner"
-              aria-label="Next Random Partner"
-            >
-              <ChevronRight size={12} />
-            </button>
-          </div>
+      {/* ── CONTRAST GRADIENT OVERLAY (Transparent from center line to bottom black) ── */}
+      <div className="absolute inset-x-0 bottom-0 top-[45%] bg-gradient-to-t from-black/90 via-black/55 to-transparent pointer-events-none z-15" />
 
-          {/* Quick link to Stats SPA */}
-          {onOpenStats && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenStats();
-              }}
-              className="flex items-center gap-1 text-yellow-300 hover:text-white font-bold transition-colors cursor-pointer"
-            >
-              <TrendingUp size={12} />
-              <span>Open Stats Graph →</span>
-            </button>
-          )}
-        </div>
+      {/* ── SINGLE FULL NAME IN ACTIVE LANGUAGE (No bilingual text, mobile optimized) ── */}
+      <div className="absolute inset-x-0 bottom-0 z-20 px-4 pb-3.5 pt-3 text-center pointer-events-none">
+        <h2
+          className={`font-sans font-black text-white text-sm sm:text-base leading-snug drop-shadow-md line-clamp-2 transform ${getTransformClass()}`}
+        >
+          {fullName}
+        </h2>
       </div>
     </div>
   );
