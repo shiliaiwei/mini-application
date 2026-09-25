@@ -21,7 +21,6 @@ import {
 } from "@/components/icons/KeylineIcons";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { BrandFooter } from "@/components/brand/BrandFooter";
-import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 import { WinGramPromoCards } from "@/components/promo/WinGramPromoCards";
 import { BanknoteCreditCards } from "@/components/cards/BanknoteCreditCards";
 import { LiveClaimsTicker } from "@/components/common/LiveClaimsTicker";

@@ -4,7 +4,6 @@ import React from "react";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { Eye, EyeOff, Bell } from "@/components/icons/KeylineIcons";
-import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 
 interface TopBrandNavBarProps {
   showBalances: boolean;
@@ -79,7 +78,7 @@ export const TopBrandNavBar: React.FC<TopBrandNavBarProps> = ({
             <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white animate-pulse" />
           </button>
 
-          {/* User Profile Avatar with Verified Badge */}
+          {/* User Profile Avatar */}
           <button
             type="button"
             onClick={() => {
@@ -88,14 +87,13 @@ export const TopBrandNavBar: React.FC<TopBrandNavBarProps> = ({
               } catch {}
               onOpenProfile?.();
             }}
-            className="flex items-center gap-1 pl-1 cursor-pointer focus:outline-none group active:scale-95 transition-transform"
+            className="flex items-center pl-1 cursor-pointer focus:outline-none group active:scale-95 transition-transform"
             aria-label="Open Profile"
             title="Profile"
           >
             <div className="w-8 h-8 rounded-full bg-slate-100 group-hover:bg-slate-200 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-800 transition-colors">
               {user?.first_name ? user.first_name.slice(0, 2).toUpperCase() : "VS"}
             </div>
-            {user && <TelegramVerifiedBadge size={14} />}
           </button>
         </div>
       </div>

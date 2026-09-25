@@ -23,6 +23,7 @@ import {
 } from "@/components/icons/KeylineIcons";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { BrandFooter } from "@/components/brand/BrandFooter";
+import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 
 /* ──────────────────────────────────────────────────────────── */
 /* Types                                                        */
@@ -180,6 +181,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
 
   const displayName = [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "SHILIAIWEI";
   const handle = user?.username ? `@${user.username}` : `@uid_${user?.id || "0"}`;
+  const isTelegramUser = Boolean(user && (user.id || user.username));
   const playerId = user?.id ? String(user.id) : "--------";
   const walletAddress = user?.id
     ? `shi_0x${Number(user.id).toString(16).padStart(8, "0")}...${String(user.id).slice(-4)}`
@@ -309,6 +311,20 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
                 className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-[#0098ea] transition-colors cursor-pointer flex-shrink-0">
                 {copiedWallet ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
               </button>
+            </div>
+            <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block">Telegram Handle</span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-sm font-black text-slate-900">{handle}</span>
+                  {isTelegramUser && <TelegramVerifiedBadge size={14} />}
+                </div>
+              </div>
+              {isTelegramUser && (
+                <span className="text-[10px] font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200">
+                  Verified
+                </span>
+              )}
             </div>
             <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
               <div>
@@ -472,7 +488,17 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
             </div>
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Handle</label>
-              <div className="px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 text-sm font-mono">{handle}</div>
+              <div className="px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 text-sm font-mono flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <span>{handle}</span>
+                  {isTelegramUser && <TelegramVerifiedBadge size={15} />}
+                </div>
+                {isTelegramUser && (
+                  <span className="text-[10px] font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200">
+                    Verified
+                  </span>
+                )}
+              </div>
             </div>
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Bio</label>
@@ -504,7 +530,12 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
             <ProfileAvatar user={user} size={68} />
             <div className="flex-1 min-w-0">
               <h1 className="text-lg font-black text-white leading-tight truncate">{displayName}</h1>
-              <p className="text-blue-200 text-xs font-semibold mt-0.5">{handle}</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <p className="text-blue-200 text-xs font-semibold">{handle}</p>
+                {isTelegramUser && (
+                  <TelegramVerifiedBadge size={14} className="flex-shrink-0 drop-shadow-xs" />
+                )}
+              </div>
               <p className="text-blue-100/80 text-[11px] font-medium mt-1 leading-snug line-clamp-2">{bio}</p>
             </div>
             <button type="button" onClick={() => setView("edit")}
@@ -515,6 +546,12 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
           <div className="flex items-center gap-2">
             <ShiliaiweiBrand height={14} colorScheme="white" />
             <span className="text-[9px] font-black text-blue-200 uppercase tracking-widest">VAULT MEMBER</span>
+            {isTelegramUser && (
+              <span className="text-[8.5px] font-bold text-sky-100 bg-white/10 px-2 py-0.5 rounded-full border border-white/15 ml-auto flex items-center gap-1">
+                <TelegramVerifiedBadge size={11} />
+                <span>Verified Telegram</span>
+              </span>
+            )}
           </div>
         </div>
       </div>
