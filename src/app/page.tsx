@@ -13,10 +13,10 @@ import { GameWelcomeScreen } from "@/components/welcome/GameWelcomeScreen";
 import { TelegramGateScreen } from "@/components/common/TelegramGateScreen";
 import { MiniGameFullView, MiniGameType } from "@/components/views/MiniGameFullView";
 import {
-  X,
   Check,
   Wallet,
   DollarSign,
+  ChevronLeft,
 } from "@/components/icons/KeylineIcons";
 
 export default function MiniAppPage() {
@@ -28,9 +28,9 @@ export default function MiniAppPage() {
   const [activeCategory, setActiveCategory] = useState<NavCategory>("lobby");
   const [profileSubTab, setProfileSubTab] = useState<ProfileSubTab>("profile");
   const [activeGameScreen, setActiveGameScreen] = useState<MiniGameType | null>(null);
+  const [activeTopUpScreen, setActiveTopUpScreen] = useState(false);
 
-  // Modals
-  const [showTopUpModal, setShowTopUpModal] = useState(false);
+  // Top Up State
   const [topUpAmount, setTopUpAmount] = useState(100);
   const [topUpSuccess, setTopUpSuccess] = useState(false);
 
@@ -319,7 +319,7 @@ export default function MiniAppPage() {
     } catch {}
     setTimeout(() => {
       setTopUpSuccess(false);
-      setShowTopUpModal(false);
+      setActiveTopUpScreen(false);
     }, 1500);
   };
 
@@ -376,12 +376,95 @@ export default function MiniAppPage() {
           setProfileSubTab("profile");
           handleTabChange("profile");
         }}
-        onOpenTopUp={() => setShowTopUpModal(true)}
+        onOpenTopUp={() => setActiveTopUpScreen(true)}
       />
 
       {/* 3. Main SPA View Switcher */}
       <main className="flex-1 w-full max-w-4xl mx-auto px-3 pt-2 pb-safe">
-        {activeGameScreen ? (
+        {activeTopUpScreen ? (
+          <div className="w-full max-w-xl mx-auto space-y-4 pt-1 pb-28 animate-fadeIn select-none font-sans text-slate-900">
+            {/* Top Navigation Bar with Back Button */}
+            <div className="flex items-center justify-between py-2 border-b border-slate-200/80 mb-2">
+              <button
+                type="button"
+                onClick={() => setActiveTopUpScreen(false)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs shadow-2xs active:scale-95 transition-all cursor-pointer"
+              >
+                <ChevronLeft size={16} className="text-[#0098ea]" />
+                <span>Back</span>
+              </button>
+              <div className="flex items-center gap-2">
+                <Wallet size={18} className="text-[#16a34a]" />
+                <span className="text-sm font-black uppercase text-slate-900">
+                  Top Up Vault
+                </span>
+              </div>
+              <div className="w-14" />
+            </div>
+
+            <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-5">
+              <div className="text-center py-2 space-y-1">
+                <span className="text-xs font-black tracking-widest text-[#0098ea] uppercase block">
+                  Simulated USD Boost
+                </span>
+                <h2 className="text-2xl font-black text-slate-900">
+                  Instant Vault Top-Up
+                </h2>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Select a simulated USD credit package to instantly boost your vault balance and claim points.
+                </p>
+              </div>
+
+              {/* Amount Grid */}
+              <div className="grid grid-cols-3 gap-2.5">
+                {[50, 100, 250, 500, 1000, 2500].map((amt) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => {
+                      setTopUpAmount(amt);
+                    }}
+                    className={`py-3 rounded-2xl border text-xs font-black transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer active:scale-95 ${
+                      topUpAmount === amt
+                        ? "bg-[#0098ea] border-[#0098ea] text-white shadow-md shadow-[#0098ea]/20"
+                        : "bg-slate-50 hover:bg-white border-slate-200 text-slate-700 hover:border-slate-300 shadow-2xs"
+                    }`}
+                  >
+                    <span className="text-base font-black">+${amt}</span>
+                    <span className={`text-[10px] ${topUpAmount === amt ? "text-sky-100" : "text-slate-400"}`}>
+                      +{amt * 100} PTS
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {topUpSuccess && (
+                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-[#16a34a] text-xs font-bold flex items-center justify-center gap-2 animate-fadeIn">
+                  <Check size={18} className="w-4 h-4" />
+                  <span>Successfully added +${topUpAmount}.00 (+{topUpAmount * 100} PTS) to Vault!</span>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={handleExecuteTopUp}
+                disabled={topUpSuccess}
+                className="w-full py-3.5 rounded-2xl bg-[#0098ea] hover:bg-[#0088cc] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <DollarSign size={18} />
+                <span>Confirm Top Up (${topUpAmount}.00)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTopUpScreen(false)}
+                className="w-full py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+              >
+                Exit to Home View
+              </button>
+            </div>
+          </div>
+        ) : activeGameScreen ? (
           <MiniGameFullView
             game={activeGameScreen}
             score={score}
@@ -468,71 +551,6 @@ export default function MiniAppPage() {
         onChangeTab={handleTabChange}
         user={user}
       />
-
-
-
-      {/* Top Up Modal (WinGram Quick Top-up) */}
-      {showTopUpModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
-          <div className="liquid-glass-modal p-5 max-w-sm w-full space-y-4 animate-in fade-in zoom-in-95 duration-150 border border-slate-200/95 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
-              <div className="flex items-center gap-2">
-                <Wallet size={20} className="w-5 h-5 text-[#16a34a]" />
-                <span className="text-sm font-bold text-slate-900 uppercase font-display">
-                  Top Up Vault
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowTopUpModal(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 touch-target-44 flex items-center justify-center"
-                aria-label="Close modal"
-              >
-                <X size={20} className="w-5 h-5" />
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-500">
-              Select simulated USD credit package to instantly boost your vault balance.
-            </p>
-
-            {/* Amount Grid */}
-            <div className="grid grid-cols-3 gap-2">
-              {[50, 100, 250, 500, 1000, 2500].map((amt) => (
-                <button
-                  key={amt}
-                  type="button"
-                  onClick={() => setTopUpAmount(amt)}
-                  className={`py-2.5 rounded-xl border text-xs font-black transition-all touch-target-44 flex items-center justify-center ${
-                    topUpAmount === amt
-                      ? "bg-[#0098ea] border-[#0098ea] text-white shadow-sm shadow-[#0098ea]/20"
-                      : "bg-white border-slate-200 text-slate-700 hover:border-slate-300 shadow-sm"
-                  }`}
-                >
-                  +${amt}
-                </button>
-              ))}
-            </div>
-
-            {topUpSuccess && (
-              <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-[#16a34a] text-xs font-bold flex items-center justify-center gap-2">
-                <Check size={18} className="w-4 h-4" />
-                <span>Successfully added +${topUpAmount}.00 to Vault!</span>
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={handleExecuteTopUp}
-              disabled={topUpSuccess}
-              className="w-full py-3.5 rounded-xl bg-[#0098ea] hover:bg-[#0088cc] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all touch-target-44"
-            >
-              <DollarSign size={20} className="w-5 h-5" />
-              <span>Confirm Top Up (${topUpAmount}.00)</span>
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
