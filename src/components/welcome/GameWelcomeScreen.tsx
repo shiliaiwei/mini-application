@@ -1,9 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
+import React, { useEffect, useState, useCallback } from "react";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
-import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
+import {
+  Send,
+  ShieldCheck,
+  Coins,
+  Zap,
+  Check,
+  ChevronRight,
+} from "@/components/icons/KeylineIcons";
 
 interface GameWelcomeScreenProps {
   user?: TelegramUser | null;
@@ -12,205 +18,156 @@ interface GameWelcomeScreenProps {
 }
 
 /**
- * Mobile App Welcome Screen (Android 14+ SplashScreen API & Real Brand Logo Sync)
+ * Standard Telegram Mini App Welcome Screen
  *
- * SPECIFICATIONS:
- * 1. Window Background: Pure white (#ffffff) with subtle vector security mesh.
- * 2. Real Brand Logo: Center adaptive launcher showcasing the authentic SHILIAIWEI emblem.
- * 3. Animated Logo Loading: Smooth orbital ring, breathing aura pulse, and Telegram sync status.
- * 4. Telegram Mini App Sync Progression: Real-time multi-stage sequence verifying Telegram cloud session.
+ * Designed according to official Telegram Mini App guidelines:
+ * - Solid Telegram blue (#0098ea) accent and clean white canvas (no gradients)
+ * - Telegram user verification summary
+ * - Key feature overview cells in standard Telegram list format
+ * - Native Telegram MainButton and prominent in-screen Start button
  */
 export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
   user,
   tgApp,
   onComplete,
 }) => {
-  const [syncPhase, setSyncPhase] = useState<1 | 2 | 3 | 4>(1);
-  const [progress, setProgress] = useState(15);
   const [isDismissing, setIsDismissing] = useState(false);
 
-  useEffect(() => {
-    // Stage 1: Initializing Telegram Session (0 - 350ms)
-    const t1 = setTimeout(() => {
-      setSyncPhase(1);
-      setProgress(35);
-      try {
-        tgApp?.HapticFeedback?.impactOccurred("light");
-      } catch {}
-    }, 100);
-
-    // Stage 2: Synchronizing Vault & Player Session (350 - 800ms)
-    const t2 = setTimeout(() => {
-      setSyncPhase(2);
-      setProgress(75);
-      try {
-        tgApp?.HapticFeedback?.selectionChanged();
-      } catch {}
-    }, 450);
-
-    // Stage 3: Verification & Vault Ready (800 - 1300ms)
-    const t3 = setTimeout(() => {
-      setSyncPhase(3);
-      setProgress(100);
-      try {
-        tgApp?.HapticFeedback?.notificationOccurred("success");
-      } catch {}
-    }, 900);
-
-    // Stage 4: Smooth Into-App Exit (1350ms)
-    const t4 = setTimeout(() => {
-      setIsDismissing(true);
-    }, 1350);
-
-    // Complete and hand over to app (1550ms)
-    const tComplete = setTimeout(() => {
-      onComplete();
-    }, 1550);
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
-      clearTimeout(tComplete);
-    };
-  }, [tgApp, onComplete]);
-
-  const handleInstantDismiss = () => {
-    setIsDismissing(true);
+  const handleStart = useCallback(() => {
     try {
       tgApp?.HapticFeedback?.impactOccurred("medium");
     } catch {}
-    setTimeout(onComplete, 120);
-  };
+    setIsDismissing(true);
+    setTimeout(() => {
+      onComplete();
+    }, 150);
+  }, [tgApp, onComplete]);
 
-  const getSyncText = () => {
-    switch (syncPhase) {
-      case 1:
-        return "Connecting Telegram WebApp...";
-      case 2:
-        return "Synchronizing Web3 Vault...";
-      case 3:
-      case 4:
-        return user?.first_name ? `Welcome, ${user.first_name}` : "Telegram Verified • Ready";
-      default:
-        return "Loading SHILIAIWEI...";
+  // Integrate with Telegram WebApp native MainButton
+  useEffect(() => {
+    if (tgApp?.MainButton) {
+      try {
+        if (typeof (tgApp.MainButton as unknown as { setText?: (t: string) => void }).setText === "function") {
+          (tgApp.MainButton as unknown as { setText: (t: string) => void }).setText("START MINI APP");
+        } else {
+          tgApp.MainButton.text = "START MINI APP";
+        }
+        tgApp.MainButton.color = "#0098ea";
+        tgApp.MainButton.textColor = "#ffffff";
+        tgApp.MainButton.show();
+        tgApp.MainButton.onClick(handleStart);
+      } catch {}
+
+      return () => {
+        try {
+          tgApp.MainButton.offClick(handleStart);
+          tgApp.MainButton.hide();
+        } catch {}
+      };
     }
-  };
+  }, [tgApp, handleStart]);
 
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={handleInstantDismiss}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleInstantDismiss()}
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-between bg-white select-none overflow-hidden cursor-pointer focus:outline-none transition-all duration-300 ease-out font-sans ${
-        isDismissing ? "opacity-0 scale-[1.03] pointer-events-none" : "opacity-100 scale-100"
+      className={`fixed inset-0 z-50 flex flex-col justify-between bg-white text-slate-900 max-w-md mx-auto w-full select-none font-sans overflow-y-auto px-6 py-8 transition-opacity duration-200 ease-out ${
+        isDismissing ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
-      aria-label="SHILIAIWEI Android App Launch Screen"
     >
-      {/* 1. Android Window Background with Vector Guilloche Security Mesh */}
-      <div className="absolute inset-0 bg-app-guilloche opacity-[0.04] pointer-events-none z-0" />
-
-      {/* Top Android System Bar Spacer */}
-      <div className="flex-1 w-full pt-8 flex items-center justify-center">
-        <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">
-          SHILIAIWEI TELEGRAM MINI APP
+      {/* Top Telegram Header Bar */}
+      <div className="w-full flex items-center justify-between pb-4 border-b border-slate-100">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+          <span className="text-[#0098ea] font-bold">@srievibot</span>
+          <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#0098ea] text-white">
+            <Check size={10} className="w-2.5 h-2.5" />
+          </span>
+        </div>
+        <span className="text-[11px] font-medium tracking-wide uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+          Mini App
         </span>
       </div>
 
-      {/* 2. Center Adaptive Icon Container with Real Brand Logo & Loading Animation */}
-      <div className="relative z-10 flex flex-col items-center justify-center my-auto">
-        <div
-          className="relative flex items-center justify-center"
-          style={{ width: "240px", height: "240px" }}
-        >
-          {/* Animated Concentric Breathing Energy Waves */}
-          <div className="absolute w-56 h-56 rounded-full bg-[#0098ea]/5 animate-ping opacity-60 pointer-events-none" />
-          <div className="absolute w-48 h-48 rounded-full border border-[#0098ea]/20 animate-pulse pointer-events-none" />
-
-          {/* Animated Spinning SVG Progress Orbit Ring */}
-          <svg
-            className="absolute inset-0 w-full h-full animate-spin pointer-events-none"
-            style={{ animationDuration: "3s" }}
-            viewBox="0 0 240 240"
-          >
-            <circle
-              cx="120"
-              cy="120"
-              r="84"
-              stroke="#0098ea"
-              strokeWidth="2.5"
-              strokeDasharray="40 180"
-              strokeLinecap="round"
-              fill="none"
-              opacity="0.85"
-            />
-            <circle
-              cx="120"
-              cy="120"
-              r="84"
-              stroke="#38bdf8"
-              strokeWidth="1.5"
-              strokeDasharray="20 220"
-              strokeLinecap="round"
-              fill="none"
-              opacity="0.5"
-            />
-          </svg>
-
-          {/* Center Adaptive Circular Mask (Android 14 Spec: 160dp diameter) */}
-          <div
-            style={{ width: "160px", height: "160px" }}
-            className="rounded-full bg-white border border-slate-200/90 shadow-2xl shadow-[#0098ea]/20 flex items-center justify-center relative overflow-hidden transition-all duration-500 transform"
-          >
-            {/* Shimmer Light Reflection Layer */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-sky-100/40 to-transparent -translate-x-full animate-shimmer pointer-events-none" />
-
-            {/* REAL OFFICIAL BRAND LOGO EMBLEM */}
-            <div className="relative w-28 h-28 flex items-center justify-center transform transition-transform duration-500 hover:scale-105">
-              <Image
-                src="/ads/Main Logo.png"
-                alt="SHILIAIWEI Official Logo"
-                fill
-                sizes="112px"
-                className="object-contain filter drop-shadow-md select-none pointer-events-none"
-                priority
-              />
-            </div>
-          </div>
+      {/* Center Welcome Hero */}
+      <div className="my-auto py-6 flex flex-col items-center text-center">
+        {/* Telegram Paper Plane Icon */}
+        <div className="w-20 h-20 rounded-full bg-[#0098ea] text-white flex items-center justify-center shadow-sm mb-5">
+          <Send size={38} className="w-10 h-10 translate-x-[-1px] translate-y-[1px]" />
         </div>
 
-        {/* 3. Real-Time Telegram Sync Status Indicator */}
-        <div className="mt-4 flex flex-col items-center gap-2.5">
-          {/* Status Pill Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 shadow-2xs">
-            {syncPhase < 3 ? (
-              <span className="w-2 h-2 rounded-full bg-[#0098ea] animate-ping" />
-            ) : (
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            )}
-            <span className="text-xs font-bold text-slate-700 tracking-tight">
-              {getSyncText()}
-            </span>
+        {/* Welcome Title */}
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1.5">
+          Welcome to SHILIAIWEI
+        </h1>
+
+        {/* Subtitle / User Welcome */}
+        <p className="text-xs text-slate-500 max-w-xs mb-6 leading-relaxed">
+          {user?.first_name
+            ? `Hello, ${user.first_name}. Your Telegram session is ready.`
+            : "Official Telegram Mini App for @srievibot."}
+        </p>
+
+        {/* Standard Telegram Feature Highlights */}
+        <div className="w-full rounded-2xl bg-slate-50 border border-slate-200 divide-y divide-slate-100 overflow-hidden text-left shadow-2xs">
+          {/* Item 1: Telegram Identity */}
+          <div className="p-3.5 flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#0098ea] shrink-0">
+              <ShieldCheck size={20} className="w-5 h-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-bold text-slate-800">
+                Telegram Verified
+              </div>
+              <div className="text-[11px] text-slate-500 truncate">
+                {user?.username ? `@${user.username}` : "Connected via @srievibot"}
+              </div>
+            </div>
           </div>
 
-          {/* Android Material 3 Minimalist Linear Progress Indicator */}
-          <div className="w-44 h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60 shadow-inner">
-            <div
-              className="h-full bg-gradient-to-r from-[#0098ea] via-[#38bdf8] to-emerald-400 rounded-full transition-all duration-400 ease-out"
-              style={{ width: `${progress}%` }}
-            />
+          {/* Item 2: Play & Earn */}
+          <div className="p-3.5 flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#16a34a] shrink-0">
+              <Coins size={20} className="w-5 h-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-bold text-slate-800">
+                Play & Earn PTS
+              </div>
+              <div className="text-[11px] text-slate-500">
+                Tap, complete tasks, and climb the leaderboard
+              </div>
+            </div>
+          </div>
+
+          {/* Item 3: Real-Time Sync */}
+          <div className="p-3.5 flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#0098ea] shrink-0">
+              <Zap size={20} className="w-5 h-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-bold text-slate-800">
+                Instant Cloud Sync
+              </div>
+              <div className="text-[11px] text-slate-500">
+                Scores and rewards update directly in Telegram
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 4. Bottom Branded Lockup (Official Single-line SHILIAIWEI Wordmark) */}
-      <div className="flex-1 w-full pb-8 flex flex-col items-center justify-end">
-        <div className="flex flex-col items-center gap-1.5">
-          <ShiliaiweiBrand height={26} colorScheme="blue" />
-          <span className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">
-            Official Web3 Vault Platform
+      {/* Bottom Action Area */}
+      <div className="w-full pt-4 space-y-3">
+        <button
+          type="button"
+          onClick={handleStart}
+          className="w-full py-3.5 px-6 rounded-2xl bg-[#0098ea] hover:bg-[#0088cc] active:scale-[0.99] text-white font-bold text-sm tracking-wide flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-all"
+        >
+          <span>Start Mini App</span>
+          <ChevronRight size={18} className="w-4 h-4" />
+        </button>
+
+        <div className="text-center">
+          <span className="text-[11px] text-slate-400 font-medium">
+            @srievibot • Official Telegram Mini App
           </span>
         </div>
       </div>

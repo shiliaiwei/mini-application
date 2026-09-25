@@ -13,6 +13,7 @@ interface GameDockProps {
   activeTab: GameTab;
   onChangeTab: (tab: GameTab) => void;
   user: TelegramUser | null;
+  isVisible?: boolean;
 }
 
 // Apple Keyline Home Icon
@@ -39,11 +40,16 @@ export const GameDock: React.FC<GameDockProps> = ({
   activeTab,
   onChangeTab,
   user,
+  isVisible = true,
 }) => {
   return (
     <nav
       aria-label="Bottom Navigation Dock"
-      className="fixed bottom-[max(0.85rem,env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-[370px] select-none font-sans"
+      className={`fixed bottom-[max(0.85rem,env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-[370px] select-none font-sans transition-all duration-300 ease-out ${
+        isVisible
+          ? "translate-y-0 opacity-100 pointer-events-auto"
+          : "translate-y-24 opacity-0 pointer-events-none"
+      }`}
     >
       {/* Floating Apple-Style Glassmorphism Dock */}
       <div className="rounded-full px-2 py-1.5 flex items-center justify-between border border-white/80 shadow-[0_12px_32px_rgba(15,23,42,0.12),0_2px_8px_rgba(15,23,42,0.06)] bg-white/90 backdrop-blur-2xl ring-1 ring-slate-900/5">

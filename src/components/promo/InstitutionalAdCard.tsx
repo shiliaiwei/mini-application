@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { VERIFIED_ADS_PARTNERS, AdPartnerItem } from "@/data/adsData";
 
@@ -12,23 +12,25 @@ interface InstitutionalAdCardProps {
   lang?: AdCardLanguage;
 }
 
-const AD_DURATION_SECONDS = 7;
-type AnimationDirection = "left" | "right" | "up" | "down";
-const DIRECTIONS: AnimationDirection[] = ["left", "right", "up", "down"];
+const AD_ROTATION_INTERVAL_MS = 3800;
 
+/**
+ * InstitutionalAdCard — Ticket/Stub Monochrome Premium Style
+ * - No "AD" label, no acronym short label
+ * - Ornate ticket shape with notched semicircles on both sides
+ * - Black background, white inner content area
+ * - Perforated dashed divider line
+ */
 export const InstitutionalAdCard: React.FC<InstitutionalAdCardProps> = ({
   onOpenDetail,
   lang,
 }) => {
-  // Random initial selection from verified partners
   const [currentIndex, setCurrentIndex] = useState(() =>
     Math.floor(Math.random() * VERIFIED_ADS_PARTNERS.length)
   );
-  const [direction, setDirection] = useState<AnimationDirection>("right");
-  const [animStage, setAnimStage] = useState<"idle" | "entering" | "exiting">("idle");
-  const [flash, setFlash] = useState(false);
+  const [direction, setDirection] = useState<"left" | "right">("right");
+  const [animStage, setAnimStage] = useState<"idle" | "exiting" | "entering">("idle");
 
-  // Active language detection (strictly single language, no bilingual text)
   const [currentLang, setCurrentLang] = useState<AdCardLanguage>(() => {
     if (lang) return lang;
     if (typeof window !== "undefined") {
@@ -40,17 +42,11 @@ export const InstitutionalAdCard: React.FC<InstitutionalAdCardProps> = ({
     return "km";
   });
 
-  // Listen for language changes from user switch
   useEffect(() => {
-    if (lang) {
-      setCurrentLang(lang);
-      return;
-    }
+    if (lang) { setCurrentLang(lang); return; }
     const handleLangChange = () => {
       const saved = localStorage.getItem("shi_app_lang");
-      if (saved === "en" || saved === "km") {
-        setCurrentLang(saved);
-      }
+      if (saved === "en" || saved === "km") setCurrentLang(saved);
     };
     window.addEventListener("storage", handleLangChange);
     window.addEventListener("shi_lang_change", handleLangChange);
@@ -60,59 +56,34 @@ export const InstitutionalAdCard: React.FC<InstitutionalAdCardProps> = ({
     };
   }, [lang]);
 
-  // Pick a random DIFFERENT partner with fast random direction and flash effect
-  const pickNextRandomPartner = () => {
+  const triggerNextAd = useCallback(() => {
     setAnimStage("exiting");
-
     setTimeout(() => {
       setCurrentIndex((prev) => {
         let next: number;
-        do {
-          next = Math.floor(Math.random() * VERIFIED_ADS_PARTNERS.length);
-        } while (next === prev && VERIFIED_ADS_PARTNERS.length > 1);
+        do { next = Math.floor(Math.random() * VERIFIED_ADS_PARTNERS.length); }
+        while (next === prev && VERIFIED_ADS_PARTNERS.length > 1);
         return next;
       });
-
-      const nextDir = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
-      setDirection(nextDir);
+      setDirection((prev) => (prev === "right" ? "left" : "right"));
       setAnimStage("entering");
-      setFlash(true);
-
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          setAnimStage("idle");
-          setFlash(false);
-        }, 25);
-      });
-    }, 100);
-  };
-
-  // Fast 7-Second Auto-rotation interval for rapid style changes
-  useEffect(() => {
-    const timer = setInterval(() => {
-      pickNextRandomPartner();
-    }, AD_DURATION_SECONDS * 1000);
-
-    return () => clearInterval(timer);
+      requestAnimationFrame(() => setTimeout(() => setAnimStage("idle"), 30));
+    }, 120);
   }, []);
+
+  useEffect(() => {
+    const timer = setInterval(triggerNextAd, AD_ROTATION_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [triggerNextAd]);
 
   const partner: AdPartnerItem = VERIFIED_ADS_PARTNERS[currentIndex] || VERIFIED_ADS_PARTNERS[0];
   const fullName = currentLang === "en" ? partner.nameEn : partner.nameKm;
+  const sector = currentLang === "en" ? partner.sectorEn : partner.sectorKm;
 
-  // Compute transform classes for snappy, fast animation (crisp deceleration)
-  const getTransformClass = () => {
-    if (animStage === "exiting") {
-      return "opacity-0 scale-95 transition-all duration-100 ease-in";
-    }
-    if (animStage === "entering") {
-      let offset = "";
-      if (direction === "left") offset = "-translate-x-12 translate-y-0";
-      else if (direction === "right") offset = "translate-x-12 translate-y-0";
-      else if (direction === "up") offset = "translate-y-12 translate-x-0";
-      else if (direction === "down") offset = "-translate-y-12 translate-x-0";
-      return `opacity-0 scale-90 ${offset} duration-0`;
-    }
-    return "opacity-100 scale-100 translate-x-0 translate-y-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]";
+  const getAnimStyle = (): React.CSSProperties => {
+    if (animStage === "exiting") return { opacity: 0, transform: `scale(0.94) translateX(${direction === "right" ? "-24px" : "24px"})`, transition: "all 0.12s ease-in" };
+    if (animStage === "entering") return { opacity: 0, transform: `scale(0.88) translateX(${direction === "right" ? "28px" : "-28px"})`, transition: "none" };
+    return { opacity: 1, transform: "scale(1) translateX(0)", transition: "all 0.22s cubic-bezier(0.22,1,0.36,1)" };
   };
 
   return (
@@ -122,55 +93,129 @@ export const InstitutionalAdCard: React.FC<InstitutionalAdCardProps> = ({
       onClick={() => onOpenDetail(partner.id)}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpenDetail(partner.id)}
       aria-label={fullName}
-      className="sm:col-span-6 relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#0088cc] via-[#006fa7] to-[#004f77] min-h-[255px] sm:min-h-[270px] border border-blue-400/25 shadow-sm cursor-pointer select-none group active:scale-[0.98] transition-transform duration-300 ease-out"
+      className="w-full cursor-pointer select-none active:scale-[0.98] transition-transform duration-150 outline-none"
     >
-      {/* Dynamic Ambient Background Glow */}
+      {/*
+        ── TICKET SHAPE ──
+        Outer black shell, inner white area cut with notches on left/right sides.
+        Uses CSS clip with a radial-gradient trick for the semicircle punch-outs.
+      */}
       <div
-        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full opacity-30 pointer-events-none filter blur-2xl transition-colors duration-500"
-        style={{ backgroundColor: partner.officialColor || "#38bdf8" }}
-      />
-
-      {/* Momentary Fast Flash Overlay on ad rotation */}
-      <div
-        className={`absolute inset-0 bg-white/40 pointer-events-none transition-opacity duration-250 ease-out z-30 ${
-          flash ? "opacity-100" : "opacity-0"
-        }`}
-      />
-
-      {/* ── BIG CENTERED LOGO SHOWCASE (Transparent background, no box, slow float when center) ── */}
-      <div className="absolute inset-0 flex items-center justify-center pb-12 pt-3 px-4 z-10 pointer-events-none">
+        className="relative w-full overflow-visible"
+        style={{ minHeight: "240px" }}
+      >
+        {/* Black outer shell */}
         <div
-          className={`relative w-44 h-44 sm:w-48 sm:h-48 flex items-center justify-center transform ${getTransformClass()} ${
-            animStage === "idle" ? "animate-ad-logo-float" : ""
-          }`}
+          className="relative w-full overflow-hidden"
+          style={{
+            background: "#0F172A",
+            borderRadius: "8px",
+            minHeight: "240px",
+          }}
         >
-          {/* Subtle luminous halo ring behind logo */}
+          {/* Subtle decorative corner ornaments — top-left */}
+          <svg className="absolute top-3 left-3 pointer-events-none" width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden>
+            <path d="M2 14 Q2 2 14 2" stroke="white" strokeWidth="1.2" strokeOpacity="0.25" fill="none"/>
+            <path d="M2 14 Q2 2 14 2" stroke="white" strokeWidth="0.5" strokeOpacity="0.12" fill="none" strokeDasharray="2 2"/>
+            <circle cx="2" cy="2" r="1.5" fill="white" fillOpacity="0.3"/>
+            <circle cx="14" cy="2" r="1" fill="white" fillOpacity="0.2"/>
+            <circle cx="2" cy="14" r="1" fill="white" fillOpacity="0.2"/>
+          </svg>
+          {/* Corner ornament — top-right */}
+          <svg className="absolute top-3 right-3 pointer-events-none" width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden>
+            <path d="M26 14 Q26 2 14 2" stroke="white" strokeWidth="1.2" strokeOpacity="0.25" fill="none"/>
+            <path d="M26 14 Q26 2 14 2" stroke="white" strokeWidth="0.5" strokeOpacity="0.12" fill="none" strokeDasharray="2 2"/>
+            <circle cx="26" cy="2" r="1.5" fill="white" fillOpacity="0.3"/>
+            <circle cx="14" cy="2" r="1" fill="white" fillOpacity="0.2"/>
+            <circle cx="26" cy="14" r="1" fill="white" fillOpacity="0.2"/>
+          </svg>
+          {/* Corner ornament — bottom-left */}
+          <svg className="absolute bottom-3 left-3 pointer-events-none" width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden>
+            <path d="M2 14 Q2 26 14 26" stroke="white" strokeWidth="1.2" strokeOpacity="0.25" fill="none"/>
+            <circle cx="2" cy="26" r="1.5" fill="white" fillOpacity="0.3"/>
+          </svg>
+          {/* Corner ornament — bottom-right */}
+          <svg className="absolute bottom-3 right-3 pointer-events-none" width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden>
+            <path d="M26 14 Q26 26 14 26" stroke="white" strokeWidth="1.2" strokeOpacity="0.25" fill="none"/>
+            <circle cx="26" cy="26" r="1.5" fill="white" fillOpacity="0.3"/>
+          </svg>
+
+          {/* Inner white content zone */}
           <div
-            className="absolute inset-3 rounded-full opacity-30 filter blur-xl pointer-events-none transition-all duration-700"
-            style={{ backgroundColor: partner.officialColor || "#38bdf8" }}
-          />
+            className="relative mx-4 my-4"
+            style={{
+              background: "white",
+              borderRadius: "4px",
+              overflow: "hidden",
+            }}
+          >
+            {/* Punch-out notches on left & right at ~65% from top (divider row) */}
+            {/* Left notch */}
+            <div
+              className="absolute z-10"
+              style={{
+                left: "-12px",
+                top: "68%",
+                width: "24px",
+                height: "24px",
+                borderRadius: "50%",
+                background: "#0F172A",
+                transform: "translateY(-50%)",
+              }}
+            />
+            {/* Right notch */}
+            <div
+              className="absolute z-10"
+              style={{
+                right: "-12px",
+                top: "68%",
+                width: "24px",
+                height: "24px",
+                borderRadius: "50%",
+                background: "#0F172A",
+                transform: "translateY(-50%)",
+              }}
+            />
 
-          <Image
-            src={`/ads/${partner.filename}`}
-            alt={fullName}
-            fill
-            sizes="(max-width: 640px) 192px, 220px"
-            className="object-contain filter drop-shadow-[0_12px_28px_rgba(0,0,0,0.65)] drop-shadow-[0_2px_10px_rgba(255,255,255,0.22)] select-none pointer-events-none relative z-10"
-            priority
-          />
+            {/* Logo zone (top 65%) */}
+            <div
+              className="flex items-center justify-center"
+              style={{ height: "160px" }}
+            >
+              <div style={getAnimStyle()} className="flex items-center justify-center w-36 h-36">
+                <Image
+                  src={`/ads/${partner.filename}`}
+                  alt={fullName}
+                  fill
+                  sizes="144px"
+                  className="object-contain select-none pointer-events-none"
+                  priority
+                />
+              </div>
+            </div>
+
+            {/* Dashed perforated divider line */}
+            <div className="w-full px-3">
+              <div
+                style={{
+                  borderTop: "1.5px dashed #CBD5E1",
+                  marginLeft: "8px",
+                  marginRight: "8px",
+                }}
+              />
+            </div>
+
+            {/* Stub zone — name & sector */}
+            <div style={getAnimStyle()} className="px-5 py-3 text-center">
+              <h2 className="font-black text-slate-900 text-base leading-tight line-clamp-1">
+                {fullName}
+              </h2>
+              <p className="text-[11px] text-slate-400 font-medium mt-0.5 truncate">
+                {sector}
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* ── CONTRAST GRADIENT OVERLAY (Transparent from center line to bottom black) ── */}
-      <div className="absolute inset-x-0 bottom-0 top-[45%] bg-gradient-to-t from-black/90 via-black/55 to-transparent pointer-events-none z-15" />
-
-      {/* ── SINGLE FULL NAME IN ACTIVE LANGUAGE (No bilingual text, mobile optimized) ── */}
-      <div className="absolute inset-x-0 bottom-0 z-20 px-4 pb-3.5 pt-3 text-center pointer-events-none">
-        <h2
-          className={`font-sans font-black text-white text-sm sm:text-base leading-snug drop-shadow-md line-clamp-2 transform ${getTransformClass()}`}
-        >
-          {fullName}
-        </h2>
       </div>
     </div>
   );

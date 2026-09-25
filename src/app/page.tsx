@@ -56,6 +56,59 @@ export default function MiniAppPage() {
   scoreRef.current = score;
   spendRef.current = spendSeconds;
 
+  // Dynamic Dock Visibility on Scroll
+  const [isDockVisible, setIsDockVisible] = useState(true);
+  const lastScrollYRef = useRef(0);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Track scroll direction for dock hide/show
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentY = window.scrollY;
+          const delta = currentY - lastScrollYRef.current;
+
+          // When scrolling down, hide dock to maximize content view
+          if (delta > 8 && currentY > 50) {
+            setIsDockVisible(false);
+          }
+          // When scrolling up, show dock
+          else if (delta < -8 || currentY <= 30) {
+            setIsDockVisible(true);
+          }
+
+          // If reached near page bottom, reveal dock
+          const windowHeight = window.innerHeight;
+          const docHeight = document.documentElement.scrollHeight;
+          if (currentY + windowHeight >= docHeight - 70) {
+            setIsDockVisible(true);
+          }
+
+          lastScrollYRef.current = currentY;
+
+          // Gently restore dock 1.2s after scroll stops
+          if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
+          }
+          scrollTimeoutRef.current = setTimeout(() => {
+            setIsDockVisible(true);
+          }, 1200);
+
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
+
   // Track active time spent
   useEffect(() => {
     const timer = setInterval(() => {
@@ -374,20 +427,18 @@ export default function MiniAppPage() {
       {/* Vector Guilloche Banknote Security Mesh from background.svg */}
       <div className="fixed inset-0 bg-app-guilloche opacity-[0.06] pointer-events-none z-0" />
 
-      {/* Sticky Global Top Navigation Bar with pt-[45px] - NOT in profile menu */}
-      {activeTab !== "profile" && (
-        <TopBrandNavBar
-          showBalances={showBalances}
-          onToggleBalances={() => setShowBalances(!showBalances)}
-          onOpenProfile={() => {
-            setProfileSubTab("profile");
-            handleTabChange("profile");
-          }}
-          onOpenNotifications={() => setActiveStatsScreen(true)}
-          user={user}
-          tgApp={tgApp}
-        />
-      )}
+      {/* Sticky Global Top Navigation Bar with pt-[60px] - ALWAYS displayed anywhere */}
+      <TopBrandNavBar
+        showBalances={showBalances}
+        onToggleBalances={() => setShowBalances(!showBalances)}
+        onOpenProfile={() => {
+          setProfileSubTab("profile");
+          handleTabChange("profile");
+        }}
+        onOpenNotifications={() => setActiveStatsScreen(true)}
+        user={user}
+        tgApp={tgApp}
+      />
 
       {/* 3. Main SPA View Switcher */}
       <main className="flex-1 w-full max-w-4xl mx-auto px-3 pt-2 pb-safe">
@@ -586,11 +637,12 @@ export default function MiniAppPage() {
         )}
       </main>
 
-      {/* Floating Bottom Dock for Easy Mobile Navigation */}
+      {/* Floating Bottom Dock with dynamic hide/show on scroll */}
       <GameDock
         activeTab={activeTab}
         onChangeTab={handleTabChange}
         user={user}
+        isVisible={isDockVisible}
       />
     </div>
   );
