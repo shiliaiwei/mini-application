@@ -50,6 +50,7 @@ interface TapGameViewProps {
   onGoToSettings?: () => void;
   onSelectCategory?: (cat: NavCategory) => void;
   onSelectGame?: (game: MiniGameType) => void;
+  onOpenStats?: () => void;
   user: TelegramUser | null;
   tgApp: TelegramWebApp | null;
 }
@@ -68,6 +69,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
   onGoToSettings,
   onSelectCategory,
   onSelectGame,
+  onOpenStats,
   user,
   tgApp,
 }) => {
@@ -638,6 +640,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           onAddScore={onAddScore || (() => {})}
           onOpenDeposit={() => setSubView("deposit")}
           onOpenTapVault={() => setSubView("tap-vault")}
+          onOpenStats={onOpenStats}
           onSelectGame={onSelectGame}
           tgApp={tgApp}
         />

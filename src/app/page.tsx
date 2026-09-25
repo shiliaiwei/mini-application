@@ -12,6 +12,7 @@ import { GameProfileView, ProfileSubTab } from "@/components/views/GameProfileVi
 import { GameWelcomeScreen } from "@/components/welcome/GameWelcomeScreen";
 import { TelegramGateScreen } from "@/components/common/TelegramGateScreen";
 import { MiniGameFullView, MiniGameType } from "@/components/views/MiniGameFullView";
+import { StatsDetailSpaView } from "@/components/views/StatsDetailSpaView";
 import {
   Check,
   Wallet,
@@ -28,6 +29,7 @@ export default function MiniAppPage() {
   const [activeCategory, setActiveCategory] = useState<NavCategory>("lobby");
   const [profileSubTab, setProfileSubTab] = useState<ProfileSubTab>("profile");
   const [activeGameScreen, setActiveGameScreen] = useState<MiniGameType | null>(null);
+  const [activeStatsScreen, setActiveStatsScreen] = useState(false);
   const [activeTopUpScreen, setActiveTopUpScreen] = useState(false);
 
   // Top Up State
@@ -283,6 +285,7 @@ export default function MiniAppPage() {
     } catch {}
     syncWithDatabase(scoreRef.current, spendRef.current);
     setActiveGameScreen(null);
+    setActiveStatsScreen(false);
     setActiveTab(tab);
 
     // Sync category bar state
@@ -297,6 +300,7 @@ export default function MiniAppPage() {
       tgApp?.HapticFeedback?.selectionChanged();
     } catch {}
     setActiveGameScreen(null);
+    setActiveStatsScreen(false);
     setActiveCategory(cat);
 
     if (cat === "lobby" || cat === "vault" || cat === "popular" || cat === "favorites") {
@@ -473,6 +477,13 @@ export default function MiniAppPage() {
             user={user}
             tgApp={tgApp}
           />
+        ) : activeStatsScreen ? (
+          <StatsDetailSpaView
+            score={score}
+            onBack={() => setActiveStatsScreen(false)}
+            user={user}
+            tgApp={tgApp}
+          />
         ) : (
           <>
             {activeTab === "wallet" && (
@@ -486,6 +497,12 @@ export default function MiniAppPage() {
                 passiveRate={passiveRate}
                 onAddScore={handleAddScore}
                 onSelectCategory={handleCategorySelect}
+                onOpenStats={() => {
+                  try {
+                    tgApp?.HapticFeedback?.impactOccurred("medium");
+                  } catch {}
+                  setActiveStatsScreen(true);
+                }}
                 onSelectGame={(selectedGame) => {
                   try {
                     tgApp?.HapticFeedback?.impactOccurred("medium");

@@ -11,6 +11,7 @@ interface WinGramPromoCardsProps {
   onAddScore?: (amount: number) => void;
   onOpenDeposit?: () => void;
   onOpenTapVault?: () => void;
+  onOpenStats?: () => void;
   onSelectGame?: (game: MiniGameType) => void;
   tgApp: TelegramWebApp | null;
 }
@@ -66,6 +67,7 @@ const CardWatermarkPattern: React.FC<{ patternId: string }> = ({ patternId }) =>
 export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
   score = 0,
   onOpenTapVault,
+  onOpenStats,
   onSelectGame,
   tgApp,
 }) => {
@@ -76,8 +78,9 @@ export const WinGramPromoCards: React.FC<WinGramPromoCardsProps> = ({
       tgApp?.HapticFeedback?.impactOccurred("medium");
     } catch {}
 
-    // Never auto-add points: only playing collects points
-    if (onOpenTapVault) {
+    if (onOpenStats) {
+      onOpenStats();
+    } else if (onOpenTapVault) {
       onOpenTapVault();
     }
   };
