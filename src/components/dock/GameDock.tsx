@@ -173,8 +173,8 @@ export const GameDock: React.FC<GameDockProps> = ({
           : "translate-y-24 opacity-0 pointer-events-none"
       }`}
     >
-      {/* Floating Apple-Style Glassmorphism Dock */}
-      <div className="rounded-full px-1 py-1.5 flex items-center justify-between border border-white/80 shadow-[0_12px_32px_rgba(15,23,42,0.12),0_2px_8px_rgba(15,23,42,0.06)] bg-white/90 backdrop-blur-2xl ring-1 ring-slate-900/5">
+      {/* Floating Apple-Style Dock */}
+      <div className="rounded-full px-1 py-1.5 flex items-center justify-between border border-slate-200/80 shadow-[0_12px_32px_rgba(15,23,42,0.12),0_2px_8px_rgba(15,23,42,0.06)] bg-white ring-1 ring-slate-900/5">
         {tabs.map((tab) => (
           <button
             key={tab.id}

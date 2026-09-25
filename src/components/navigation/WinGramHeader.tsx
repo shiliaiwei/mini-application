@@ -28,7 +28,7 @@ export const WinGramHeader: React.FC<WinGramHeaderProps> = ({
   const levelInfo = getUserLevelInfo(score);
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200/90 px-3 py-2 flex items-center justify-between gap-2 select-none font-body shadow-xs">
+    <header className="sticky top-0 z-40 bg-white border-b border-slate-200/90 px-3 py-2 flex items-center justify-between gap-2 select-none font-body shadow-xs">
       {/* Left: Brand Logo */}
       <div className="flex items-center gap-2 min-w-0">
         {/* SHILIAIWEI Brand: Standalone Wordmark (Zero Logo Icon per rule) */}

@@ -638,7 +638,7 @@ export const StatsDetailSpaView: React.FC<StatsDetailSpaViewProps> = ({
                     content={({ active, payload, label }: any) => {
                       if (!active || !payload?.length) return null;
                       return (
-                        <div className="bg-white/95 backdrop-blur-md border border-white/80 rounded-xl px-3 py-2 shadow-xl text-xs font-black text-slate-900">
+                        <div className="bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-xl text-xs font-black text-slate-900">
                           <p className="text-[10px] text-slate-400 font-medium">{label}</p>
                           <p className="text-[#0098ea] font-mono text-sm">{payload[0]?.value?.toLocaleString()} PTS</p>
                           <p className="text-slate-500 font-mono text-[10px]">Vol: {payload[0]?.payload?.vol} units</p>
@@ -1234,7 +1234,7 @@ export const StatsDetailSpaView: React.FC<StatsDetailSpaViewProps> = ({
               <div className="absolute w-2.5 h-2.5 rounded-full bg-white border border-yellow-400 shadow-sm" />
 
               {/* Floating Trackball HUD Pill */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white border border-cyan-400/40 px-2 py-1 rounded-xl shadow-xl whitespace-nowrap text-[9px] font-black font-mono">
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white border border-cyan-400/40 px-2 py-1 rounded-xl shadow-xl whitespace-nowrap text-[9px] font-black font-mono">
                 <span className="text-cyan-300 mr-1">{hoverData.t}:</span>
                 <span className="text-yellow-300">{hoverData.pts?.toLocaleString()} PTS</span>
               </div>
