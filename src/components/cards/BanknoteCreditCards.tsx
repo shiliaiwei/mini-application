@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Eye, EyeOff } from "@/components/icons/KeylineIcons";
 
 interface BanknoteCreditCardsProps {
   score: number;
@@ -27,99 +28,85 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = ({
     <div className="w-full flex flex-col space-y-2.5 select-none">
       {/* 1. KHMER RIEL CARD (FIRST) */}
       <div
-        className="relative w-full h-[120px] rounded-2xl overflow-hidden border border-[#d4a017]/40 shadow-md shadow-amber-800/20 flex items-center justify-between px-5 sm:px-6"
+        onClick={onToggleBalance}
+        className="relative w-full h-[104px] rounded-2xl overflow-hidden border border-amber-300/35 shadow-md shadow-amber-900/10 flex items-center justify-between px-5 sm:px-6 cursor-pointer active:scale-[0.99] transition-all"
         style={{
           background:
-            "linear-gradient(135deg, #b8860b 0%, #c9960e 30%, #d4a832 50%, #c9960e 70%, #a87809 100%)",
+            "linear-gradient(135deg, #c28b10 0%, #d9a01c 45%, #b88107 100%)",
         }}
+        title="Click to toggle balance visibility"
       >
-        {/* Banknote Guilloche Mesh — no blend mode, pure opacity */}
-        <div
-          className="absolute inset-0 bg-cover bg-center pointer-events-none"
-          style={{
-            backgroundImage: "url('/backgrounds/cardbanknote.svg')",
-            opacity: 0.18,
-          }}
-        />
-
-        {/* CENTER: Currency Sign — warm amber-gold, no gray/white */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center justify-center pointer-events-none select-none">
-          <span
-            className="text-[128px] font-black leading-none select-none"
-            style={{
-              fontFamily: "var(--font-faculty-glyphic), serif",
-              color: "rgba(255, 220, 80, 0.28)",
-              filter: "none",
-            }}
-          >
-            ៛
-          </span>
+        {/* Left Side: Crisp Currency Icon Badge + Info */}
+        <div className="flex items-center gap-3.5 z-10 min-w-0">
+          <div className="w-11 h-11 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center flex-shrink-0 shadow-xs">
+            <span className="text-2xl font-black text-white leading-none">
+              ៛
+            </span>
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-base font-bold text-white tracking-tight leading-tight truncate">
+              Khmer Riel
+            </span>
+            <span className="text-[11px] font-semibold text-amber-100/85 tracking-wider uppercase">
+              KHR • Wallet
+            </span>
+          </div>
         </div>
 
-        {/* Left Side: Empty spacer */}
-        <div className="relative z-20" />
-
-        {/* Right Side: Riel Balance with prominent large Khmer sign */}
-        <div
-          onClick={onToggleBalance}
-          className="relative z-20 flex flex-col items-end justify-center text-right cursor-pointer group/bal"
-          title="Click to toggle balance visibility"
-        >
-          <span className="text-2xl sm:text-3xl font-black tracking-tight text-white font-mono drop-shadow-sm group-hover/bal:opacity-90 transition-opacity flex items-baseline gap-1.5">
-            <span className="text-3xl sm:text-4xl font-extrabold text-amber-200/95 leading-none">
+        {/* Right Side: Eye Toggle + Large Crisp Balance */}
+        <div className="flex flex-col items-end justify-center text-right z-10 flex-shrink-0">
+          <div className="flex items-center gap-1 text-[11px] font-medium text-amber-100/80 mb-0.5">
+            <span>{showBalance ? "Hide" : "Show"}</span>
+            {showBalance ? <Eye size={12} /> : <EyeOff size={12} />}
+          </div>
+          <div className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight flex items-baseline gap-1">
+            <span className="text-xl sm:text-2xl font-bold text-amber-200">
               ៛
             </span>
             <span>{showBalance ? khrBalance : "••••••"}</span>
-          </span>
+          </div>
         </div>
       </div>
 
       {/* 2. US DOLLAR CARD (BELOW RIEL) */}
       <div
-        className="relative w-full h-[120px] rounded-2xl overflow-hidden border border-blue-500/30 shadow-md shadow-blue-900/20 flex items-center justify-between px-5 sm:px-6"
+        onClick={onToggleBalance}
+        className="relative w-full h-[104px] rounded-2xl overflow-hidden border border-blue-400/35 shadow-md shadow-blue-950/15 flex items-center justify-between px-5 sm:px-6 cursor-pointer active:scale-[0.99] transition-all"
         style={{
           background:
-            "linear-gradient(135deg, #1a3a6c 0%, #1e4d8c 30%, #2460a8 50%, #1e4d8c 70%, #163264 100%)",
+            "linear-gradient(135deg, #163d72 0%, #1e529a 45%, #133463 100%)",
         }}
+        title="Click to toggle balance visibility"
       >
-        {/* Banknote Guilloche Mesh — no blend mode, pure opacity */}
-        <div
-          className="absolute inset-0 bg-cover bg-center pointer-events-none"
-          style={{
-            backgroundImage: "url('/backgrounds/cardbanknote.svg')",
-            opacity: 0.15,
-          }}
-        />
-
-        {/* CENTER: Currency Sign — steel-blue native tone, no gray/white */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center justify-center pointer-events-none select-none">
-          <span
-            className="text-[104px] font-black leading-none select-none"
-            style={{
-              fontFamily: "var(--font-faculty-glyphic), serif",
-              color: "rgba(147, 210, 255, 0.28)",
-              filter: "none",
-            }}
-          >
-            $
-          </span>
+        {/* Left Side: Crisp Currency Icon Badge + Info */}
+        <div className="flex items-center gap-3.5 z-10 min-w-0">
+          <div className="w-11 h-11 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center flex-shrink-0 shadow-xs">
+            <span className="text-2xl font-black text-white leading-none">
+              $
+            </span>
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-base font-bold text-white tracking-tight leading-tight truncate">
+              US Dollar
+            </span>
+            <span className="text-[11px] font-semibold text-sky-100/85 tracking-wider uppercase">
+              USD • Wallet
+            </span>
+          </div>
         </div>
 
-        {/* Left Side: Empty spacer */}
-        <div className="relative z-20" />
-
-        {/* Right Side: Dollar Balance */}
-        <div
-          onClick={onToggleBalance}
-          className="relative z-20 flex flex-col items-end justify-center text-right cursor-pointer group/bal"
-          title="Click to toggle balance visibility"
-        >
-          <span className="text-2xl sm:text-3xl font-black tracking-tight text-white font-mono drop-shadow-sm group-hover/bal:opacity-90 transition-opacity flex items-baseline gap-1">
-            <span className="text-2xl sm:text-3xl font-extrabold text-sky-200/95 leading-none">
+        {/* Right Side: Eye Toggle + Large Crisp Balance */}
+        <div className="flex flex-col items-end justify-center text-right z-10 flex-shrink-0">
+          <div className="flex items-center gap-1 text-[11px] font-medium text-sky-100/80 mb-0.5">
+            <span>{showBalance ? "Hide" : "Show"}</span>
+            {showBalance ? <Eye size={12} /> : <EyeOff size={12} />}
+          </div>
+          <div className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight flex items-baseline gap-1">
+            <span className="text-xl sm:text-2xl font-bold text-sky-200">
               $
             </span>
             <span>{showBalance ? usdBalance : "••••••"}</span>
-          </span>
+          </div>
         </div>
       </div>
     </div>
