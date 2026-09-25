@@ -36,6 +36,50 @@ class GameAudioSynthesizer {
     } catch {}
   }
 
+  // Alias for playTap
+  playClick() {
+    this.playTap();
+  }
+
+  // Short clock tick for timers
+  playClockTick() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(1200, ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.02);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.02);
+    } catch {}
+  }
+
+  // Rapid mechanical tick for wheel spin
+  playWheelSpin() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      for (let i = 0; i < 6; i++) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const t = ctx.currentTime + i * 0.08;
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(900 - i * 50, t);
+        gain.gain.setValueAtTime(0.12, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.03);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.03);
+      }
+    } catch {}
+  }
+
   // Pleasant bell chime for correct character tapped (+1 pt)
   playCorrectChar() {
     const ctx = this.getContext();

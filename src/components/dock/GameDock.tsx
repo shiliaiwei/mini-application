@@ -46,26 +46,27 @@ export const GameDock: React.FC<GameDockProps> = ({
       className="fixed bottom-[max(0.85rem,env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-[390px] select-none font-sans"
     >
       {/* Floating Apple-Style Glassmorphism Dock */}
-      <div className="rounded-full px-2 py-1.5 flex items-center justify-between border border-white/80 shadow-[0_12px_32px_rgba(15,23,42,0.12),0_2px_8px_rgba(15,23,42,0.06)] bg-white/85 backdrop-blur-2xl ring-1 ring-slate-900/5">
-        {/* 1. Home Tab (Changed from Vault to Home per user request) */}
+      <div className="rounded-full p-1.5 flex items-center justify-between border border-white/80 shadow-[0_12px_32px_rgba(15,23,42,0.12),0_2px_8px_rgba(15,23,42,0.06)] bg-white/90 backdrop-blur-2xl ring-1 ring-slate-900/5">
+        {/* 1. Home Tab */}
         <button
           type="button"
           onClick={() => onChangeTab("wallet")}
           aria-label="Home"
           aria-current={activeTab === "wallet" ? "page" : undefined}
-          className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-full transition-all min-h-[46px] focus:outline-none active:scale-90 ${
+          className={`flex-1 flex items-center justify-center h-[42px] rounded-full transition-all duration-300 focus:outline-none cursor-pointer group ${
             activeTab === "wallet"
-              ? "text-[#0098ea] font-extrabold bg-blue-50/90 shadow-2xs"
-              : "text-slate-500 hover:text-slate-900 hover:bg-slate-100/50"
+              ? "bg-gradient-to-r from-[#0088cc] via-[#0098ea] to-[#00b0ff] text-white shadow-[0_4px_16px_rgba(0,152,234,0.38)] scale-105"
+              : "flex-col text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 hover:scale-105 active:scale-90"
           }`}
         >
           <HomeIcon
-            size={20}
-            className={activeTab === "wallet" ? "text-[#0098ea]" : "text-slate-500"}
+            size={activeTab === "wallet" ? 22 : 19}
+            className={activeTab === "wallet" ? "text-white" : "text-slate-500 group-hover:text-slate-900"}
           />
-          <span className="text-[10px] mt-0.5 tracking-wider font-bold">Home</span>
-          {activeTab === "wallet" && (
-            <span className="w-1 h-1 rounded-full bg-[#0098ea] mt-0.5" />
+          {activeTab !== "wallet" && (
+            <span className="text-[10px] mt-0.5 tracking-tight font-bold text-slate-500 group-hover:text-slate-900 leading-none">
+              Home
+            </span>
           )}
         </button>
 
@@ -75,19 +76,20 @@ export const GameDock: React.FC<GameDockProps> = ({
           onClick={() => onChangeTab("earn")}
           aria-label="Missions"
           aria-current={activeTab === "earn" ? "page" : undefined}
-          className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-full transition-all min-h-[46px] focus:outline-none active:scale-90 ${
+          className={`flex-1 flex items-center justify-center h-[42px] rounded-full transition-all duration-300 focus:outline-none cursor-pointer group ${
             activeTab === "earn"
-              ? "text-[#0098ea] font-extrabold bg-blue-50/90 shadow-2xs"
-              : "text-slate-500 hover:text-slate-900 hover:bg-slate-100/50"
+              ? "bg-gradient-to-r from-[#0088cc] via-[#0098ea] to-[#00b0ff] text-white shadow-[0_4px_16px_rgba(0,152,234,0.38)] scale-105"
+              : "flex-col text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 hover:scale-105 active:scale-90"
           }`}
         >
           <Gift
-            size={20}
-            className={activeTab === "earn" ? "text-[#0098ea]" : "text-slate-500"}
+            size={activeTab === "earn" ? 22 : 19}
+            className={activeTab === "earn" ? "text-white" : "text-slate-500 group-hover:text-slate-900"}
           />
-          <span className="text-[10px] mt-0.5 tracking-wider font-bold">Missions</span>
-          {activeTab === "earn" && (
-            <span className="w-1 h-1 rounded-full bg-[#0098ea] mt-0.5" />
+          {activeTab !== "earn" && (
+            <span className="text-[10px] mt-0.5 tracking-tight font-bold text-slate-500 group-hover:text-slate-900 leading-none">
+              Missions
+            </span>
           )}
         </button>
 
@@ -97,19 +99,20 @@ export const GameDock: React.FC<GameDockProps> = ({
           onClick={() => onChangeTab("leaderboard")}
           aria-label="Leaderboard Rank"
           aria-current={activeTab === "leaderboard" ? "page" : undefined}
-          className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-full transition-all min-h-[46px] focus:outline-none active:scale-90 ${
+          className={`flex-1 flex items-center justify-center h-[42px] rounded-full transition-all duration-300 focus:outline-none cursor-pointer group ${
             activeTab === "leaderboard"
-              ? "text-[#0098ea] font-extrabold bg-blue-50/90 shadow-2xs"
-              : "text-slate-500 hover:text-slate-900 hover:bg-slate-100/50"
+              ? "bg-gradient-to-r from-[#0088cc] via-[#0098ea] to-[#00b0ff] text-white shadow-[0_4px_16px_rgba(0,152,234,0.38)] scale-105"
+              : "flex-col text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 hover:scale-105 active:scale-90"
           }`}
         >
           <Trophy
-            size={20}
-            className={activeTab === "leaderboard" ? "text-[#0098ea]" : "text-slate-500"}
+            size={activeTab === "leaderboard" ? 22 : 19}
+            className={activeTab === "leaderboard" ? "text-white" : "text-slate-500 group-hover:text-slate-900"}
           />
-          <span className="text-[10px] mt-0.5 tracking-wider font-bold">Rank</span>
-          {activeTab === "leaderboard" && (
-            <span className="w-1 h-1 rounded-full bg-[#0098ea] mt-0.5" />
+          {activeTab !== "leaderboard" && (
+            <span className="text-[10px] mt-0.5 tracking-tight font-bold text-slate-500 group-hover:text-slate-900 leading-none">
+              Rank
+            </span>
           )}
         </button>
 
@@ -119,16 +122,16 @@ export const GameDock: React.FC<GameDockProps> = ({
           onClick={() => onChangeTab("profile")}
           aria-label="Settings"
           aria-current={activeTab === "profile" ? "page" : undefined}
-          className={`flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-full transition-all min-h-[46px] focus:outline-none active:scale-90 ${
+          className={`flex-1 flex items-center justify-center h-[42px] rounded-full transition-all duration-300 focus:outline-none cursor-pointer group ${
             activeTab === "profile"
-              ? "text-[#0098ea] font-extrabold bg-blue-50/90 shadow-2xs"
-              : "text-slate-500 hover:text-slate-900 hover:bg-slate-100/50"
+              ? "bg-gradient-to-r from-[#0088cc] via-[#0098ea] to-[#00b0ff] text-white shadow-[0_4px_16px_rgba(0,152,234,0.38)] scale-105"
+              : "flex-col text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 hover:scale-105 active:scale-90"
           }`}
         >
           {user?.photo_url ? (
             <div
               className={`w-5 h-5 rounded-full overflow-hidden border ${
-                activeTab === "profile" ? "border-[#0098ea]" : "border-slate-300"
+                activeTab === "profile" ? "border-white shadow-2xs" : "border-slate-300"
               }`}
             >
               <Image
@@ -142,13 +145,14 @@ export const GameDock: React.FC<GameDockProps> = ({
             </div>
           ) : (
             <User
-              size={20}
-              className={activeTab === "profile" ? "text-[#0098ea]" : "text-slate-500"}
+              size={activeTab === "profile" ? 22 : 19}
+              className={activeTab === "profile" ? "text-white" : "text-slate-500 group-hover:text-slate-900"}
             />
           )}
-          <span className="text-[10px] mt-0.5 tracking-wider font-bold">Settings</span>
-          {activeTab === "profile" && (
-            <span className="w-1 h-1 rounded-full bg-[#0098ea] mt-0.5" />
+          {activeTab !== "profile" && (
+            <span className="text-[10px] mt-0.5 tracking-tight font-bold text-slate-500 group-hover:text-slate-900 leading-none">
+              Settings
+            </span>
           )}
         </button>
       </div>

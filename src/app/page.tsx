@@ -11,6 +11,7 @@ import { LeaderboardView } from "@/components/views/LeaderboardView";
 import { GameProfileView, ProfileSubTab } from "@/components/views/GameProfileView";
 import { GameWelcomeScreen } from "@/components/welcome/GameWelcomeScreen";
 import { TelegramGateScreen } from "@/components/common/TelegramGateScreen";
+import { MiniGameFullView, MiniGameType } from "@/components/views/MiniGameFullView";
 import {
   X,
   Check,
@@ -26,6 +27,7 @@ export default function MiniAppPage() {
   const [activeTab, setActiveTab] = useState<GameTab>("wallet");
   const [activeCategory, setActiveCategory] = useState<NavCategory>("lobby");
   const [profileSubTab, setProfileSubTab] = useState<ProfileSubTab>("profile");
+  const [activeGameScreen, setActiveGameScreen] = useState<MiniGameType | null>(null);
 
   // Modals
   const [showTopUpModal, setShowTopUpModal] = useState(false);
@@ -280,6 +282,7 @@ export default function MiniAppPage() {
       tgApp?.HapticFeedback?.impactOccurred("light");
     } catch {}
     syncWithDatabase(scoreRef.current, spendRef.current);
+    setActiveGameScreen(null);
     setActiveTab(tab);
 
     // Sync category bar state
@@ -293,6 +296,7 @@ export default function MiniAppPage() {
     try {
       tgApp?.HapticFeedback?.selectionChanged();
     } catch {}
+    setActiveGameScreen(null);
     setActiveCategory(cat);
 
     if (cat === "lobby" || cat === "vault" || cat === "popular" || cat === "favorites") {
@@ -377,65 +381,84 @@ export default function MiniAppPage() {
 
       {/* 3. Main SPA View Switcher */}
       <main className="flex-1 w-full max-w-4xl mx-auto px-3 pt-2 pb-safe">
-        {activeTab === "wallet" && (
-          <TapGameView
-            score={score}
-            onTap={handleTap}
-            energy={energy}
-            maxEnergy={maxEnergy}
-            spendSeconds={spendSeconds}
-            tapPower={tapPower}
-            passiveRate={passiveRate}
-            onAddScore={handleAddScore}
-            onSelectCategory={handleCategorySelect}
-            onGoToSwap={() => {
-              setProfileSubTab("swap");
-              handleTabChange("profile");
-            }}
-            onGoToEarn={() => handleTabChange("earn")}
-            onGoToSettings={() => {
-              setProfileSubTab("profile");
-              handleTabChange("profile");
-            }}
-            user={user}
-            tgApp={tgApp}
-          />
-        )}
-
-        {activeTab === "earn" && (
-          <EarnTasksView
+        {activeGameScreen ? (
+          <MiniGameFullView
+            game={activeGameScreen}
             score={score}
             onAddScore={handleAddScore}
-            tapPower={tapPower}
-            onUpgradeTapPower={handleUpgradeTapPower}
-            passiveRate={passiveRate}
-            onUpgradePassiveRate={handleUpgradePassiveRate}
+            onBack={() => setActiveGameScreen(null)}
             user={user}
             tgApp={tgApp}
           />
-        )}
+        ) : (
+          <>
+            {activeTab === "wallet" && (
+              <TapGameView
+                score={score}
+                onTap={handleTap}
+                energy={energy}
+                maxEnergy={maxEnergy}
+                spendSeconds={spendSeconds}
+                tapPower={tapPower}
+                passiveRate={passiveRate}
+                onAddScore={handleAddScore}
+                onSelectCategory={handleCategorySelect}
+                onSelectGame={(selectedGame) => {
+                  try {
+                    tgApp?.HapticFeedback?.impactOccurred("medium");
+                  } catch {}
+                  setActiveGameScreen(selectedGame);
+                }}
+                onGoToSwap={() => {
+                  setProfileSubTab("swap");
+                  handleTabChange("profile");
+                }}
+                onGoToEarn={() => handleTabChange("earn")}
+                onGoToSettings={() => {
+                  setProfileSubTab("profile");
+                  handleTabChange("profile");
+                }}
+                user={user}
+                tgApp={tgApp}
+              />
+            )}
 
-        {activeTab === "leaderboard" && (
-          <LeaderboardView
-            userScore={score}
-            userSpendSeconds={spendSeconds}
-            user={user}
-            userRank={userRank}
-          />
-        )}
+            {activeTab === "earn" && (
+              <EarnTasksView
+                score={score}
+                onAddScore={handleAddScore}
+                tapPower={tapPower}
+                onUpgradeTapPower={handleUpgradeTapPower}
+                passiveRate={passiveRate}
+                onUpgradePassiveRate={handleUpgradePassiveRate}
+                user={user}
+                tgApp={tgApp}
+              />
+            )}
 
-        {activeTab === "profile" && (
-          <GameProfileView
-            user={user}
-            tgApp={tgApp}
-            score={score}
-            spendSeconds={spendSeconds}
-            tapPower={tapPower}
-            passiveRate={passiveRate}
-            initialSubTab={profileSubTab}
-            onSetScore={(newScore) => setScore(newScore)}
-            onBack={() => handleTabChange("wallet")}
-          />
+            {activeTab === "leaderboard" && (
+              <LeaderboardView
+                userScore={score}
+                userSpendSeconds={spendSeconds}
+                user={user}
+                userRank={userRank}
+              />
+            )}
+
+            {activeTab === "profile" && (
+              <GameProfileView
+                user={user}
+                tgApp={tgApp}
+                score={score}
+                spendSeconds={spendSeconds}
+                tapPower={tapPower}
+                passiveRate={passiveRate}
+                initialSubTab={profileSubTab}
+                onSetScore={(newScore) => setScore(newScore)}
+                onBack={() => handleTabChange("wallet")}
+              />
+            )}
+          </>
         )}
       </main>
 

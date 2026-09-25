@@ -30,6 +30,7 @@ import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge
 import { WinGramPromoCards } from "@/components/promo/WinGramPromoCards";
 import { BanknoteCreditCards } from "@/components/cards/BanknoteCreditCards";
 import { NavCategory } from "@/components/navigation/CategoryBar";
+import { MiniGameType } from "@/components/views/MiniGameFullView";
 
 interface FloatingPoint {
   id: number;
@@ -51,6 +52,7 @@ interface TapGameViewProps {
   onGoToEarn?: () => void;
   onGoToSettings?: () => void;
   onSelectCategory?: (cat: NavCategory) => void;
+  onSelectGame?: (game: MiniGameType) => void;
   user: TelegramUser | null;
   tgApp: TelegramWebApp | null;
 }
@@ -68,6 +70,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
   onGoToEarn,
   onGoToSettings,
   onSelectCategory,
+  onSelectGame,
   user,
   tgApp,
 }) => {
@@ -246,6 +249,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           onAddScore={onAddScore || (() => {})}
           onOpenDeposit={() => setShowDepositModal(true)}
           onOpenTapVault={() => setShowTapVaultModal(true)}
+          onSelectGame={onSelectGame}
           tgApp={tgApp}
         />
       </div>
