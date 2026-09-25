@@ -576,7 +576,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
     <div className="flex flex-col items-center justify-between min-h-[calc(100dvh-150px)] pb-28 select-none font-sans text-slate-900 max-w-xl mx-auto w-full px-1">
       {/* 1. Top Brand & Visibility Status Bar */}
       <div className="w-full space-y-2.5 pt-0.5">
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between px-1 pt-8">
           {/* Brand Logo (Full word logo: SHILIAI [WEI], no duplicate text alongside) */}
           <div className="flex items-center">
             <ShiliaiweiBrand height={22} colorScheme="blue" />
