@@ -141,8 +141,14 @@ export const StatsGraphCard: React.FC<StatsGraphCardProps> = ({ score, onClick }
         </ResponsiveContainer>
       </div>
 
+      {/* ── 14 CHART TYPES PREVIEW TEASER ── */}
+      <div className="relative z-10 flex items-center justify-between text-[8px] text-blue-200/90 font-medium py-1 px-1 bg-black/15 rounded-lg border border-white/10">
+        <span className="font-bold text-white uppercase tracking-wider">14 Chart Suites:</span>
+        <span className="truncate ml-1 font-mono text-white/80">Cartesian • Pie • Bubble • Gauge • Funnel • Heatmap • Maps...</span>
+      </div>
+
       {/* ── FOOTER: Consistent 3-Metric Status Row (Tap for Full SPA) ── */}
-      <div className="relative z-10 flex items-center justify-between pt-2 mt-1 border-t border-white/15 text-[9px] font-bold text-white/80 select-none">
+      <div className="relative z-10 flex items-center justify-between pt-1.5 mt-0.5 border-t border-white/15 text-[9px] font-bold text-white/80 select-none">
         <div className="flex items-center gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
           <span>{totalTrackedEvents.toLocaleString()} Events Tracked</span>
@@ -154,7 +160,7 @@ export const StatsGraphCard: React.FC<StatsGraphCardProps> = ({ score, onClick }
         </div>
 
         <div className="flex items-center gap-0.5 text-white font-black group-hover:underline">
-          <span>Tap to View SPA</span>
+          <span>Open 14 Charts</span>
           <span>→</span>
         </div>
       </div>
