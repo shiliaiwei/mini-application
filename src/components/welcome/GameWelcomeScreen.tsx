@@ -29,43 +29,54 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
   tgApp,
   onComplete,
 }) => {
-  const [phase, setPhase] = useState<"launch" | "active" | "transition">("launch");
-  const [isDismissing, setIsDismissing] = useState(false);
+  const [stage, setStage] = useState<"initial" | "entered" | "shimmer" | "exit">("initial");
 
   useEffect(() => {
-    // 0ms - 400ms: Into-app motion at launch
-    const tActive = setTimeout(() => {
-      setPhase("active");
+    // 50ms: Trigger spring into-app launch motion
+    const tEnter = setTimeout(() => {
+      setStage("entered");
       try {
         tgApp?.HapticFeedback?.impactOccurred("light");
       } catch {}
+    }, 50);
+
+    // 400ms: Trigger logo shimmer sweep & badge energy pulse
+    const tShimmer = setTimeout(() => {
+      setStage("shimmer");
+      try {
+        tgApp?.HapticFeedback?.selectionChanged();
+      } catch {}
     }, 400);
 
-    // 750ms: Begin transition to app itself
-    const tTransition = setTimeout(() => {
-      setPhase("transition");
-      setIsDismissing(true);
-    }, 750);
+    // 780ms: Begin smooth into-app exit transition
+    const tExit = setTimeout(() => {
+      setStage("exit");
+    }, 780);
 
-    // 950ms: Complete and hand over to app Activity (<= 1,000ms limit)
+    // 980ms: Finalize and hand over to app Activity (<= 1,000ms limit)
     const tComplete = setTimeout(() => {
       onComplete();
-    }, 950);
+    }, 980);
 
     return () => {
-      clearTimeout(tActive);
-      clearTimeout(tTransition);
+      clearTimeout(tEnter);
+      clearTimeout(tShimmer);
+      clearTimeout(tExit);
       clearTimeout(tComplete);
     };
   }, [tgApp, onComplete]);
 
   const handleInstantDismiss = () => {
-    setIsDismissing(true);
+    setStage("exit");
     try {
       tgApp?.HapticFeedback?.impactOccurred("medium");
     } catch {}
-    setTimeout(onComplete, 60);
+    setTimeout(onComplete, 80);
   };
+
+  const isExiting = stage === "exit";
+  const isEntered = stage === "entered" || stage === "shimmer" || stage === "exit";
+  const isShimmer = stage === "shimmer" || stage === "exit";
 
   return (
     <div
@@ -73,42 +84,51 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
       tabIndex={0}
       onClick={handleInstantDismiss}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleInstantDismiss()}
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-between bg-white select-none overflow-hidden cursor-pointer focus:outline-none transition-all duration-200 ${
-        isDismissing ? "opacity-0 scale-[1.03] pointer-events-none" : "opacity-100 scale-100"
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-between bg-white select-none overflow-hidden cursor-pointer focus:outline-none transition-all duration-300 ease-out ${
+        isExiting ? "opacity-0 scale-[1.04] pointer-events-none" : "opacity-100 scale-100"
       }`}
       aria-label="SHILIAIWEI Mobile App Launch Screen"
     >
-      {/* 1. Window Background - Single Opaque Color (#ffffff) with subtle security mesh */}
+      {/* 1. Window Background - Single Opaque White (#ffffff) with subtle banknote security mesh */}
       <div className="absolute inset-0 bg-app-guilloche opacity-[0.035] pointer-events-none z-0" />
 
-      {/* Top Spacer for Center Alignment */}
+      {/* Top Spacer */}
       <div className="flex-1 w-full" />
 
-      {/* 2. Adaptive App Icon (Android SplashScreen API: 240x240 dp canvas, 160 dp circular mask) */}
+      {/* 2. Adaptive App Icon (Android 12+ SplashScreen: 240x240 dp canvas, 160 dp circular mask) */}
       <div className="relative z-10 flex flex-col items-center justify-center">
-        {/* Outer 240×240 dp Canvas Container */}
         <div
           className="relative flex items-center justify-center"
           style={{ width: "240px", height: "240px" }}
         >
-          {/* Subtle concentric launch pulse aura */}
+          {/* Concentric Ambient Energy Ripple Rings */}
           <div
-            className={`absolute rounded-full border border-[#0098ea]/20 pointer-events-none transition-all duration-700 ${
-              phase === "launch"
-                ? "w-40 h-40 opacity-0 scale-75"
-                : "w-56 h-56 opacity-100 scale-100 animate-pulse"
+            className={`absolute rounded-full border border-[#0098ea]/25 pointer-events-none transition-all duration-700 ease-out ${
+              isEntered ? "w-60 h-60 opacity-60 scale-100" : "w-28 h-28 opacity-0 scale-50"
+            }`}
+          />
+          <div
+            className={`absolute rounded-full border border-[#0098ea]/15 pointer-events-none transition-all duration-1000 ease-out delay-100 ${
+              isEntered ? "w-72 h-72 opacity-40 scale-100" : "w-32 h-32 opacity-0 scale-50"
             }`}
           />
 
           {/* Centered Circular Mask: 160 dp diameter (One-third foreground masked) */}
           <div
             style={{ width: "160px", height: "160px" }}
-            className={`rounded-full overflow-hidden bg-gradient-to-br from-[#00a8ff] via-[#0098ea] to-[#0077b5] shadow-2xl shadow-[#0098ea]/30 flex items-center justify-center transition-all duration-500 ease-out transform ${
-              phase === "launch"
-                ? "scale-90 opacity-0 translate-y-3"
-                : "scale-100 opacity-100 translate-y-0"
+            className={`rounded-full overflow-hidden bg-gradient-to-br from-[#00b4d8] via-[#0098ea] to-[#0077b5] shadow-2xl shadow-[#0098ea]/35 flex items-center justify-center relative transition-all duration-500 transform ${
+              isEntered
+                ? "scale-100 opacity-100 translate-y-0"
+                : "scale-75 opacity-0 translate-y-4"
             }`}
           >
+            {/* Shimmer Light Reflection Sweep Layer */}
+            <div
+              className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent -translate-x-full transition-transform duration-700 ease-in-out pointer-events-none ${
+                isShimmer ? "translate-x-full" : "-translate-x-full"
+              }`}
+            />
+
             {/* Vector Drawable Foreground: Vault Shield & Web3 Lightning Mark */}
             <svg
               width="96"
@@ -116,13 +136,15 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
               viewBox="0 0 96 96"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="select-none filter drop-shadow-md"
+              className={`select-none filter drop-shadow-md transition-all duration-500 ${
+                isEntered ? "scale-100 rotate-0" : "scale-90 -rotate-6"
+              }`}
             >
               {/* Outer Security Shield Hexagon Contour */}
               <path
                 d="M48 8L82 22V46C82 66.8 67.5 86.1 48 91C28.5 86.1 14 66.8 14 46V22L48 8Z"
                 fill="white"
-                fillOpacity="0.14"
+                fillOpacity="0.16"
                 stroke="white"
                 strokeWidth="2.5"
                 strokeLinejoin="round"
@@ -136,7 +158,7 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
                 stroke="white"
                 strokeWidth="1.8"
                 strokeDasharray="4 3"
-                strokeOpacity="0.5"
+                strokeOpacity="0.6"
               />
 
               {/* Center Web3 Lightning Energy Vector */}
@@ -159,16 +181,32 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
       {/* Bottom Spacer */}
       <div className="flex-1 w-full" />
 
-      {/* 3. Branded Image (Android SplashScreen API: 200x80 dp) */}
+      {/* 3. Branded Image (Android SplashScreen API: 200x80 dp) with Animated Logo Entrance */}
       <div className="relative z-10 pb-8 flex flex-col items-center justify-center">
         <div
           style={{ width: "200px", height: "80px" }}
-          className={`flex items-center justify-center transition-all duration-500 delay-100 ${
-            phase === "launch" ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"
+          className={`flex items-center justify-center relative overflow-hidden transition-all duration-600 ease-out transform ${
+            isEntered
+              ? "opacity-100 translate-y-0 scale-100"
+              : "opacity-0 translate-y-3 scale-95"
           }`}
         >
-          {/* Strictly Official SHILIAIWEI Logo: Single line, tight 2px gap, zero additions */}
-          <ShiliaiweiBrand height={24} colorScheme="blue" />
+          {/* Logo Container with Smooth Spring Scale */}
+          <div
+            className={`transition-all duration-500 transform ${
+              isShimmer ? "scale-105" : "scale-100"
+            }`}
+          >
+            {/* Strictly Official SHILIAIWEI Logo: Single line, tight 2px gap, zero additions */}
+            <ShiliaiweiBrand height={26} colorScheme="blue" />
+          </div>
+
+          {/* Shimmer Light Bar across Logo */}
+          <div
+            className={`absolute inset-0 bg-gradient-to-r from-transparent via-sky-300/30 to-transparent pointer-events-none transition-transform duration-700 ease-in-out ${
+              isShimmer ? "translate-x-full" : "-translate-x-full"
+            }`}
+          />
         </div>
       </div>
     </div>
