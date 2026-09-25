@@ -42,12 +42,6 @@ import {
   Award,
   CircleAlert,
   Info,
-  RotateCw,
-  Brain,
-  Grid3x3,
-  Dice5,
-  Layers,
-  CircleDollarSign,
 } from "@keyline-icons/react/two-tone";
 
 export interface KeylineIconProps extends React.SVGProps<SVGSVGElement> {
@@ -172,10 +166,4 @@ export {
   Award,
   CircleAlert,
   Info,
-  RotateCw,
-  Brain,
-  Grid3x3,
-  Dice5,
-  Layers,
-  CircleDollarSign,
 };
