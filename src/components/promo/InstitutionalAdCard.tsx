@@ -12,7 +12,7 @@ interface InstitutionalAdCardProps {
   lang?: AdCardLanguage;
 }
 
-const AD_DURATION_SECONDS = 15;
+const AD_DURATION_SECONDS = 7;
 type AnimationDirection = "left" | "right" | "up" | "down";
 const DIRECTIONS: AnimationDirection[] = ["left", "right", "up", "down"];
 
@@ -60,7 +60,7 @@ export const InstitutionalAdCard: React.FC<InstitutionalAdCardProps> = ({
     };
   }, [lang]);
 
-  // Pick a random DIFFERENT partner with random direction and flash effect (fast to slow)
+  // Pick a random DIFFERENT partner with fast random direction and flash effect
   const pickNextRandomPartner = () => {
     setAnimStage("exiting");
 
@@ -82,12 +82,12 @@ export const InstitutionalAdCard: React.FC<InstitutionalAdCardProps> = ({
         setTimeout(() => {
           setAnimStage("idle");
           setFlash(false);
-        }, 35);
+        }, 25);
       });
-    }, 200);
+    }, 100);
   };
 
-  // 15-Second Auto-rotation interval (cut from 31s to 15s)
+  // Fast 7-Second Auto-rotation interval for rapid style changes
   useEffect(() => {
     const timer = setInterval(() => {
       pickNextRandomPartner();
@@ -99,20 +99,20 @@ export const InstitutionalAdCard: React.FC<InstitutionalAdCardProps> = ({
   const partner: AdPartnerItem = VERIFIED_ADS_PARTNERS[currentIndex] || VERIFIED_ADS_PARTNERS[0];
   const fullName = currentLang === "en" ? partner.nameEn : partner.nameKm;
 
-  // Compute transform classes for random direction flash animation (fast to slow deceleration)
+  // Compute transform classes for snappy, fast animation (crisp deceleration)
   const getTransformClass = () => {
     if (animStage === "exiting") {
-      return "opacity-0 scale-95 transition-all duration-200 ease-in";
+      return "opacity-0 scale-95 transition-all duration-100 ease-in";
     }
     if (animStage === "entering") {
       let offset = "";
-      if (direction === "left") offset = "-translate-x-14 translate-y-0";
-      else if (direction === "right") offset = "translate-x-14 translate-y-0";
-      else if (direction === "up") offset = "translate-y-14 translate-x-0";
-      else if (direction === "down") offset = "-translate-y-14 translate-x-0";
+      if (direction === "left") offset = "-translate-x-12 translate-y-0";
+      else if (direction === "right") offset = "translate-x-12 translate-y-0";
+      else if (direction === "up") offset = "translate-y-12 translate-x-0";
+      else if (direction === "down") offset = "-translate-y-12 translate-x-0";
       return `opacity-0 scale-90 ${offset} duration-0`;
     }
-    return "opacity-100 scale-100 translate-x-0 translate-y-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]";
+    return "opacity-100 scale-100 translate-x-0 translate-y-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]";
   };
 
   return (
@@ -126,13 +126,13 @@ export const InstitutionalAdCard: React.FC<InstitutionalAdCardProps> = ({
     >
       {/* Dynamic Ambient Background Glow */}
       <div
-        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full opacity-30 pointer-events-none filter blur-2xl transition-colors duration-1000"
+        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full opacity-30 pointer-events-none filter blur-2xl transition-colors duration-500"
         style={{ backgroundColor: partner.officialColor || "#38bdf8" }}
       />
 
-      {/* Momentary Flash Overlay on ad rotation (fast to slow) */}
+      {/* Momentary Fast Flash Overlay on ad rotation */}
       <div
-        className={`absolute inset-0 bg-white/40 pointer-events-none transition-opacity duration-500 ease-out z-30 ${
+        className={`absolute inset-0 bg-white/40 pointer-events-none transition-opacity duration-250 ease-out z-30 ${
           flash ? "opacity-100" : "opacity-0"
         }`}
       />
