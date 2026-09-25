@@ -632,6 +632,8 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
 
         {/* 3. WINGRAM HERO PROMO & BONUS CARDS (No icons, pure typography, no guide text!) */}
         <WinGramPromoCards
+          score={score}
+          totalPlayed={spendSeconds * 5 + Math.floor(score * 0.4)}
           onAddScore={onAddScore || (() => {})}
           onOpenDeposit={() => setSubView("deposit")}
           onOpenTapVault={() => setSubView("tap-vault")}
