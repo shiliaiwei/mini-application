@@ -27,26 +27,28 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = ({
     <div className="w-full flex flex-col space-y-2.5 select-none">
       {/* 1. KHMER RIEL CARD (FIRST) */}
       <div
-        className="relative w-full h-[120px] rounded-2xl overflow-hidden border border-[#b88a22]/30 shadow-md shadow-amber-950/15 flex items-center justify-between px-5 sm:px-6"
+        className="relative w-full h-[120px] rounded-2xl overflow-hidden border border-[#d4a017]/40 shadow-md shadow-amber-800/20 flex items-center justify-between px-5 sm:px-6"
         style={{
           background:
-            "linear-gradient(135deg, #6b4a0c 0%, #7d5711 35%, #885f14 50%, #7d5711 65%, #5c3e07 100%)",
+            "linear-gradient(135deg, #b8860b 0%, #c9960e 30%, #d4a832 50%, #c9960e 70%, #a87809 100%)",
         }}
       >
-        {/* Banknote Guilloche Mesh fitted across entire card */}
+        {/* Banknote Guilloche Mesh — no blend mode, pure opacity */}
         <div
-          className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-40 mix-blend-overlay"
+          className="absolute inset-0 bg-cover bg-center pointer-events-none"
           style={{
             backgroundImage: "url('/backgrounds/cardbanknote.svg')",
+            opacity: 0.18,
           }}
         />
 
-        {/* CENTER: Currency Sign for Khmer Riel (Significantly enlarged, crisp vector gray, zero blur) */}
+        {/* CENTER: Currency Sign — warm amber-gold, no gray/white */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center justify-center pointer-events-none select-none">
           <span
-            className="text-[128px] font-black leading-none text-slate-300/25 select-none"
+            className="text-[128px] font-black leading-none select-none"
             style={{
               fontFamily: "var(--font-faculty-glyphic), serif",
+              color: "rgba(255, 220, 80, 0.28)",
               filter: "none",
             }}
           >
@@ -74,26 +76,28 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = ({
 
       {/* 2. US DOLLAR CARD (BELOW RIEL) */}
       <div
-        className="relative w-full h-[120px] rounded-2xl overflow-hidden border border-blue-900/40 shadow-md shadow-blue-950/20 flex items-center justify-between px-5 sm:px-6"
+        className="relative w-full h-[120px] rounded-2xl overflow-hidden border border-blue-500/30 shadow-md shadow-blue-900/20 flex items-center justify-between px-5 sm:px-6"
         style={{
           background:
-            "linear-gradient(135deg, #051323 0%, #091e36 35%, #0d2847 50%, #091e36 65%, #040e1b 100%)",
+            "linear-gradient(135deg, #1a3a6c 0%, #1e4d8c 30%, #2460a8 50%, #1e4d8c 70%, #163264 100%)",
         }}
       >
-        {/* Banknote Guilloche Mesh fitted across entire card */}
+        {/* Banknote Guilloche Mesh — no blend mode, pure opacity */}
         <div
-          className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-35 mix-blend-screen"
+          className="absolute inset-0 bg-cover bg-center pointer-events-none"
           style={{
             backgroundImage: "url('/backgrounds/cardbanknote.svg')",
+            opacity: 0.15,
           }}
         />
 
-        {/* CENTER: Currency Sign for US Dollar (Crisp vector gray, zero blur) */}
+        {/* CENTER: Currency Sign — steel-blue native tone, no gray/white */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center justify-center pointer-events-none select-none">
           <span
-            className="text-[104px] font-black leading-none text-slate-300/25 select-none"
+            className="text-[104px] font-black leading-none select-none"
             style={{
               fontFamily: "var(--font-faculty-glyphic), serif",
+              color: "rgba(147, 210, 255, 0.28)",
               filter: "none",
             }}
           >
