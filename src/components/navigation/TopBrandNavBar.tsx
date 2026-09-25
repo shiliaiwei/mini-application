@@ -32,7 +32,7 @@ export const TopBrandNavBar: React.FC<TopBrandNavBarProps> = ({
   tgApp,
 }) => {
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-100/80 px-3 pt-[60px] pb-2 select-none font-sans shadow-2xs">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100/80 px-3 pt-[60px] pb-2 select-none font-sans shadow-2xs">
       <div className="max-w-xl mx-auto flex items-center justify-between px-1">
         {/* Brand Logo (Full word logo: SHILIAI [WEI] on single line, tight 2px gap) */}
         <div className="flex items-center">

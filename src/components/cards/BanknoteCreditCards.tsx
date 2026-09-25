@@ -29,17 +29,16 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = ({
       {/* 1. KHMER RIEL CARD (FIRST) */}
       <div
         onClick={onToggleBalance}
-        className="relative w-full h-[104px] rounded-2xl overflow-hidden border border-amber-300/40 flex items-center justify-between px-5 sm:px-6 cursor-pointer active:scale-[0.99] transition-all"
+        className="relative w-full h-[104px] rounded-2xl overflow-hidden border border-amber-300/35 shadow-md shadow-amber-900/10 flex items-center justify-between px-5 sm:px-6 cursor-pointer active:scale-[0.99] transition-all"
         style={{
           background:
             "linear-gradient(135deg, #c28b10 0%, #d9a01c 45%, #b88107 100%)",
-          filter: "none",
         }}
         title="Click to toggle balance visibility"
       >
         {/* Left Side: Crisp Currency Icon Badge + Info */}
         <div className="flex items-center gap-3.5 z-10 min-w-0">
-          <div className="w-11 h-11 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center flex-shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center flex-shrink-0 shadow-xs">
             <span className="text-2xl font-black text-white leading-none">
               ៛
             </span>
@@ -72,17 +71,16 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = ({
       {/* 2. US DOLLAR CARD (BELOW RIEL) */}
       <div
         onClick={onToggleBalance}
-        className="relative w-full h-[104px] rounded-2xl overflow-hidden border border-blue-400/40 flex items-center justify-between px-5 sm:px-6 cursor-pointer active:scale-[0.99] transition-all"
+        className="relative w-full h-[104px] rounded-2xl overflow-hidden border border-blue-400/35 shadow-md shadow-blue-950/15 flex items-center justify-between px-5 sm:px-6 cursor-pointer active:scale-[0.99] transition-all"
         style={{
           background:
             "linear-gradient(135deg, #163d72 0%, #1e529a 45%, #133463 100%)",
-          filter: "none",
         }}
         title="Click to toggle balance visibility"
       >
         {/* Left Side: Crisp Currency Icon Badge + Info */}
         <div className="flex items-center gap-3.5 z-10 min-w-0">
-          <div className="w-11 h-11 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center flex-shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center flex-shrink-0 shadow-xs">
             <span className="text-2xl font-black text-white leading-none">
               $
             </span>

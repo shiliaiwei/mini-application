@@ -107,6 +107,11 @@ export const AdDetailSpaView: React.FC<AdDetailSpaViewProps> = ({
 
       {/* Main Hero Card with Centered Logo */}
       <div className="bg-white rounded-[32px] p-6 border border-slate-200 shadow-sm relative overflow-hidden space-y-5 text-center">
+        {/* Subtle Radial Ambient Glow */}
+        <div
+          className="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full opacity-15 pointer-events-none filter blur-3xl"
+          style={{ backgroundColor: partner.officialColor }}
+        />
 
         {/* Official Verified Institution Badge */}
         <div className="inline-flex items-center gap-1 px-4 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold tracking-wide">

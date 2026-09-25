@@ -415,6 +415,13 @@ export const BrandFeatureCards: React.FC<BrandFeatureCardsProps> = ({
                   : "border-slate-200/90 hover:border-slate-300 hover:shadow-sm active:scale-[0.99]"
               }`}
             >
+              {/* Subtle Banknote Mesh Watermark across entire card */}
+              <div
+                className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-[0.035]"
+                style={{
+                  backgroundImage: "url('/backgrounds/cardbanknote.svg')",
+                }}
+              />
 
               {/* Left Column: Grip Handle, Tags, Title, Subtitle, Action */}
               <div className="relative z-10 flex-1 min-w-0 pr-3 sm:pr-5 space-y-1.5">
