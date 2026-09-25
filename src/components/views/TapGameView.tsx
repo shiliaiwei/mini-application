@@ -29,7 +29,6 @@ import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 import { WinGramPromoCards } from "@/components/promo/WinGramPromoCards";
 import { BanknoteCreditCards } from "@/components/cards/BanknoteCreditCards";
-import { ClaimPointsGameHub } from "@/components/games/ClaimPointsGameHub";
 import { NavCategory } from "@/components/navigation/CategoryBar";
 
 interface FloatingPoint {
@@ -247,13 +246,6 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           onAddScore={onAddScore || (() => {})}
           onOpenDeposit={() => setShowDepositModal(true)}
           onOpenTapVault={() => setShowTapVaultModal(true)}
-          tgApp={tgApp}
-        />
-
-        {/* 4. CLAIM POINTS GAMES CARD BLOCK (Word Flash, Guess Faster, Tic Tac & Row 5 Winner) */}
-        <ClaimPointsGameHub
-          score={score}
-          onAddScore={onAddScore || (() => {})}
           tgApp={tgApp}
         />
       </div>
