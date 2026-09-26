@@ -339,3 +339,32 @@ html, body {
   border: 1px solid #86efac;
 }
 
+/* Creative 3D Gem Float & Shimmer Animations */
+@keyframes gem-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(3deg);
+  }
+}
+
+.animate-gem-float {
+  animation: gem-float 3.6s ease-in-out infinite;
+}
+
+@keyframes gem-glow-pulse {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.15);
+  }
+}
+
+.animate-gem-glow {
+  animation: gem-glow-pulse 2.8s ease-in-out infinite;
+}
+
