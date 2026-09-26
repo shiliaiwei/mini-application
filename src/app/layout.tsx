@@ -64,6 +64,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${roboto.variable} ${googleSans.variable} ${facultyGlyphic.variable} h-full antialiased light`}
     >
       <head>
@@ -72,7 +73,10 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-white text-[#0f172a] antialiased font-sans selection:bg-[#0098ea] selection:text-white">
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col bg-white text-[#0f172a] antialiased font-sans selection:bg-[#0098ea] selection:text-white"
+      >
         {children}
       </body>
     </html>

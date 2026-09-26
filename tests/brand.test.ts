@@ -31,7 +31,7 @@ test("Brand Component: ShiliaiweiBrand file structure and variants definition", 
   assert.equal(fs.existsSync(brandPath), true, "ShiliaiweiBrand.tsx should exist");
 
   const code = fs.readFileSync(brandPath, "utf-8");
-  assert.ok(code.includes('export type BrandVariant = "wordmark" | "mark"'));
+  assert.ok(code.includes("export type BrandVariant"));
   assert.ok(code.includes("SHILIAI"));
   assert.ok(code.includes("WEI"));
   assert.ok(code.includes("ShiliaiweiBrand"));

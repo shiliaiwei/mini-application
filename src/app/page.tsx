@@ -8,11 +8,7 @@ import { TapGameView } from "@/components/views/TapGameView";
 import { EarnTasksView } from "@/components/views/EarnTasksView";
 import { LeaderboardView } from "@/components/views/LeaderboardView";
 import { GameProfileView, ProfileSubTab } from "@/components/views/GameProfileView";
-import { GameWelcomeScreen } from "@/components/welcome/GameWelcomeScreen";
 import { TelegramGateScreen } from "@/components/common/TelegramGateScreen";
-import { MiniGameFullView, MiniGameType } from "@/components/views/MiniGameFullView";
-import { StatsDetailSpaView } from "@/components/views/StatsDetailSpaView";
-import { AdDetailSpaView } from "@/components/views/AdDetailSpaView";
 import { TopBrandNavBar } from "@/components/navigation/TopBrandNavBar";
 import {
   Check,
@@ -25,14 +21,9 @@ export default function MiniAppPage() {
   const [tgApp, setTgApp] = useState<TelegramWebApp | null>(null);
   const [user, setUser] = useState<TelegramUser | null>(null);
   const [isReady, setIsReady] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(true);
   const [activeTab, setActiveTab] = useState<GameTab>("wallet");
   const [activeCategory, setActiveCategory] = useState<NavCategory>("lobby");
   const [profileSubTab, setProfileSubTab] = useState<ProfileSubTab>("profile");
-  const [activeGameScreen, setActiveGameScreen] = useState<MiniGameType | null>(null);
-  const [activeStatsScreen, setActiveStatsScreen] = useState(false);
-  const [activeAdPartnerId, setActiveAdPartnerId] = useState<string>("mpwt");
-  const [activeAdSpaScreen, setActiveAdSpaScreen] = useState(false);
   const [showBalances, setShowBalances] = useState(true);
   const [activeTopUpScreen, setActiveTopUpScreen] = useState(false);
 
@@ -43,9 +34,7 @@ export default function MiniAppPage() {
   // Game Mechanics State
   const [score, setScore] = useState(0);
   const [spendSeconds, setSpendSeconds] = useState(0);
-  const [energy, setEnergy] = useState(1000);
   const [userRank, setUserRank] = useState(1);
-  const maxEnergy = 1000;
 
   // Crypto Upgrades & Mining Power
   const [tapPower, setTapPower] = useState(1);
@@ -117,13 +106,7 @@ export default function MiniAppPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Energy regeneration
-  useEffect(() => {
-    const energyTimer = setInterval(() => {
-      setEnergy((prev) => Math.min(maxEnergy, prev + 2));
-    }, 2000);
-    return () => clearInterval(energyTimer);
-  }, [maxEnergy]);
+
 
   // Passive Auto-Miner Yield: Auto-increase is disabled to prevent dollar and Khmer currency from auto-ticking in Telegram.
   // Points must be explicitly claimed through playing games or tapping.
@@ -293,10 +276,7 @@ export default function MiniAppPage() {
     return () => clearInterval(interval);
   }, [syncWithDatabase]);
 
-  const handleTap = useCallback(() => {
-    setScore((prev) => prev + tapPower);
-    setEnergy((prev) => Math.max(0, prev - 1));
-  }, [tapPower]);
+
 
   const handleUpgradeTapPower = useCallback(() => {
     const cost = tapPower * 150;
@@ -341,9 +321,6 @@ export default function MiniAppPage() {
       tgApp?.HapticFeedback?.impactOccurred("light");
     } catch {}
     syncWithDatabase(scoreRef.current, spendRef.current);
-    setActiveGameScreen(null);
-    setActiveStatsScreen(false);
-    setActiveAdSpaScreen(false);
     setActiveTab(tab);
 
     // Sync category bar state
@@ -357,9 +334,6 @@ export default function MiniAppPage() {
     try {
       tgApp?.HapticFeedback?.selectionChanged();
     } catch {}
-    setActiveGameScreen(null);
-    setActiveStatsScreen(false);
-    setActiveAdSpaScreen(false);
     setActiveCategory(cat);
 
     if (cat === "lobby" || cat === "vault" || cat === "popular" || cat === "favorites") {
@@ -411,16 +385,7 @@ export default function MiniAppPage() {
     );
   }
 
-  // Welcome Screen with Auto-Sync & Auto-Open
-  if (showWelcome) {
-    return (
-      <GameWelcomeScreen
-        user={user}
-        tgApp={tgApp}
-        onComplete={() => setShowWelcome(false)}
-      />
-    );
-  }
+
 
   return (
     <div className="min-h-dvh flex flex-col justify-between app-bg-white text-slate-900 select-none overflow-x-hidden font-body relative">
@@ -435,7 +400,11 @@ export default function MiniAppPage() {
           setProfileSubTab("profile");
           handleTabChange("profile");
         }}
-        onOpenNotifications={() => setActiveStatsScreen(true)}
+        onOpenNotifications={() => {
+          try {
+            tgApp?.HapticFeedback?.notificationOccurred("warning");
+          } catch {}
+        }}
         user={user}
         tgApp={tgApp}
       />
@@ -525,65 +494,16 @@ export default function MiniAppPage() {
               </button>
             </div>
           </div>
-        ) : activeGameScreen ? (
-          <MiniGameFullView
-            game={activeGameScreen}
-            score={score}
-            onAddScore={handleAddScore}
-            onBack={() => setActiveGameScreen(null)}
-            user={user}
-            tgApp={tgApp}
-          />
-        ) : activeStatsScreen ? (
-          <StatsDetailSpaView
-            score={score}
-            onBack={() => setActiveStatsScreen(false)}
-            user={user}
-            tgApp={tgApp}
-          />
-        ) : activeAdSpaScreen ? (
-          <AdDetailSpaView
-            partnerId={activeAdPartnerId}
-            onBack={() => setActiveAdSpaScreen(false)}
-            onSelectPartner={(id) => setActiveAdPartnerId(id)}
-            onAddScore={handleAddScore}
-            user={user}
-            tgApp={tgApp}
-          />
         ) : (
           <>
             {activeTab === "wallet" && (
               <TapGameView
                 score={score}
-                onTap={handleTap}
-                energy={energy}
-                maxEnergy={maxEnergy}
                 spendSeconds={spendSeconds}
-                tapPower={tapPower}
-                passiveRate={passiveRate}
                 showBalances={showBalances}
                 onToggleBalances={() => setShowBalances(!showBalances)}
                 onAddScore={handleAddScore}
                 onSelectCategory={handleCategorySelect}
-                onOpenStats={() => {
-                  try {
-                    tgApp?.HapticFeedback?.impactOccurred("medium");
-                  } catch {}
-                  setActiveStatsScreen(true);
-                }}
-                onOpenAdDetail={(partnerId) => {
-                  try {
-                    tgApp?.HapticFeedback?.impactOccurred("medium");
-                  } catch {}
-                  setActiveAdPartnerId(partnerId);
-                  setActiveAdSpaScreen(true);
-                }}
-                onSelectGame={(selectedGame) => {
-                  try {
-                    tgApp?.HapticFeedback?.impactOccurred("medium");
-                  } catch {}
-                  setActiveGameScreen(selectedGame);
-                }}
                 onGoToSwap={() => {
                   setProfileSubTab("swap");
                   handleTabChange("profile");

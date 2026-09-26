@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
 import {
-  Zap,
   Wallet,
   ArrowUpRight,
   Repeat,
@@ -12,37 +11,20 @@ import {
   Check,
   QrCode,
   Coins,
-  Eye,
-  EyeOff,
-  Bell,
   ChevronLeft,
   ScanLine,
   Send,
 } from "@/components/icons/KeylineIcons";
-import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { BrandFooter } from "@/components/brand/BrandFooter";
-import { WinGramPromoCards } from "@/components/promo/WinGramPromoCards";
 import { BanknoteCreditCards } from "@/components/cards/BanknoteCreditCards";
+import { AsymmetricGemBanner } from "@/components/cards/AsymmetricGemBanner";
 import { NavCategory } from "@/components/navigation/CategoryBar";
-import { MiniGameType } from "@/components/views/MiniGameFullView";
 
-interface FloatingPoint {
-  id: number;
-  x: number;
-  y: number;
-  text: string;
-}
-
-type TapSubView = "none" | "tap-vault" | "receive" | "send" | "scan" | "deposit";
+type TapSubView = "none" | "send" | "scan" | "deposit";
 
 interface TapGameViewProps {
   score: number;
-  onTap: () => void;
-  energy: number;
-  maxEnergy: number;
-  spendSeconds: number;
-  tapPower: number;
-  passiveRate: number;
+  spendSeconds?: number;
   showBalances?: boolean;
   onToggleBalances?: () => void;
   onAddScore?: (amount: number) => void;
@@ -50,98 +32,30 @@ interface TapGameViewProps {
   onGoToEarn?: () => void;
   onGoToSettings?: () => void;
   onSelectCategory?: (cat: NavCategory) => void;
-  onSelectGame?: (game: MiniGameType) => void;
-  onOpenStats?: () => void;
-  onOpenAdDetail?: (partnerId: string) => void;
   user: TelegramUser | null;
   tgApp: TelegramWebApp | null;
 }
 
 export const TapGameView: React.FC<TapGameViewProps> = ({
   score,
-  onTap,
-  energy,
-  maxEnergy,
-  spendSeconds,
-  tapPower,
-  passiveRate,
   onAddScore,
   onGoToSwap,
   onGoToEarn,
-  onGoToSettings,
-  onSelectCategory,
-  onSelectGame,
-  onOpenStats,
-  onOpenAdDetail,
   showBalances,
   onToggleBalances,
   user,
   tgApp,
 }) => {
   const [subView, setSubView] = useState<TapSubView>("none");
-  const [floatingPoints, setFloatingPoints] = useState<FloatingPoint[]>([]);
   const [showLocalBalances, setShowLocalBalances] = useState(true);
-  const [copiedAddress, setCopiedAddress] = useState(false);
   const [sendRecipient, setSendRecipient] = useState("");
   const [sendAmount, setSendAmount] = useState("");
   const [sendCurrency, setSendCurrency] = useState<"USD" | "KHR">("USD");
   const [sendSuccess, setSendSuccess] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
-
-  const walletAddress = user?.id
-    ? `shi_0x${Number(user.id).toString(16).padStart(8, "0")}...${String(user.id).slice(-4)}`
-    : "shi_0x78a19bc3...82f1";
 
   // Conversion rates: 100 PTS = $1.00 USD = 4,100 KHR (~500 PTS = 1 TON)
   const usdValue = (score / 100).toFixed(2);
   const khrValue = Math.floor(score * 41).toLocaleString();
-
-  const handleTap = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
-    try {
-      tgApp?.HapticFeedback?.impactOccurred("medium");
-    } catch {}
-
-    let clientX = 0;
-    let clientY = 0;
-
-    if ("touches" in e && e.touches.length > 0) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else if ("clientX" in e) {
-      clientX = (e as React.MouseEvent).clientX;
-      clientY = (e as React.MouseEvent).clientY;
-    }
-
-    if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const x = clientX ? clientX - rect.left : rect.width / 2;
-      const y = clientY ? clientY - rect.top : rect.height / 2;
-
-      const newPoint: FloatingPoint = {
-        id: Date.now() + Math.random(),
-        x,
-        y,
-        text: `+${tapPower} PTS`,
-      };
-
-      setFloatingPoints((prev) => [...prev.slice(-15), newPoint]);
-
-      setTimeout(() => {
-        setFloatingPoints((prev) => prev.filter((p) => p.id !== newPoint.id));
-      }, 700);
-    }
-
-    onTap();
-  };
-
-  const handleCopyAddress = () => {
-    navigator.clipboard.writeText(walletAddress);
-    setCopiedAddress(true);
-    try {
-      tgApp?.HapticFeedback?.notificationOccurred("success");
-    } catch {}
-    setTimeout(() => setCopiedAddress(false), 2000);
-  };
 
   const handleSendTransaction = (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,172 +85,6 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
       setSendAmount("");
     }, 1500);
   };
-
-  const energyPercent = Math.round((energy / maxEnergy) * 100);
-
-  // ==============================================================
-  // FULL PAGE SPA SUBVIEW: TAP VAULT MEDALLION & ENERGY MINTING
-  // ==============================================================
-  if (subView === "tap-vault") {
-    return (
-      <div className="w-full max-w-xl mx-auto space-y-4 pt-1 pb-28 animate-fadeIn select-none font-sans text-slate-900">
-        <div className="flex items-center justify-between py-2 border-b border-slate-200/80 mb-2">
-          <button
-            type="button"
-            onClick={() => setSubView("none")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs shadow-2xs active:scale-95 transition-all cursor-pointer"
-          >
-            <ChevronLeft size={16} className="text-[#0098ea]" />
-            <span>Back</span>
-          </button>
-          <div className="flex items-center gap-2">
-            <Zap size={18} className="text-[#0098ea]" />
-            <span className="text-sm font-black uppercase text-slate-900">
-              SHILIAIWEI Tap Vault
-            </span>
-          </div>
-          <div className="w-14" />
-        </div>
-
-        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-5 text-center">
-          {/* Score & Multiplier */}
-          <div className="text-center py-1">
-            <span className="text-3xl font-black text-slate-900 block font-sans">
-              {score.toLocaleString()} PTS
-            </span>
-            <span className="text-xs text-slate-500 font-bold block mt-1">
-              +{tapPower} PTS per tap • Vault Energy Active
-            </span>
-          </div>
-
-          {/* Tap Medallion */}
-          <div className="flex items-center justify-center py-4">
-            <button
-              ref={buttonRef}
-              type="button"
-              onClick={handleTap}
-              onTouchStart={handleTap}
-              aria-label="Tap Medallion to mint points"
-              className="relative w-52 h-52 rounded-full flex flex-col items-center justify-center cursor-pointer select-none focus:outline-none active:scale-95 transition-transform duration-300 ease-out"
-            >
-              <div className="w-44 h-44 rounded-full border-4 border-[#0098ea]/40 flex flex-col items-center justify-center bg-white shadow-2xl relative p-1 overflow-hidden">
-                <div className="w-36 h-36 rounded-full border border-dashed border-[#0098ea]/40 flex flex-col items-center justify-center relative bg-white/90">
-                  <ShiliaiweiBrand height={22} className="my-1" />
-                  <span className="text-[11px] font-black text-[#16a34a] tracking-wider uppercase mt-1">
-                    TAP FOR POINTS
-                  </span>
-                  <span className="text-[9px] font-bold text-slate-500 tracking-widest uppercase">
-                    +{tapPower} PTS / TAP
-                  </span>
-                </div>
-              </div>
-
-              {floatingPoints.map((p) => (
-                <span
-                  key={p.id}
-                  className="absolute pointer-events-none text-base font-black text-[#16a34a] animate-out fade-out slide-out-to-top duration-700 font-sans"
-                  style={{ left: p.x, top: p.y }}
-                >
-                  {p.text}
-                </span>
-              ))}
-            </button>
-          </div>
-
-          {/* Vault Energy Bar */}
-          <div className="w-full space-y-1.5 max-w-sm mx-auto">
-            <div className="flex items-center justify-between text-xs text-slate-600 font-bold">
-              <span>Energy</span>
-              <span>{energy} / {maxEnergy}</span>
-            </div>
-            <div className="w-full h-3 bg-slate-100 border border-slate-200 rounded-full overflow-hidden p-0.5">
-              <div
-                className="h-full bg-[#0098ea] rounded-full transition-all duration-150"
-                style={{ width: `${energyPercent}%` }}
-              />
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setSubView("none")}
-            className="w-full py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors duration-300 ease-out cursor-pointer"
-          >
-            Exit to Home View
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ==============================================================
-  // FULL PAGE SPA SUBVIEW: RECEIVE VAULT (WALLET ADDRESS)
-  // ==============================================================
-  if (subView === "receive") {
-    return (
-      <div className="w-full max-w-xl mx-auto space-y-4 pt-1 pb-28 animate-fadeIn select-none font-sans text-slate-900">
-        <div className="flex items-center justify-between py-2 border-b border-slate-200/80 mb-2">
-          <button
-            type="button"
-            onClick={() => setSubView("none")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs shadow-2xs active:scale-95 transition-all cursor-pointer"
-          >
-            <ChevronLeft size={16} className="text-[#0098ea]" />
-            <span>Back</span>
-          </button>
-          <div className="flex items-center gap-2">
-            <Wallet size={18} className="text-[#0098ea]" />
-            <span className="text-sm font-black uppercase text-slate-900">
-              ទទួលប្រាក់ (Receive Vault)
-            </span>
-          </div>
-          <div className="w-14" />
-        </div>
-
-        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
-          <div className="w-44 h-44 bg-white border border-slate-200 rounded-2xl mx-auto flex flex-col items-center justify-center text-slate-500 shadow-xs">
-            <QrCode size={110} className="text-[#0098ea]" />
-            <span className="text-xs font-mono mt-1 text-slate-600 font-bold">SHILIAIWEI QR</span>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-            <span className="text-[10px] font-bold text-slate-600 uppercase block">
-              Simulated Deposit Address (SHILIAIWEI L2)
-            </span>
-            <div className="flex items-center justify-between mt-1">
-              <span className="text-xs font-mono text-slate-900 truncate">
-                {walletAddress}
-              </span>
-              <button
-                type="button"
-                onClick={handleCopyAddress}
-                aria-label="Copy address to clipboard"
-                className="w-9 h-9 rounded-full text-slate-600 hover:text-slate-900 flex items-center justify-center ml-2 border border-slate-200 bg-white cursor-pointer transition-colors duration-300 ease-out"
-              >
-                {copiedAddress ? (
-                  <Check size={18} className="text-[#16a34a]" />
-                ) : (
-                  <Copy size={18} />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <p className="text-xs text-slate-600 text-center">
-            Supports simulated USD assets and Cambodian Khmer Riel backed by earned points.
-          </p>
-
-          <button
-            type="button"
-            onClick={() => setSubView("none")}
-            className="w-full py-3 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white font-bold text-xs uppercase tracking-wider shadow-xs cursor-pointer transition-colors duration-300 ease-out"
-          >
-            Exit to Home View
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   // ==============================================================
   // FULL PAGE SPA SUBVIEW: SEND / TRANSFER CURRENCY
@@ -412,7 +160,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
                   required
                   value={sendRecipient}
                   onChange={(e) => setSendRecipient(e.target.value)}
-                  placeholder="@username or shi_0x..."
+                  placeholder="@username or wei_0x..."
                   className="w-full px-4 py-3 rounded-full border border-slate-200 text-xs font-mono bg-white focus:outline-none focus:border-[#0098ea]"
                 />
               </div>
@@ -532,7 +280,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-1">
             <h4 className="text-sm font-black text-slate-900">Earn Points for Free</h4>
             <p className="text-xs text-slate-600 leading-relaxed">
-              You do not need to pay real money. Tap the medallion, complete daily missions, and win games to earn PTS that you can exchange directly for USD ($) or KHR (៛)!
+              Complete daily missions and check in regularly to earn PTS that you can exchange directly for USD ($) or KHR (៛)!
             </p>
           </div>
 
@@ -579,8 +327,8 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
   // ==============================================================
   return (
     <div className="flex flex-col items-center justify-between min-h-[calc(100dvh-150px)] pb-28 select-none font-sans text-slate-900 max-w-xl mx-auto w-full px-1">
-      <div className="w-full space-y-2.5 pt-1">
-        {/* 2. DUAL KHMER & DOLLAR BANKNOTE CREDIT CARDS */}
+      <div className="w-full space-y-3.5 pt-1">
+        {/* 1. DUAL KHMER & DOLLAR BANKNOTE CREDIT CARDS */}
         <BanknoteCreditCards
           score={score}
           showBalance={showBalances !== undefined ? showBalances : showLocalBalances}
@@ -593,23 +341,12 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           onOpenDeposit={() => setSubView("deposit")}
           onOpenSend={() => setSubView("send")}
           onOpenSwap={onGoToSwap}
-          onOpenAddress={() => setSubView("receive")}
         />
 
-        {/* 3. WINGRAM HERO PROMO & BONUS CARDS (Highlighting institutional ads in 31s loop) */}
-        <WinGramPromoCards
-          score={score}
-          totalPlayed={spendSeconds * 5 + Math.floor(score * 0.4)}
-          onAddScore={onAddScore || (() => {})}
-          onOpenDeposit={() => setSubView("deposit")}
-          onOpenTapVault={() => setSubView("tap-vault")}
-          onOpenStats={onOpenStats}
-          onOpenAdDetail={onOpenAdDetail}
-          onSelectGame={onSelectGame}
-          tgApp={tgApp}
-        />
+        {/* 2. ASYMMETRIC ROUNDED GEM BANNERS (3 COLOR SHOWCASE) */}
+        <AsymmetricGemBanner />
 
-        {/* 4. Brand Footer for screen consistency */}
+        {/* 3. Brand Footer for screen consistency */}
         <BrandFooter height={16} className="mt-4 pb-2" />
       </div>
     </div>

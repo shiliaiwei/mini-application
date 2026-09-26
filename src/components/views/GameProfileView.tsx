@@ -184,8 +184,8 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
   const isTelegramUser = Boolean(user && (user.id || user.username));
   const playerId = user?.id ? String(user.id) : "--------";
   const walletAddress = user?.id
-    ? `shi_0x${Number(user.id).toString(16).padStart(8, "0")}...${String(user.id).slice(-4)}`
-    : "shi_0x78a19bc3...82f1";
+    ? `wei_0x${Number(user.id).toString(16).padStart(8, "0")}...${String(user.id).slice(-4)}`
+    : "wei_0x78a19bc3...82f1";
   const usdValue = (score / 100).toFixed(2);
   const khrValue = Math.floor(score * 41).toLocaleString();
 
