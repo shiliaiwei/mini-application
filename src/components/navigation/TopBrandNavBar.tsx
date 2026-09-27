@@ -3,7 +3,6 @@
 import React from "react";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
-import { Bell } from "@/components/icons/KeylineIcons";
 
 interface TopBrandNavBarProps {
   showBalances: boolean;
@@ -33,33 +32,9 @@ export const TopBrandNavBar: React.FC<TopBrandNavBarProps> = React.memo(({
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100/80 px-3 pt-[60px] pb-2 select-none font-sans shadow-2xs">
-      <div className="max-w-xl mx-auto flex items-center justify-between px-1">
-        {/* Brand Logo (Full word logo: SHILIAI [WEI] on single line, tight 2px gap) */}
-        <div className="flex items-center">
-          <ShiliaiweiBrand height={22} colorScheme="blue" />
-        </div>
-
-        {/* Top Actions: Notifications */}
-        <div className="flex items-center gap-1.5">
-          {/* Bell Notifications */}
-          <button
-            type="button"
-            onClick={() => {
-              try {
-                tgApp?.HapticFeedback?.impactOccurred("light");
-              } catch {}
-              onOpenNotifications?.();
-            }}
-            className="w-10 h-10 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 flex items-center justify-center transition-colors shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] cursor-pointer relative"
-            aria-label="Notifications"
-            title="Notifications"
-          >
-            <Bell size={20} className="text-slate-700" />
-            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white animate-pulse" />
-          </button>
-
-
-        </div>
+      <div className="max-w-xl mx-auto flex items-center justify-center px-1 min-h-[40px]">
+        {/* Brand Logo - Centered Horizontally */}
+        <ShiliaiweiBrand height={22} colorScheme="blue" />
       </div>
     </header>
   );

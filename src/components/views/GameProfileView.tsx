@@ -213,15 +213,6 @@ const InfoTile: React.FC<InfoTileProps> = ({
           {source}
         </span>
       </div>
-      {sensitive && (
-        <span
-          className={`text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
-            isRevealed ? "bg-amber-400 text-slate-950 font-black" : "bg-emerald-400/25 text-emerald-300 border border-emerald-400/30"
-          }`}
-        >
-          {isRevealed ? "REVEALED" : "HINT"}
-        </span>
-      )}
     </div>
 
     {/* Value Pill Box */}
@@ -234,16 +225,6 @@ const InfoTile: React.FC<InfoTileProps> = ({
         {displayValue}
       </span>
       <div className="flex items-center gap-1 flex-shrink-0">
-        {sensitive && onTogglePeek && (
-          <button
-            type="button"
-            onClick={onTogglePeek}
-            className="p-1 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer active:scale-90 transition-transform"
-            title={isRevealed ? "Hide Hint" : "Peek Value"}
-          >
-            {isRevealed ? <EyeOff size={12} className="text-amber-300" /> : <Eye size={12} className="text-white/70" />}
-          </button>
-        )}
         {onCopy && (
           <button
             type="button"
@@ -443,18 +424,12 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
     navigator.clipboard?.writeText(text).catch(() => {});
     setter(true);
     setTimeout(() => setter(false), 1800);
-    try {
-      tgApp?.HapticFeedback?.notificationOccurred("success");
-    } catch {}
   };
 
   const handleCopyFieldValue = (key: string, val: string) => {
     navigator.clipboard?.writeText(val).catch(() => {});
     setCopiedField(key);
     setTimeout(() => setCopiedField(null), 1800);
-    try {
-      tgApp?.HapticFeedback?.notificationOccurred("success");
-    } catch {}
   };
 
   const handleSaveBio = () => {
@@ -792,35 +767,18 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <h2 className="text-base font-bold text-white drop-shadow-sm truncate">
-                    {piiMasked ? maskName(rawDisplayName) : rawDisplayName}
+                    {rawDisplayName}
                   </h2>
-                  <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-white/20 text-white font-bold backdrop-blur-xs shrink-0">
-                    {piiMasked ? "HINT" : "LIVE"}
-                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
                   <span className="text-xs font-mono text-cyan-200 font-semibold truncate">
-                    {piiMasked ? maskHandle(rawHandle) : rawHandle}
+                    {rawHandle}
                   </span>
                   {isTelegramUser && <TelegramVerifiedBadge size={13} className="shrink-0" />}
                 </div>
                 <p className="text-[11px] text-cyan-100/80 leading-snug line-clamp-1 mt-0.5">
-                  {piiMasked ? maskGeneral(bio, 10, 10) : bio}
+                  {bio}
                 </p>
-              </div>
-            </div>
-
-            {/* 3D Frosted Glass User Icon Badge Panel */}
-            <div className="shrink-0 relative pointer-events-none">
-              <div className="absolute inset-0 rounded-full blur-md opacity-70 bg-cyan-400" />
-              <div
-                className="relative w-12 h-12 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-xl flex items-center justify-center"
-                style={{
-                  boxShadow:
-                    "0 8px 20px -4px rgba(0, 0, 0, 0.35), inset 0 1.5px 2px rgba(255, 255, 255, 0.4)",
-                }}
-              >
-                <User size={22} className="text-cyan-200" />
               </div>
             </div>
           </div>
@@ -829,43 +787,9 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
           <div className="relative z-10 flex items-center justify-between pt-3 mt-3 border-t border-white/15 text-[10px] flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <ShiliaiweiBrand height={13} colorScheme="white" />
-              <span className="font-bold text-cyan-200 uppercase tracking-widest text-[9px]">
-                OFFICIAL VAULT
-              </span>
             </div>
 
             <div className="flex items-center gap-1.5 flex-wrap">
-              {isOwner && (
-                <button
-                  type="button"
-                  onClick={toggleGlobalPiiMask}
-                  className={`px-3 py-1 rounded-full border text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95 ${
-                    piiMasked
-                      ? "bg-white/20 hover:bg-white/30 border-white/30 text-white"
-                      : "bg-amber-400 hover:bg-amber-500 border-amber-300 text-slate-950 font-black shadow-xs"
-                  }`}
-                >
-                  {piiMasked ? (
-                    <>
-                      <Eye size={12} />
-                      <span>Reveal Hints</span>
-                    </>
-                  ) : (
-                    <>
-                      <EyeOff size={12} />
-                      <span>Lock ({autoLockSeconds}s)</span>
-                    </>
-                  )}
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => copyToClipboard(fullTelemetryDump, setCopiedJson)}
-                className="px-2.5 py-1 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer active:scale-95 transition-all"
-              >
-                {copiedJson ? <Check size={11} className="text-emerald-300" /> : <Copy size={11} />}
-                <span>JSON</span>
-              </button>
               <button
                 type="button"
                 onClick={() => setView("edit")}
@@ -930,113 +854,84 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
             <SpecularRim />
 
             <div className="relative z-10 flex items-center justify-between gap-4 pb-3 mb-3 border-b border-white/15">
-              <div>
-                <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-white/15 border border-white/20 text-blue-100">
-                  Identity Block
-                </span>
-                <h3 className="text-base font-bold text-white drop-shadow-sm mt-1">
-                  Telegram Bot API Profile
-                </h3>
-              </div>
-              <div className="shrink-0 relative pointer-events-none">
-                <div className="absolute inset-0 rounded-full blur-md opacity-70 bg-blue-400" />
-                <div
-                  className="relative w-12 h-12 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-xl flex items-center justify-center"
-                  style={{
-                    boxShadow:
-                      "0 8px 20px -4px rgba(0, 0, 0, 0.35), inset 0 1.5px 2px rgba(255, 255, 255, 0.4)",
-                  }}
-                >
-                  <User size={22} className="text-blue-200" />
-                </div>
-              </div>
+              <h3 className="text-base font-bold text-white drop-shadow-sm">
+                Telegram Bot API Profile
+              </h3>
             </div>
 
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <InfoTile
                 label="Telegram UID"
                 source="Bot API"
-                displayValue={piiMasked && !unmaskedKeys["user_id"] ? maskTelegramId(user?.id || botProfile?.id || "6600489302") : String(user?.id || botProfile?.id || "6600489302")}
+                displayValue={String(user?.id || botProfile?.id || "6600489302")}
                 realValue={String(user?.id || botProfile?.id || "6600489302")}
                 description="Permanent unique Telegram numerical UID"
                 mono
-                sensitive
-                isRevealed={!piiMasked || unmaskedKeys["user_id"]}
-                onTogglePeek={() => toggleItemMask("user_id")}
                 onCopy={() => handleCopyFieldValue("user_id", String(user?.id || botProfile?.id || "6600489302"))}
                 isCopied={copiedField === "user_id"}
               />
               <InfoTile
                 label="Handle"
                 source="Bot API"
-                displayValue={piiMasked && !unmaskedKeys["username"] ? maskHandle(rawHandle) : rawHandle}
+                displayValue={rawHandle}
                 realValue={rawHandle}
                 description="Public account Telegram handle"
                 mono
-                sensitive
-                isRevealed={!piiMasked || unmaskedKeys["username"]}
-                onTogglePeek={() => toggleItemMask("username")}
                 onCopy={() => handleCopyFieldValue("username", rawHandle)}
                 isCopied={copiedField === "username"}
               />
               <InfoTile
                 label="First Name"
                 source="Bot API"
-                displayValue={piiMasked && !unmaskedKeys["first_name"] ? maskName(user?.first_name || botProfile?.first_name || "SREIVEY") : user?.first_name || botProfile?.first_name || "SREIVEY"}
+                displayValue={user?.first_name || botProfile?.first_name || "SREIVEY"}
                 realValue={user?.first_name || botProfile?.first_name || "SREIVEY"}
                 description="Account display first name"
-                sensitive
-                isRevealed={!piiMasked || unmaskedKeys["first_name"]}
-                onTogglePeek={() => toggleItemMask("first_name")}
                 onCopy={() => handleCopyFieldValue("first_name", user?.first_name || botProfile?.first_name || "SREIVEY")}
                 isCopied={copiedField === "first_name"}
               />
               <InfoTile
                 label="Last Name"
                 source="Bot API"
-                displayValue={piiMasked && !unmaskedKeys["last_name"] ? maskName(user?.last_name || botProfile?.last_name || "PRO") : user?.last_name || botProfile?.last_name || "PRO"}
+                displayValue={user?.last_name || botProfile?.last_name || "PRO"}
                 realValue={user?.last_name || botProfile?.last_name || "PRO"}
                 description="Account family suffix / surname"
-                sensitive
-                isRevealed={!piiMasked || unmaskedKeys["last_name"]}
-                onTogglePeek={() => toggleItemMask("last_name")}
                 onCopy={() => handleCopyFieldValue("last_name", user?.last_name || botProfile?.last_name || "PRO")}
                 isCopied={copiedField === "last_name"}
               />
               <InfoTile
+                label="Full Name"
+                source="Bot API"
+                displayValue={`${user?.first_name || botProfile?.first_name || "SREIVEY"} ${user?.last_name || botProfile?.last_name || "PRO"}`.trim()}
+                realValue={`${user?.first_name || botProfile?.first_name || "SREIVEY"} ${user?.last_name || botProfile?.last_name || "PRO"}`.trim()}
+                description="Complete Telegram identity display name"
+                onCopy={() => handleCopyFieldValue("full_name", `${user?.first_name || botProfile?.first_name || "SREIVEY"} ${user?.last_name || botProfile?.last_name || "PRO"}`.trim())}
+                isCopied={copiedField === "full_name"}
+              />
+              <InfoTile
                 label="Bio Description"
                 source="Bot API"
-                displayValue={piiMasked && !unmaskedKeys["bio"] ? maskGeneral(botProfile?.bio || bio, 6, 6) : botProfile?.bio || bio}
+                displayValue={botProfile?.bio || bio}
                 realValue={botProfile?.bio || bio}
                 description="User public biography statement"
-                sensitive
-                isRevealed={!piiMasked || unmaskedKeys["bio"]}
-                onTogglePeek={() => toggleItemMask("bio")}
                 onCopy={() => handleCopyFieldValue("bio", botProfile?.bio || bio)}
                 isCopied={copiedField === "bio"}
               />
               <InfoTile
                 label="Broadcast Channel"
                 source="Bot API"
-                displayValue={piiMasked && !unmaskedKeys["channel"] ? "史力爱卫 (@sh••••ei)" : botProfile?.personal_chat?.title ? `${botProfile.personal_chat.title} (@${botProfile.personal_chat.username || "shiliaiwei"})` : "史力爱卫 (@shiliaiwei)"}
+                displayValue={botProfile?.personal_chat?.title ? `${botProfile.personal_chat.title} (@${botProfile.personal_chat.username || "shiliaiwei"})` : "史力爱卫 (@shiliaiwei)"}
                 realValue={botProfile?.personal_chat?.title ? `${botProfile.personal_chat.title} (@${botProfile.personal_chat.username || "shiliaiwei"})` : "史力爱卫 (@shiliaiwei)"}
                 description="Linked Telegram broadcast channel"
-                sensitive
-                isRevealed={!piiMasked || unmaskedKeys["channel"]}
-                onTogglePeek={() => toggleItemMask("channel")}
                 onCopy={() => handleCopyFieldValue("channel", "史力爱卫 (@shiliaiwei)")}
                 isCopied={copiedField === "channel"}
               />
               <InfoTile
                 label="Direct Chat ID"
                 source="Bot API"
-                displayValue={piiMasked && !unmaskedKeys["chat_id"] ? maskTelegramId(botProfile?.id || user?.id || "6600489302") : String(botProfile?.id || user?.id || "6600489302")}
+                displayValue={String(botProfile?.id || user?.id || "6600489302")}
                 realValue={String(botProfile?.id || user?.id || "6600489302")}
                 description="Private message chat route"
                 mono
-                sensitive
-                isRevealed={!piiMasked || unmaskedKeys["chat_id"]}
-                onTogglePeek={() => toggleItemMask("chat_id")}
                 onCopy={() => handleCopyFieldValue("chat_id", String(botProfile?.id || user?.id || "6600489302"))}
                 isCopied={copiedField === "chat_id"}
               />
@@ -1046,339 +941,64 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
                 displayValue={user?.is_premium ? "Active Premium Member" : "Standard Tier"}
                 realValue={user?.is_premium ? "Active Premium Member" : "Standard Tier"}
                 description="Telegram subscriber status"
-                isRevealed={true}
                 onCopy={() => handleCopyFieldValue("is_premium", user?.is_premium ? "Premium" : "Standard")}
                 isCopied={copiedField === "is_premium"}
               />
-            </div>
-          </div>
-        )}
-
-        {/* 4. CLOUDFLARE EDGE & NETWORK SECURITY SKEUOMORPHIC CARD (PURPLE LEATHER) */}
-        {isOwner && (
-          <div
-            className="relative w-full rounded-[28px] p-4 sm:p-5 overflow-hidden bg-gradient-to-b from-[#6420a7] via-[#4e1688] to-[#340b5c] text-white"
-            style={{
-              boxShadow:
-                "0 16px 36px -10px rgba(45, 10, 80, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.32), inset 0 -3px 6px rgba(0, 0, 0, 0.5)",
-            }}
-          >
-            <GuillocheBackground opacity={0.25} />
-            <ThreadStitching strokeColor="#e9d5ff" />
-            <SpecularRim />
-
-            <div className="relative z-10 flex items-center justify-between gap-4 pb-3 mb-3 border-b border-white/15">
-              <div>
-                <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-white/15 border border-white/20 text-purple-100">
-                  Edge Security Block
-                </span>
-                <h3 className="text-base font-bold text-white drop-shadow-sm mt-1">
-                  Cloudflare WAF & Edge Telemetry
-                </h3>
-              </div>
-              <div className="shrink-0 relative pointer-events-none">
-                <div className="absolute inset-0 rounded-full blur-md opacity-70 bg-purple-400" />
-                <div
-                  className="relative w-12 h-12 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-xl flex items-center justify-center"
-                  style={{
-                    boxShadow:
-                      "0 8px 20px -4px rgba(0, 0, 0, 0.35), inset 0 1.5px 2px rgba(255, 255, 255, 0.4)",
-                  }}
-                >
-                  <Shield size={22} className="text-purple-200" />
-                </div>
-              </div>
-            </div>
-
-            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <InfoTile
-                label="Client Edge IP"
-                source="CF-Connecting-IP"
-                displayValue={piiMasked && !unmaskedKeys["ip_address"] ? maskIp(telemetryData?.network?.ip_address || "127.0.0.1") : telemetryData?.network?.ip_address || "127.0.0.1"}
-                realValue={telemetryData?.network?.ip_address || "127.0.0.1"}
-                description="Cloudflare verified origin connecting IP"
-                mono
-                sensitive
-                isRevealed={!piiMasked || unmaskedKeys["ip_address"]}
-                onTogglePeek={() => toggleItemMask("ip_address")}
-                onCopy={() => handleCopyFieldValue("ip_address", telemetryData?.network?.ip_address || "127.0.0.1")}
-                isCopied={copiedField === "ip_address"}
+                label="Language Code"
+                source="Bot API"
+                displayValue={user?.language_code ? `${user.language_code.toUpperCase()} (Client UI)` : "EN (English)"}
+                realValue={user?.language_code || "en"}
+                description="Telegram user client UI language"
+                onCopy={() => handleCopyFieldValue("language_code", user?.language_code || "en")}
+                isCopied={copiedField === "language_code"}
               />
               <InfoTile
-                label="Edge Geo-Country"
-                source="CF-IPCountry"
-                displayValue={telemetryData?.network?.country ? `${telemetryData.network.country} (CF Verified)` : "Cambodia (CF Verified)"}
-                realValue={telemetryData?.network?.country || "Cambodia"}
-                description="Verified country header from Cloudflare edge"
-                isRevealed={true}
-                onCopy={() => handleCopyFieldValue("country", telemetryData?.network?.country || "Cambodia")}
-                isCopied={copiedField === "country"}
+                label="Direct Messaging (PM)"
+                source="Bot API"
+                displayValue={user?.allows_write_to_pm !== false ? "Allowed (Active)" : "Restricted"}
+                realValue={user?.allows_write_to_pm !== false ? "Allowed" : "Restricted"}
+                description="Permission to send bot messages to private chat"
+                onCopy={() => handleCopyFieldValue("allows_write_to_pm", "Allowed")}
+                isCopied={copiedField === "allows_write_to_pm"}
               />
               <InfoTile
-                label="Device User-Agent"
-                source="Edge Telemetry"
-                displayValue={piiMasked && !unmaskedKeys["user_agent"] ? maskGeneral(telemetryData?.network?.user_agent || "Mozilla/5.0", 12, 6) : telemetryData?.network?.user_agent || "Mozilla/5.0"}
-                realValue={telemetryData?.network?.user_agent || "Mozilla/5.0"}
-                description="Client browser platform fingerprint"
-                mono
-                sensitive
-                isRevealed={!piiMasked || unmaskedKeys["user_agent"]}
-                onTogglePeek={() => toggleItemMask("user_agent")}
-                onCopy={() => handleCopyFieldValue("user_agent", telemetryData?.network?.user_agent || "Mozilla/5.0")}
-                isCopied={copiedField === "user_agent"}
-              />
-              <InfoTile
-                label="Edge Handshake Sync"
-                source="Edge Server"
-                displayValue={telemetryData?.network?.server_timestamp ? new Date(telemetryData.network.server_timestamp).toLocaleTimeString() : "Live Active"}
-                realValue={telemetryData?.network?.server_timestamp || new Date().toISOString()}
-                description="Verified edge server synchronization"
-                mono
-                isRevealed={true}
-                onCopy={() => handleCopyFieldValue("timestamp", telemetryData?.network?.server_timestamp || "")}
-                isCopied={copiedField === "timestamp"}
+                label="Account Status"
+                source="Bot API"
+                displayValue={isTelegramUser ? "Verified Telegram Account" : "Local Mock Profile"}
+                realValue={isTelegramUser ? "Verified Telegram Account" : "Local Mock Profile"}
+                description="Cryptographic initData authentication status"
+                onCopy={() => handleCopyFieldValue("account_status", "Verified")}
+                isCopied={copiedField === "account_status"}
               />
             </div>
           </div>
         )}
 
-        {/* 5. WEB3 VAULT & COMMERCE SKEUOMORPHIC BLOCK CARD (EMERALD) */}
-        {isOwner && (
-          <div
-            className="relative w-full rounded-[28px] p-4 sm:p-5 overflow-hidden bg-gradient-to-b from-[#047857] via-[#065f46] to-[#022c22] text-white"
-            style={{
-              boxShadow:
-                "0 16px 36px -10px rgba(4, 120, 87, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.32), inset 0 -3px 6px rgba(0, 0, 0, 0.5)",
-            }}
-          >
-            <GuillocheBackground opacity={0.25} />
-            <ThreadStitching strokeColor="#a7f3d0" />
-            <SpecularRim />
 
-            <div className="relative z-10 flex items-center justify-between gap-4 pb-3 mb-3 border-b border-white/15">
-              <div>
-                <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-white/15 border border-white/20 text-emerald-100">
-                  Vault Block
-                </span>
-                <h3 className="text-base font-bold text-white drop-shadow-sm mt-1">
-                  Web3 Vault & Game Economy
-                </h3>
-              </div>
-              <div className="shrink-0 relative pointer-events-none">
-                <div className="absolute inset-0 rounded-full blur-md opacity-70 bg-emerald-400" />
-                <div
-                  className="relative w-12 h-12 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-xl flex items-center justify-center"
-                  style={{
-                    boxShadow:
-                      "0 8px 20px -4px rgba(0, 0, 0, 0.35), inset 0 1.5px 2px rgba(255, 255, 255, 0.4)",
-                  }}
-                >
-                  <Wallet size={22} className="text-emerald-200" />
-                </div>
-              </div>
-            </div>
 
-            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <InfoTile
-                label="Vault Wallet"
-                source="Web3 Vault"
-                displayValue={piiMasked && !unmaskedKeys["wallet"] ? encryptedAddress : walletAddress}
-                realValue={walletAddress}
-                description="Cryptographic vault destination address"
-                mono
-                sensitive
-                isRevealed={!piiMasked || unmaskedKeys["wallet"]}
-                onTogglePeek={() => toggleItemMask("wallet")}
-                onCopy={() => copyToClipboard(walletAddress, setCopiedWallet)}
-                isCopied={copiedWallet}
-              />
-              <InfoTile
-                label="Score Points"
-                source="Neon Ledger"
-                displayValue={`${score.toLocaleString()} WEI`}
-                realValue={String(score)}
-                description="Verified on-chain simulated tokens"
-                isRevealed={true}
-                onCopy={() => handleCopyFieldValue("score", String(score))}
-                isCopied={copiedField === "score"}
-              />
-              <InfoTile
-                label="Fiat Equivalent"
-                source="Currency Hub"
-                displayValue={`$${usdValue} USD • ៛${khrValue} KHR`}
-                realValue={`$${usdValue}`}
-                description="Estimated real-world exchange values"
-                isRevealed={true}
-                onCopy={() => handleCopyFieldValue("fiat", `$${usdValue}`)}
-                isCopied={copiedField === "fiat"}
-              />
-              <InfoTile
-                label="Anti-Cheat Delta"
-                source="Server Clamping"
-                displayValue="Active (+500,000 Clamped)"
-                realValue="Active (+500,000 Clamped)"
-                description="Server score delta validation enforcement"
-                isRevealed={true}
-                onCopy={() => handleCopyFieldValue("anti-cheat", "Clamped")}
-                isCopied={copiedField === "anti-cheat"}
-              />
-            </div>
-          </div>
-        )}
 
-        {/* 6. TELEGRAM MINI APP SDK DIAGNOSTICS SKEUOMORPHIC CARD (AMBER / GOLD) */}
-        {isOwner && (
-          <div
-            className="relative w-full rounded-[28px] p-4 sm:p-5 overflow-hidden bg-gradient-to-b from-[#b45309] via-[#92400e] to-[#451a03] text-white"
-            style={{
-              boxShadow:
-                "0 16px 36px -10px rgba(180, 83, 9, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.32), inset 0 -3px 6px rgba(0, 0, 0, 0.5)",
-            }}
-          >
-            <GuillocheBackground opacity={0.25} />
-            <ThreadStitching strokeColor="#fde68a" />
-            <SpecularRim />
-
-            <div className="relative z-10 flex items-center justify-between gap-4 pb-3 mb-3 border-b border-white/15">
-              <div>
-                <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-white/15 border border-white/20 text-amber-100">
-                  SDK Diagnostics Block
-                </span>
-                <h3 className="text-base font-bold text-white drop-shadow-sm mt-1">
-                  Telegram Mini App Environment
-                </h3>
-              </div>
-              <div className="shrink-0 relative pointer-events-none">
-                <div className="absolute inset-0 rounded-full blur-md opacity-70 bg-amber-400" />
-                <div
-                  className="relative w-12 h-12 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-xl flex items-center justify-center"
-                  style={{
-                    boxShadow:
-                      "0 8px 20px -4px rgba(0, 0, 0, 0.35), inset 0 1.5px 2px rgba(255, 255, 255, 0.4)",
-                  }}
-                >
-                  <KeylineGamepad size={22} className="text-amber-200" />
-                </div>
-              </div>
-            </div>
-
-            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <InfoTile
-                label="initData Hash"
-                source="WebApp SDK"
-                displayValue={piiMasked && !unmaskedKeys["init_data_hash"] ? maskedHash : initDataHash}
-                realValue={initDataHash}
-                description="HMAC cryptographically signed payload signature"
-                mono
-                sensitive
-                isRevealed={!piiMasked || unmaskedKeys["init_data_hash"]}
-                onTogglePeek={() => toggleItemMask("init_data_hash")}
-                onCopy={() => handleCopyFieldValue("init_data_hash", initDataHash)}
-                isCopied={copiedField === "init_data_hash"}
-              />
-              <InfoTile
-                label="Client Platform"
-                source="WebApp SDK"
-                displayValue={tgApp?.platform || (typeof window !== "undefined" ? window.navigator.platform : "macOS / iOS")}
-                realValue={tgApp?.platform || "macOS / iOS"}
-                description="Client device operating system runtime"
-                isRevealed={true}
-                onCopy={() => handleCopyFieldValue("platform", tgApp?.platform || "macOS")}
-                isCopied={copiedField === "platform"}
-              />
-              <InfoTile
-                label="SDK API Version"
-                source="WebApp SDK"
-                displayValue={`v${tgApp?.version || "7.10"}`}
-                realValue={`v${tgApp?.version || "7.10"}`}
-                description="Telegram WebApp client version build"
-                mono
-                isRevealed={true}
-                onCopy={() => handleCopyFieldValue("version", tgApp?.version || "7.10")}
-                isCopied={copiedField === "version"}
-              />
-              <InfoTile
-                label="Hardware Biometrics"
-                source="WebApp SDK"
-                displayValue={tgApp?.BiometricManager ? "Available (TouchID/FaceID)" : "Hardware Ready"}
-                realValue={tgApp?.BiometricManager ? "Available" : "Ready"}
-                description="Device secure enclave hardware token"
-                isRevealed={true}
-                onCopy={() => handleCopyFieldValue("biometrics", "Ready")}
-                isCopied={copiedField === "biometrics"}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* 7. QUICK ACTIONS HOMEPAGE BLOCK PANEL */}
-        <div className="bg-white rounded-[26px] border border-slate-200 shadow-sm p-4 space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-            <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
-              Quick Management Panels
-            </h4>
-            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-              Navigation
-            </span>
-          </div>
-          <div className="grid grid-cols-4 gap-2.5">
-            <button
-              type="button"
-              onClick={() => setView("wallet-detail")}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition-all cursor-pointer active:scale-95"
-            >
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#0098ea] to-[#005f99] text-white flex items-center justify-center shadow-xs">
-                <Wallet size={20} />
-              </div>
-              <span className="text-[10.5px] font-bold text-slate-700">Wallet</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setView("swap")}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition-all cursor-pointer active:scale-95"
-            >
-              <div className="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
-                <Repeat size={20} />
-              </div>
-              <span className="text-[10.5px] font-bold text-slate-700">Swap</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setView("audit");
-                fetchAuditLogs();
-              }}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition-all cursor-pointer active:scale-95"
-            >
-              <div className="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
-                <Timer size={20} />
-              </div>
-              <span className="text-[10.5px] font-bold text-slate-700">Activity</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setView("notifications")}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition-all cursor-pointer active:scale-95"
-            >
-              <div className="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
-                <Bell size={20} />
-              </div>
-              <span className="text-[10.5px] font-bold text-slate-700">Alerts</span>
-            </button>
-          </div>
-        </div>
 
         {/* 8. PREFERENCES SKEUOMORPHIC BLOCK CARD */}
-        <div className="bg-white rounded-[26px] border border-slate-200 shadow-sm p-4 space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-            <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
+        {/* 7. SYSTEM SETTINGS & HAPTICS SKEUOMORPHIC CARD */}
+        <div
+          className="relative w-full rounded-[28px] p-4 sm:p-5 overflow-hidden bg-gradient-to-b from-[#1e293b] via-[#0f172a] to-[#020617] text-white"
+          style={{
+            boxShadow:
+              "0 16px 36px -10px rgba(15, 23, 42, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.32), inset 0 -3px 6px rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          <GuillocheBackground opacity={0.25} />
+          <ThreadStitching strokeColor="#94a3b8" />
+          <SpecularRim />
+
+          <div className="relative z-10 flex items-center justify-between gap-4 pb-3 mb-3 border-b border-white/15">
+            <h3 className="text-base font-bold text-white drop-shadow-sm">
               System Settings & Haptics
-            </h4>
-            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-              Settings
-            </span>
+            </h3>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+
+          <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {[
               {
                 label: "Haptic Feedback",
@@ -1403,66 +1023,29 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
             ].map((pref) => (
               <div
                 key={pref.label}
-                className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between"
+                className="bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur-md rounded-2xl p-3.5 flex items-center justify-between transition-all duration-200"
               >
                 <div>
-                  <span className="text-xs font-bold text-slate-800 block">{pref.label}</span>
-                  <span className="text-[10px] text-slate-400 font-medium">{pref.sub}</span>
+                  <span className="text-xs font-bold text-white block">{pref.label}</span>
+                  <span className="text-[10px] text-white/60 font-medium">{pref.sub}</span>
                 </div>
                 <button
                   type="button"
                   onClick={pref.onToggle}
-                  className={`relative w-11 h-6 rounded-full border transition-all duration-300 ease-out cursor-pointer flex-shrink-0 ${
-                    pref.value ? "bg-[#0098ea] border-[#0098ea]" : "bg-slate-200 border-slate-300"
+                  className={`relative w-12 h-6 rounded-full border transition-all duration-300 ease-out cursor-pointer flex-shrink-0 shadow-inner ${
+                    pref.value
+                      ? "bg-[#0098ea] border-cyan-300 ring-2 ring-cyan-400/30 shadow-[0_0_12px_rgba(0,152,234,0.5)]"
+                      : "bg-slate-800/90 border-white/20"
                   }`}
                 >
                   <span
-                    className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-300 ease-out ${
-                      pref.value ? "left-5" : "left-0.5"
+                    className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-all duration-300 ease-out ${
+                      pref.value ? "left-6" : "left-0.5"
                     }`}
                   />
                 </button>
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* 9. PLAYER ID FOOTER CARD */}
-        <div className="bg-white rounded-[26px] border border-slate-200 shadow-sm p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">
-              Player UID (Protected Hint)
-            </span>
-            <span className="text-[9px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-bold">
-              Zero-Trust Protected
-            </span>
-          </div>
-          <div className="flex items-center justify-between gap-3 p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
-            <span className="text-xs font-mono text-slate-700 truncate ml-1">
-              {piiMasked ? maskTelegramId(rawPlayerId) : rawPlayerId}
-            </span>
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <button
-                type="button"
-                onClick={() => toggleItemMask("footer_player_id")}
-                className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 cursor-pointer active:scale-95"
-                title="Toggle Hint"
-              >
-                {unmaskedKeys["footer_player_id"] || !piiMasked ? (
-                  <EyeOff size={13} className="text-amber-600" />
-                ) : (
-                  <Eye size={13} />
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => copyToClipboard(rawPlayerId, setCopiedId)}
-                className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 cursor-pointer active:scale-95"
-                title="Copy ID"
-              >
-                {copiedId ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
-              </button>
-            </div>
           </div>
         </div>
 

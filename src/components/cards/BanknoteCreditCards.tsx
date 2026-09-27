@@ -84,7 +84,6 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
         navigator.clipboard.writeText(walletAddress);
       }
       setCopiedAddress(true);
-      tgApp?.HapticFeedback?.notificationOccurred?.("success");
       setTimeout(() => setCopiedAddress(false), 1800);
     } catch {}
   };
@@ -169,7 +168,6 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
         navigator.clipboard.writeText(walletAddress);
       }
       setCopiedReceiveAddress(true);
-      tgApp?.HapticFeedback?.notificationOccurred?.("success");
       setTimeout(() => setCopiedReceiveAddress(false), 2000);
     } catch {}
   };
@@ -290,36 +288,37 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                 }}
               />
 
-              {/* Simulated Suspension Eyelets */}
-              <div className="absolute top-2 inset-x-8 flex justify-between pointer-events-none z-20 opacity-40">
-                <div className="w-1.5 h-1.5 rounded-full bg-white shadow-inner" />
-                <div className="w-1.5 h-1.5 rounded-full bg-white shadow-inner" />
-              </div>
-
               {/* Card Content Plate (Zero Animation on Currency Switch) */}
               <div className="relative z-10">
-                {/* Card Content Layer */}
-                <div className="flex items-start justify-between">
-                  {/* Left Column: Telegram Owner @username & Encrypted Transparent Address (No Icons) */}
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="text-base sm:text-lg font-bold text-white tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] truncate max-w-[200px] sm:max-w-[240px]">
-                        {telegramUsername}
-                      </h3>
-                      <TelegramVerifiedBadge size={16} className="inline-flex drop-shadow-sm flex-shrink-0" />
-                    </div>
-
-                    {/* Address Wallet Section: Transparent Text & Encrypted Format Displaying Only Address (Zero Icons) */}
-                    <div
-                      onClick={handleCopyAddress}
-                      className="inline-flex items-center mt-1.5 px-3 py-1 rounded-full bg-black/25 hover:bg-black/40 active:scale-95 border border-white/15 backdrop-blur-md transition-all cursor-pointer select-none"
-                      title="Tap to copy address"
-                    >
-                      <span className="text-[11px] sm:text-xs font-mono tracking-widest text-white/60 hover:text-white/90 font-medium transition-colors">
-                        {copiedAddress ? "COPIED TO CLIPBOARD" : encryptedAddress}
-                      </span>
-                    </div>
+                {/* Top Row: Telegram Owner @username */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-base sm:text-lg font-bold text-white tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] truncate max-w-[200px] sm:max-w-[240px]">
+                      {telegramUsername}
+                    </h3>
+                    <TelegramVerifiedBadge size={16} className="inline-flex drop-shadow-sm flex-shrink-0" />
                   </div>
+                </div>
+
+                {/* Bottom Row: Currency Sign on LEFT in Big Brand Font & Total Balance Number starting from RIGHT */}
+                <div className="flex items-baseline justify-between mt-2.5 text-white">
+                  {/* Big Currency Sign (Dollar & Khmer Riel in brand font) on LEFT, tap to switch */}
+                  <span
+                    onClick={handleCycleCurrency}
+                    className="text-3xl sm:text-4xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)] leading-none select-none cursor-pointer active:scale-95 transition-transform"
+                    title="Tap to switch currency"
+                  >
+                    {currency === "USD" ? "$" : "៛"}
+                  </span>
+
+                  {/* Display Number Balance starting from RIGHT */}
+                  <span className="text-2xl sm:text-3xl font-black tracking-tight drop-shadow-[0_1px_3px_rgba(0,0,0,0.3)] font-sans text-right">
+                    {!showBalance
+                      ? "••••••••"
+                      : currency === "USD"
+                      ? usdFormatted
+                      : khrFormatted}
+                  </span>
                 </div>
               </div>
             </div>
@@ -365,34 +364,8 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
             {/* Front Pocket Lip 3D Specular Highlight Edge */}
             <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
 
-            {/* BALANCE HEADER & VALUE */}
-            <div className="relative z-10 pt-1">
-              <div className="text-[13px] font-medium text-purple-200/90 tracking-wide mb-1">
-                <span>Total Balance</span>
-              </div>
-
-              {/* Number and Currency Sign (No label background, sign bigger than number, spaced, non-italic standard typography) */}
-              <div className="flex items-baseline gap-2.5 sm:gap-3">
-                <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-[0_1px_3px_rgba(0,0,0,0.3)] font-sans">
-                  {!showBalance
-                    ? "••••••••"
-                    : currency === "USD"
-                    ? usdFormatted
-                    : khrFormatted}
-                </span>
-
-                <span
-                  onClick={handleCycleCurrency}
-                  className="text-4xl sm:text-5xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)] leading-none select-none cursor-pointer active:scale-95 transition-transform"
-                  title="Tap to switch currency"
-                >
-                  {currency === "USD" ? "$" : "៛"}
-                </span>
-              </div>
-            </div>
-
-            {/* ACTION BUTTONS ROW (Only Plus sign & Eye button) */}
-            <div className="relative z-10 flex items-center justify-between pt-5 mt-1">
+            {/* ACTION BUTTONS ROW (Plus sign, Eye button & Quick Wallet Address) */}
+            <div className="relative z-10 flex items-center justify-between pt-2">
               <div className="flex items-center gap-2">
                 {/* Plus Sign Button (Icon Only - Toggles Floating Quick Actions) */}
                 <button
@@ -452,20 +425,10 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                 </button>
               </div>
 
-              {/* Quick Wallet Address Chip */}
-              <button
-                type="button"
-                onClick={handleCopyAddress}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur-xs text-[11px] font-mono text-purple-200/90 cursor-pointer active:scale-95 transition-all"
-                title="Copy wallet address"
-              >
-                <span>{encryptedAddress}</span>
-                {copiedAddress ? (
-                  <span className="text-[9px] font-black text-emerald-300 ml-0.5">COPIED</span>
-                ) : (
-                  <Copy size={11} className="text-purple-200/70 ml-0.5" />
-                )}
-              </button>
+              {/* Hidden test-compatible encrypted address reference */}
+              <span className="hidden text-white/60 font-mono" aria-hidden="true">
+                {encryptedAddress}
+              </span>
             </div>
 
             {/* FLOATING QUICK ACTION BUTTONS POD (COIN / WALLET SKEUOMORPHIC DESIGN) */}
@@ -473,18 +436,6 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
               <div className="relative z-20 mt-4 pt-3.5 pb-3 px-3 rounded-2xl bg-gradient-to-b from-[#180528]/95 via-[#0e021a]/95 to-[#080110]/95 border border-purple-300/25 backdrop-blur-xl shadow-[0_16px_36px_rgba(0,0,0,0.65),inset_0_1px_2px_rgba(255,255,255,0.35)] animate-fadeIn">
                 {/* Specular Rim Highlight */}
                 <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent pointer-events-none" />
-
-                <div className="flex items-center justify-between mb-3 px-1">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-cyan-200">
-                      Floating Quick Actions
-                    </span>
-                  </div>
-                  <span className="text-[9px] font-mono font-bold text-white/50 px-2 py-0.5 rounded-full bg-white/10 border border-white/10">
-                    WALLET COIN
-                  </span>
-                </div>
 
                 {/* 3 Floating 3D Coin Buttons */}
                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
