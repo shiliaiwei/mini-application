@@ -186,6 +186,9 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
   const walletAddress = user?.id
     ? `wei_0x${Number(user.id).toString(16).padStart(8, "0")}...${String(user.id).slice(-4)}`
     : "wei_0x78a19bc3...82f1";
+  const encryptedAddress = user?.id
+    ? `0x${Number(user.id).toString(16).padStart(4, "0")}••••••••${String(user.id).slice(-4)}`
+    : "0x78a1••••••••82f1";
   const usdValue = (score / 100).toFixed(2);
   const khrValue = Math.floor(score * 41).toLocaleString();
 
@@ -303,15 +306,31 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
       <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
         <BackHeader title="Security" onBack={() => setView("main")} />
         <div className="space-y-3">
-          <div className="bg-white rounded-[32px] p-6 border border-slate-200 shadow-sm space-y-3">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">VAULT WALLET ADDRESS</span>
-            <div className="flex items-center justify-between gap-3 p-3.5 rounded-full bg-slate-50 border border-slate-200">
-              <span className="text-xs font-mono text-slate-700 truncate flex-1 ml-2">{walletAddress}</span>
-              <button type="button" onClick={() => copyToClipboard(walletAddress, setCopiedWallet)}
-                className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-[#0098ea] flex items-center justify-center transition-all duration-300 ease-out cursor-pointer flex-shrink-0">
-                {copiedWallet ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-              </button>
-            </div>
+          <div className="relative overflow-hidden bg-white rounded-[32px] p-6 border border-slate-200 shadow-sm space-y-3">
+            {/* Guilloche Banknote Background Mesh Overlay with Suitable Contrast */}
+            <div
+              className="absolute inset-0 pointer-events-none opacity-[0.09]"
+              style={{
+                backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "center center",
+                backgroundSize: "cover",
+                filter: "contrast(1.3)",
+              }}
+            />
+            <div className="relative z-10 space-y-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">VAULT WALLET ADDRESS</span>
+              {/* Address Wallet Section: Transparent Text & Encrypted Format Displaying Only Address (Zero Icons) */}
+              <div
+                onClick={() => copyToClipboard(walletAddress, setCopiedWallet)}
+                className="flex items-center justify-between gap-3 p-3.5 rounded-full bg-slate-900/90 hover:bg-slate-900 active:scale-98 border border-slate-800 backdrop-blur-md transition-all cursor-pointer select-none"
+                title="Tap to copy address"
+              >
+                <span className="text-xs font-mono tracking-widest text-white/60 hover:text-white/90 font-medium truncate flex-1 ml-2 transition-colors">
+                  {copiedWallet ? "COPIED TO CLIPBOARD" : encryptedAddress}
+                </span>
+                <span className="text-[10px] text-white/40 uppercase font-mono mr-2">ENCRYPTED</span>
+              </div>
             <div className="flex items-center justify-between gap-3 p-3.5 rounded-full bg-slate-50 border border-slate-200">
               <div className="ml-2">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block">Telegram Handle</span>
@@ -337,7 +356,8 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
               </button>
             </div>
           </div>
-          <div className="bg-white rounded-[32px] p-6 border border-slate-200 shadow-sm space-y-3">
+        </div>
+        <div className="bg-white rounded-[32px] p-6 border border-slate-200 shadow-sm space-y-3">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">PROTECTION STATUS</span>
             {[
               { label: "Telegram Auth", status: "Active", ok: true },
@@ -428,6 +448,17 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         <div className="space-y-3">
           <div className="bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] rounded-3xl p-5 text-white relative overflow-hidden shadow-md">
             <ProfileWatermark />
+            {/* Guilloche Banknote Background Style with Suitable Contrast */}
+            <div
+              className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-30"
+              style={{
+                backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "center center",
+                backgroundSize: "cover",
+                filter: "contrast(1.35) brightness(1.1)",
+              }}
+            />
             <div className="relative z-10 space-y-3">
               <span className="text-[10px] font-black uppercase tracking-widest text-blue-200 block">Total Balance</span>
               <div>
@@ -436,29 +467,29 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
               </div>
               <div className="flex items-center gap-4 pt-1">
                 <div>
-                  <span className="text-[10px] text-blue-300 font-medium block">USD Value</span>
-                  <span className="text-base font-black">${usdValue}</span>
+                  <span className="text-[10px] text-blue-300 font-medium block">Dollar Value</span>
+                  <span className="text-lg font-black">$ {usdValue}</span>
                 </div>
                 <div className="w-px h-8 bg-white/20" />
                 <div>
-                  <span className="text-[10px] text-blue-300 font-medium block">KHR Value</span>
-                  <span className="text-base font-black">{khrValue} ៛</span>
+                  <span className="text-[10px] text-blue-300 font-medium block">Riel Value</span>
+                  <span className="text-lg font-black">៛ {khrValue}</span>
                 </div>
               </div>
             </div>
           </div>
           <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-2">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">Wallet Address</span>
-            <div className="flex items-center gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-xs font-mono text-slate-700 truncate flex-1">{walletAddress}</span>
-              <button type="button" onClick={() => copyToClipboard(walletAddress, setCopiedWallet)} className="p-1.5 rounded-lg bg-white border border-slate-200 cursor-pointer">
-                {copiedWallet ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+            <div className="flex items-center gap-2 p-3 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-md">
+              <span className="text-xs font-mono tracking-widest text-white/60 truncate flex-1 ml-1">{encryptedAddress}</span>
+              <button type="button" onClick={() => copyToClipboard(walletAddress, setCopiedWallet)} className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/15 cursor-pointer">
+                {copiedWallet ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
               </button>
             </div>
           </div>
           <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-2">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">Exchange Rates</span>
-            {[{ from: "100 WEI COIN", to: "$1.00 USD" }, { from: "100 WEI COIN", to: "4,100 ៛ KHR" }, { from: "500 WEI COIN", to: "~1 TON" }].map((r, i) => (
+            {[{ from: "100 WEI COIN", to: "$ 1.00" }, { from: "100 WEI COIN", to: "៛ 4,100" }, { from: "500 WEI COIN", to: "~1 TON" }].map((r, i) => (
               <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
                 <span className="text-sm font-bold text-slate-800">{r.from}</span>
                 <span className="text-xs font-black text-[#0098ea]">= {r.to}</span>
@@ -522,9 +553,20 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
   return (
     <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
 
-      {/* HERO HEADER CARD (32dp Expressive Roundness) */}
+      {/* HERO HEADER CARD (32dp Expressive Roundness with Guilloche Banknote Background) */}
       <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0088cc] via-[#0077b5] to-[#005f99] p-6 text-white mb-4 shadow-md border border-blue-400/20">
         <ProfileWatermark />
+        {/* Guilloche Banknote Background Style with Suitable Contrast */}
+        <div
+          className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-30"
+          style={{
+            backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center 20%",
+            backgroundSize: "cover",
+            filter: "contrast(1.35) brightness(1.1)",
+          }}
+        />
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-4">
             <ProfileAvatar user={user} size={68} />

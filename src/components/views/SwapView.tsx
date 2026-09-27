@@ -149,9 +149,21 @@ export const SwapView: React.FC<SwapViewProps> = ({
       </div>
 
       {/* Main Swap Card */}
-      <div className="liquid-glass rounded-[32px] p-4 sm:p-5 space-y-3 relative border border-slate-200 shadow-sm">
+      <div className="liquid-glass rounded-[32px] p-4 sm:p-5 space-y-3 relative border border-slate-200 shadow-sm overflow-hidden">
+        {/* Guilloche Banknote Background Style with Suitable Contrast */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.08]"
+          style={{
+            backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center center",
+            backgroundSize: "cover",
+            filter: "contrast(1.3)",
+          }}
+        />
+
         {/* From Section */}
-        <div className="p-3.5 rounded-[32px] bg-slate-50 border border-slate-200 space-y-2">
+        <div className="p-3.5 rounded-[32px] bg-slate-50 border border-slate-200 space-y-2 relative z-10">
           <div className="flex items-center justify-between text-xs text-slate-700 font-bold">
             <span>YOU PAY</span>
             <span className="font-mono text-slate-800">
@@ -183,8 +195,8 @@ export const SwapView: React.FC<SwapViewProps> = ({
               className="bg-white border border-slate-300 rounded-full px-4 py-2 text-xs font-black text-slate-900 focus:outline-none shadow-xs cursor-pointer min-h-[44px] transition-colors duration-300 ease-out"
             >
               <option value="WEI">WEI Coin (WEI)</option>
-              <option value="KHR">KHR (៛)</option>
-              <option value="USD">USD ($)</option>
+              <option value="KHR">៛ (Riel)</option>
+              <option value="USD">$ (Dollar)</option>
             </select>
           </div>
 
@@ -216,23 +228,23 @@ export const SwapView: React.FC<SwapViewProps> = ({
         </div>
 
         {/* To Section */}
-        <div className="p-3.5 rounded-[32px] bg-slate-50 border border-slate-200 space-y-2">
+        <div className="p-3.5 rounded-[32px] bg-slate-50 border border-slate-200 space-y-2 relative z-10">
           <div className="flex items-center justify-between text-xs text-slate-700 font-bold">
             <span>YOU RECEIVE (ESTIMATED)</span>
             <span className="font-mono text-slate-600 text-[10px]">
-              {fromCurrency === "WEI" && toCurrency === "KHR" && "100 WEI = 4,100 KHR"}
-              {fromCurrency === "WEI" && toCurrency === "USD" && "100 WEI = $1.00 USD"}
-              {fromCurrency === "USD" && toCurrency === "KHR" && "$1.00 USD = 4,100 KHR"}
-              {fromCurrency === "KHR" && toCurrency === "USD" && "4,100 KHR = $1.00 USD"}
+              {fromCurrency === "WEI" && toCurrency === "KHR" && "100 WEI = ៛ 4,100"}
+              {fromCurrency === "WEI" && toCurrency === "USD" && "100 WEI = $ 1.00"}
+              {fromCurrency === "USD" && toCurrency === "KHR" && "$ 1.00 = ៛ 4,100"}
+              {fromCurrency === "KHR" && toCurrency === "USD" && "៛ 4,100 = $ 1.00"}
             </span>
           </div>
 
           <div className="flex items-center justify-between gap-3">
             <div className="text-2xl font-black text-[#14532d] font-display min-h-[44px] flex items-center">
               {toCurrency === "KHR"
-                ? `${Math.floor(calculatedOutput).toLocaleString()} KHR (៛)`
+                ? `៛ ${Math.floor(calculatedOutput).toLocaleString()}`
                 : toCurrency === "USD"
-                ? `$${calculatedOutput.toFixed(2)} USD`
+                ? `$ ${calculatedOutput.toFixed(2)}`
                 : `${Math.floor(calculatedOutput).toLocaleString()} WEI COIN`}
             </div>
 
@@ -246,8 +258,8 @@ export const SwapView: React.FC<SwapViewProps> = ({
               }}
               className="bg-white border border-slate-300 rounded-full px-4 py-2 text-xs font-black text-slate-900 focus:outline-none shadow-xs cursor-pointer min-h-[44px] transition-colors duration-300 ease-out"
             >
-              <option value="KHR">KHR (៛)</option>
-              <option value="USD">USD ($)</option>
+              <option value="KHR">៛ (Riel)</option>
+              <option value="USD">$ (Dollar)</option>
               <option value="WEI">WEI Coin (WEI)</option>
             </select>
           </div>

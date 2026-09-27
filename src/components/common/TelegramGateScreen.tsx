@@ -10,8 +10,8 @@ interface TelegramGateScreenProps {
 export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({ onBypass }) => {
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-between p-6 app-bg-white text-slate-900 max-w-md mx-auto w-full select-none font-body relative overflow-hidden">
-      {/* Vector Guilloche Banknote Security Mesh from background.svg */}
-      <div className="absolute inset-0 bg-app-guilloche opacity-[0.06] pointer-events-none z-0" />
+      {/* App Background on mobile: strictly background.svg, zero banknote background behind app */}
+      <div className="absolute inset-0 bg-app-background opacity-[0.06] pointer-events-none z-0" />
 
       {/* Top Banner */}
       <div className="relative z-10">

@@ -41,21 +41,33 @@ This specification establishes the authoritative, permanent Design and Component
   1. *Perimeter Stitching*: Inset `8px` to `10px` along the outer rounded wallet boundary (`rx="30" ry="30"`).
   2. *Curved Lip Stitching*: Parallel to the scooped front pocket flap with `Q` quadratic bezier curve (`M 2 2 Q 180 8 360 2`).
 
-### 3. Stacked Cards in Top Slot & Dynamic Currency Switcher
-- **Rear Layer**: Dark indigo/purple card top rim (`#3B0764`, opacity `0.80`, `rounded-t-[20px]`) visible behind the primary card.
+### 3. Stacked Cards in Top Slot & Dual Currency System
+- **Rear Layer**: Dark indigo/purple card top rim (`#3B0764`, opacity `0.80`, `rounded-t-[20px]`) with `cardbanknote.svg` texture visible behind the primary card.
 - **Front Primary Card (Sticky Currency Card)**:
+  - Vector Security Texture: Exclusively uses `cardbanknote.svg` (`/backgrounds/cardbanknote.svg`) at `25%` opacity with `mix-blend-overlay` and +35% contrast.
   - Satin gradient: `linear-gradient(135deg, #D8B4FE 0%, #C084FC 40%, #A855F7 75%, #9333EA 100%)`.
   - Specular sheen: Diagonal top-left light wash (`linear-gradient(115deg, rgba(255,255,255,0.7) 0%, transparent 60%)`).
   - Cardholder & Telegram Owner: Shows authenticated Telegram `@username` paired directly with the official blue Telegram Verified Badge (`TelegramVerifiedBadge`).
-  - Interactive Lift & Currency Toggle: Tapping the card plays an upward lift animation (`-translate-y-3.5`) and cycles the active balance display between `$ USD`, `៛ KHR`, and `SAR`.
+  - Encrypted Address: Transparent monospace address (`0x...••••••••...`) with tap-to-copy (zero icons).
+  - Dual Currency Toggle: Strictly switches between US Dollar (`$`) and Cambodian Riel (`៛`). SAR is strictly excluded.
+  - Zero Switch Animation: When switching currency, values toggle instantly with zero text translation, zero card hanging/tilt animation, and zero layout shift.
   - Sticky Persistence: The user's chosen currency preference is saved to `localStorage ("shi_wallet_currency")` and restored on startup.
 
-### 4. Front Leather Pocket Flap & Curved Lip
-- **Curved Lip Geometry**: Scooped down in the center by `6px–12px` to reveal the stacked cards.
+### 4. Front Leather Pocket Flap, Curved Lip & Single Currency Display
+- **Curved Lip Geometry**: Scooped down in the center by `6px–12px` to reveal the stacked cards with simulated thread stitching.
+- **Banknote Security Texture**: Uses `cardbanknote.svg` overlay with 25% opacity and contrast boost.
 - **Rolled Edge Highlight**: Upper specular highlight rim (`h-[1.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent`).
 - **Inner Pocket Shadow**: Casts an upward shadow onto the card slot (`box-shadow: 0 -8px 20px -4px rgba(25, 4, 45, 0.6)`).
+- **Single Currency Display (Zero Duplicate Symbols)**:
+  - Total balance displays strictly as formatted numbers without prepended currency symbols (e.g. `1,071,986` or `1,250.00`).
+  - The currency sign pill (`$` or `៛`) sits solely on the right of the total balance.
 
-### 5. Frosted Glassmorphism Controls
+### 5. Mobile Background Architecture & Asset Isolation
+- **App Background on Mobile**: Strictly uses `background.svg` (`/backgrounds/background.svg` via `.bg-app-background`) scaled to `min(100vw, 540px)`.
+- **Zero Banknote Background Behind App**: `cardbanknote.svg` is strictly prohibited behind the entire app canvas or settings views.
+- **Card Wallet Texture**: Strictly uses `cardbanknote.svg` (`/backgrounds/cardbanknote.svg`) for the card wallet (card face, back card edge, and 3D banknote pocket).
+
+### 6. Frosted Glassmorphism Controls
 - **Translucent Pill Button (`+ Add Balance`)**:
   - Background: `rgba(255, 255, 255, 0.15)` with `hover:bg-white/25`
   - Border: `1px solid rgba(255, 255, 255, 0.20)`
@@ -64,9 +76,7 @@ This specification establishes the authoritative, permanent Design and Component
   - Active State: `active:scale-95`
 - **Circular Utility Buttons**:
   - Geometry: `42px x 42px` rounded circle (`rounded-full`).
-  - Icons:
-    - Transfer / Swap: Keyline arrow swap icon (`KeylineArrowUpDown`).
-    - Visibility Toggle: Eye / EyeOff.
+  - Visibility Toggle: Eye / EyeOff circular frosted button.
 
 ---
 
@@ -76,8 +86,6 @@ This specification establishes the authoritative, permanent Design and Component
 - **Conversion Standards**:
   - `100 WEI COIN = $1.00 USD`
   - `100 WEI COIN = 4,100 KHR (Cambodian Riel)`
-  - `100 WEI COIN ≈ 3.75 SAR`
-  - `500 WEI COIN ≈ 1 TON`
 
 ---
 

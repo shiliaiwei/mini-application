@@ -27,12 +27,21 @@
 ## WEI Coin Terminology Rule - MANDATORY
 - **Strict In-Game Currency Terminology**: All in-game points, currency balances, mission rewards, and exchange rates MUST strictly use the term **WEI COIN** (or **WEI** / **$WEI**).
 - **Prohibition of "PTS"**: Generic abbreviations such as "PTS" or bare "points" are strictly prohibited in user-facing views, badges, headers, modals, and notifications.
-- **Conversion Standard**: 100 WEI COIN = $1.00 USD = 4,100 KHR (~3.75 SAR / ~0.20 TON).
+- **Conversion Standard**: 100 WEI COIN = $1.00 USD = 4,100 KHR. Dual currency strictly supports US Dollar ($) and Cambodian Riel (៛); SAR is strictly excluded.
 
 ## 3D Skeuomorphic Purple Leather Design Standard - MANDATORY
 - **Wallet Container**: Rich purple textured leather pocket container (`#4a154b` / `#6420a7`) with simulated perimeter stitching lines (`stroke-dasharray="4 4"`).
-- **Interactive Stacked Card**: Peeking credit card with dynamic currency switcher (`$ USD` / `៛ KHR`) and Telegram owner `@username` with verified badge.
+- **Interactive Stacked Card**: Peeking credit card with authenticated Telegram owner `@username`, official Telegram Verified Badge, and encrypted address (`0x...••••••••...`) with tap-to-copy (zero icons).
+- **Single Currency Display (Zero Duplicate Currency Symbols)**:
+  - Balance amount displays strictly as numbers without prepended currency symbols (e.g. `1,071,986` or `1,250.00`).
+  - Currency indicator pill (`$` / `៛`) sits solely on the right of the total balance.
+- **Zero Animation on Currency Switch**: Switching currency must toggle instantly with zero text translation, zero card hanging/tilting animation, and zero layout shift.
 - **Universal Application**: Apply 3D purple leather texture, perimeter stitching, and tactile pill buttons across cards, banners, and docks.
+
+## Background Architecture & Texture Standards - MANDATORY
+- **App Background on Mobile**: Strictly use `background.svg` (`/backgrounds/background.svg`) across the mobile app canvas.
+- **Zero Banknote Background Behind App**: Never display `cardbanknote.svg` behind the entire app or settings views.
+- **Card Wallet Texture**: Strictly use `cardbanknote.svg` (`/backgrounds/cardbanknote.svg`) for the card wallet (front card, back card edge, and 3D banknote pocket).
 
 ## Brand Mascot (Weibot) Standard - MANDATORY
 - **Official Character**: Weibot, the electric cyan/royal blue companion with feline ear tufts, large specular anime eyes, and `[WEI]` gold collar crest.

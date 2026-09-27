@@ -219,6 +219,18 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
           />
         </svg>
 
+        {/* Guilloche Banknote Background Style with Suitable Contrast */}
+        <div
+          className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-30"
+          style={{
+            backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center center",
+            backgroundSize: "cover",
+            filter: "contrast(1.35) brightness(1.1)",
+          }}
+        />
+
         {/* Specular Top Rim */}
         <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
 
@@ -227,14 +239,14 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
             <span className="text-[11px] text-purple-200/90 font-medium uppercase tracking-wider block">
               TOTAL EARNED ASSETS (RIEL)
             </span>
-            <div className="text-2xl font-black text-white font-display mt-0.5 drop-shadow-sm">
-              <span>៛{Math.floor(score * 41).toLocaleString()}</span>
-              <span className="text-purple-200 text-sm ml-1">KHR</span>
+            <div className="text-2xl sm:text-3xl font-black text-white font-display mt-0.5 drop-shadow-sm flex items-baseline gap-1.5">
+              <span className="text-2xl sm:text-3xl font-black text-white">៛</span>
+              <span>{Math.floor(score * 41).toLocaleString()}</span>
             </div>
-            <div className="text-[11px] text-purple-200/90 font-medium mt-1">
+            <div className="text-[11px] text-purple-200/90 font-medium mt-1 flex items-center">
               <span>{score.toLocaleString()} WEI COIN</span>
               <span className="mx-1.5">•</span>
-              <span>${(score / 100).toFixed(2)} USD</span>
+              <span className="font-bold text-white">$ {(score / 100).toFixed(2)}</span>
             </div>
           </div>
           <div className="text-right">
@@ -320,10 +332,10 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
                 <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
                   {quest.desc}
                 </p>
-                <div className="flex items-center gap-2 mt-1 text-[10px] font-bold">
-                  <span className="text-[#0077b5]">+{Math.floor(quest.rewardPoints * 41).toLocaleString()} KHR (៛)</span>
-                  <span className="text-slate-500">
-                    (+{quest.rewardPoints} WEI COIN • ${(quest.rewardPoints / 100).toFixed(2)} USD)
+                <div className="flex items-center gap-2 mt-1 text-[11px] font-bold">
+                  <span className="text-[#0077b5] font-black">+៛ {Math.floor(quest.rewardPoints * 41).toLocaleString()}</span>
+                  <span className="text-slate-500 font-medium">
+                    (+{quest.rewardPoints} WEI COIN • $ {(quest.rewardPoints / 100).toFixed(2)})
                   </span>
                 </div>
               </div>

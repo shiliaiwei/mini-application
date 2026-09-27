@@ -112,6 +112,18 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
           />
         </svg>
 
+        {/* Guilloche Banknote Background Style with Suitable Contrast */}
+        <div
+          className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-30"
+          style={{
+            backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center center",
+            backgroundSize: "cover",
+            filter: "contrast(1.35) brightness(1.1)",
+          }}
+        />
+
         {/* Specular Top Rim */}
         <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
 
@@ -139,11 +151,12 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
           <span className="text-[10px] text-purple-200/90 font-medium uppercase tracking-wider block">
             VAULT VALUE (RIEL)
           </span>
-          <div className="text-base sm:text-lg font-black text-white font-display drop-shadow-sm">
-            ៛{Math.floor(userScore * 41).toLocaleString()}
+          <div className="text-lg sm:text-xl font-black text-white font-display drop-shadow-sm flex items-baseline justify-end gap-1">
+            <span className="text-xl sm:text-2xl font-black text-white">៛</span>
+            <span>{Math.floor(userScore * 41).toLocaleString()}</span>
           </div>
           <span className="text-[10px] text-purple-200/80 font-medium block mt-0.5">
-            ${(userScore / 100).toFixed(2)} USD • {userScore.toLocaleString()} WEI COIN
+            $ {(userScore / 100).toFixed(2)} • {userScore.toLocaleString()} WEI COIN
           </span>
         </div>
       </div>
@@ -223,10 +236,10 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
 
                 <div className="text-right flex-shrink-0 ml-2">
                   <span className="text-xs font-black text-[#0077b5] font-display block">
-                    ៛{Math.floor(Number(p.score) * 41).toLocaleString()}
+                    ៛ {Math.floor(Number(p.score) * 41).toLocaleString()}
                   </span>
-                  <span className="text-[9px] text-slate-600 font-bold block">
-                    ${(Number(p.score) / 100).toFixed(2)} USD
+                  <span className="text-[10px] text-slate-600 font-bold block">
+                    $ {(Number(p.score) / 100).toFixed(2)}
                   </span>
                 </div>
               </div>

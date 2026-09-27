@@ -92,13 +92,43 @@ html, body {
   min-height: 100vh;
 }
 
-/* Vector Guilloche Security Mesh Overlay from background.svg */
-.bg-app-guilloche {
+/* Vector Guilloche App Background from background.svg (Optimized for Mobile) */
+.bg-app-background {
   background-image: url("/backgrounds/background.svg");
   background-repeat: no-repeat;
-  background-position: right -40px top -30px;
-  background-size: min(880px, 95vw) auto;
+  background-position: center top;
+  background-size: min(100vw, 540px) auto;
   pointer-events: none;
+  filter: contrast(1.15) brightness(1.05);
+}
+
+/* Vector Guilloche Banknote Security Mesh from cardbanknote.svg (Optimized for Mobile) */
+.bg-app-guilloche,
+.bg-app-banknote {
+  background-image: url("/backgrounds/cardbanknote.svg");
+  background-repeat: no-repeat;
+  background-position: center top -10px;
+  background-size: min(100vw, 750px) auto;
+  pointer-events: none;
+  filter: contrast(1.25);
+}
+
+.guilloche-banknote-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.guilloche-banknote-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: url("/backgrounds/cardbanknote.svg");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  pointer-events: none;
+  opacity: 0.18;
+  filter: contrast(1.35) brightness(1.1);
+  mix-blend-mode: overlay;
 }
 
 /* Code-Designed Banknote Currency Cards (Zero Raster Images) */

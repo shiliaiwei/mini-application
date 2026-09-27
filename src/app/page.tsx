@@ -400,8 +400,8 @@ export default function MiniAppPage() {
 
   return (
     <div className="min-h-dvh flex flex-col justify-between app-bg-white text-slate-900 select-none overflow-x-hidden font-body relative">
-      {/* Vector Guilloche Banknote Security Mesh from background.svg */}
-      <div className="fixed inset-0 bg-app-guilloche opacity-[0.06] pointer-events-none z-0" />
+      {/* App Background on mobile: strictly background.svg, zero banknote background behind app */}
+      <div className="fixed inset-0 bg-app-background opacity-[0.08] pointer-events-none z-0" />
 
       {/* Sticky Global Top Navigation Bar with pt-[60px] - ALWAYS displayed anywhere */}
       <TopBrandNavBar

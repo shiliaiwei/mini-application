@@ -89,3 +89,32 @@ test("Navbar Component: TopBrandNavBar excludes eye button", () => {
   const code = fs.readFileSync(navPath, "utf-8");
   assert.equal(code.includes("EyeOff"), false, "Navbar must NOT have eye balance toggle");
 });
+
+test("Card & Profile Components: Guilloche banknote background, transparent encrypted address, and larger currency signs without codes", () => {
+  const cardPath = path.resolve(__dirname, "../src/components/cards/BanknoteCreditCards.tsx");
+  const cardCode = fs.readFileSync(cardPath, "utf-8");
+  assert.ok(cardCode.includes("cardbanknote.svg"), "Card must include guilloche banknote background");
+  assert.ok(cardCode.includes("encryptedAddress"), "Card must include encryptedAddress");
+  assert.ok(cardCode.includes("text-white/60"), "Address must use transparent text");
+  assert.equal(cardCode.includes("WEI Coin Token Medallion"), false, "Address must NOT include icons");
+
+  const profilePath = path.resolve(__dirname, "../src/components/views/GameProfileView.tsx");
+  const profileCode = fs.readFileSync(profilePath, "utf-8");
+  assert.ok(profileCode.includes("cardbanknote.svg"), "Profile must include guilloche banknote background");
+  assert.ok(profileCode.includes("encryptedAddress"), "Profile must include encryptedAddress");
+});
+
+test("App & Card Backgrounds: background.svg for app, cardbanknote.svg for card wallet, zero banknote behind app", () => {
+  const cardPath = path.resolve(__dirname, "../src/components/cards/BanknoteCreditCards.tsx");
+  const cardCode = fs.readFileSync(cardPath, "utf-8");
+  assert.ok(cardCode.includes('backgroundImage: `url("/backgrounds/cardbanknote.svg")`'), "Card wallet must use cardbanknote.svg");
+
+  const pagePath = path.resolve(__dirname, "../src/app/page.tsx");
+  const pageCode = fs.readFileSync(pagePath, "utf-8");
+  assert.ok(pageCode.includes("bg-app-background"), "App must include bg-app-background");
+  assert.equal(pageCode.includes("bg-app-banknote"), false, "App must NOT show banknote background behind app");
+
+  const cssPath = path.resolve(__dirname, "../src/app/globals.css");
+  const cssCode = fs.readFileSync(cssPath, "utf-8");
+  assert.ok(cssCode.includes('background-image: url("/backgrounds/background.svg")'), "globals.css must define background.svg");
+});

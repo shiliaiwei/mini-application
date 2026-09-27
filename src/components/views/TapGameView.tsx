@@ -140,24 +140,26 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
                   <button
                     type="button"
                     onClick={() => setSendCurrency("KHR")}
-                    className={`py-3 rounded-full border text-xs font-bold transition-all duration-300 ease-out cursor-pointer ${
+                    className={`py-3 rounded-full border text-xs font-bold transition-all duration-300 ease-out cursor-pointer flex items-center justify-center gap-1.5 ${
                       sendCurrency === "KHR"
                         ? "bg-[#0098ea] text-white border-[#0098ea] shadow-xs"
                         : "bg-white text-slate-800 border-slate-200 hover:bg-slate-50"
                     }`}
                   >
-                    KHR (៛) - ៛{khrValue}
+                    <span className="text-base font-black">៛</span>
+                    <span>៛{khrValue}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setSendCurrency("USD")}
-                    className={`py-3 rounded-full border text-xs font-bold transition-all duration-300 ease-out cursor-pointer ${
+                    className={`py-3 rounded-full border text-xs font-bold transition-all duration-300 ease-out cursor-pointer flex items-center justify-center gap-1.5 ${
                       sendCurrency === "USD"
                         ? "bg-[#0098ea] text-white border-[#0098ea] shadow-xs"
                         : "bg-white text-slate-800 border-slate-200 hover:bg-slate-50"
                     }`}
                   >
-                    USD ($) - ${usdValue}
+                    <span className="text-base font-black">$</span>
+                    <span>${usdValue}</span>
                   </button>
                 </div>
               </div>
@@ -364,6 +366,17 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
           }}
           title="Tap Weibot to change pose!"
         >
+          {/* Guilloche Banknote Background Style with Suitable Contrast */}
+          <div
+            className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-25"
+            style={{
+              backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center center",
+              backgroundSize: "cover",
+              filter: "contrast(1.35) brightness(1.1)",
+            }}
+          />
           {/* Simulated Thread Stitching */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" xmlns="http://www.w3.org/2000/svg">
             <rect

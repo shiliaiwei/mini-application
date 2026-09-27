@@ -26,7 +26,7 @@ interface BanknoteCreditCardsProps {
   onOpenAddress?: () => void;
 }
 
-type CurrencyMode = "USD" | "KHR" | "SAR";
+type CurrencyMode = "USD" | "KHR";
 
 export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.memo(({
   score,
@@ -39,15 +39,28 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
   const [currency, setCurrency] = useState<CurrencyMode>("USD");
   const [switchDirection, setSwitchDirection] = useState<"left" | "right">("right");
   const [isHangingSwitch, setIsHangingSwitch] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("shi_wallet_currency");
-      if (saved === "USD" || saved === "KHR" || saved === "SAR") {
+      if (saved === "USD" || saved === "KHR") {
         setCurrency(saved as CurrencyMode);
       }
     }
   }, []);
+
+  const handleCopyAddress = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        navigator.clipboard.writeText(walletAddress);
+      }
+      setCopiedAddress(true);
+      tgApp?.HapticFeedback?.notificationOccurred?.("success");
+      setTimeout(() => setCopiedAddress(false), 1800);
+    } catch {}
+  };
 
   const telegramUsername = user?.username
     ? `@${user.username}`
@@ -59,17 +72,16 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
     ? `wei_0x${Number(user.id).toString(16).padStart(8, "0")}...${String(user.id).slice(-4)}`
     : "wei_0x78a19bc3...82f1";
 
+  const encryptedAddress = user?.id
+    ? `0x${Number(user.id).toString(16).padStart(4, "0")}••••••••${String(user.id).slice(-4)}`
+    : "0x78a1••••••••82f1";
+
   const usdFormatted = (score > 0 ? score / 100 : 268.48).toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 
   const khrFormatted = Math.floor(score > 0 ? score * 41 : 1100768).toLocaleString("en-US");
-
-  const sarFormatted = (25867.40 + (score > 0 ? score * 0.0375 : 0)).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 
   const handleCycleCurrency = () => {
     setSwitchDirection((prev) => (prev === "right" ? "left" : "right"));
@@ -81,7 +93,7 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
     } catch {}
 
     setCurrency((prev) => {
-      const next: CurrencyMode = prev === "USD" ? "KHR" : prev === "KHR" ? "SAR" : "USD";
+      const next: CurrencyMode = prev === "USD" ? "KHR" : "USD";
       if (typeof window !== "undefined") {
         localStorage.setItem("shi_wallet_currency", next);
       }
@@ -165,28 +177,37 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
           <div
             onClick={handleCycleCurrency}
             className="relative w-full pt-1 px-3 cursor-pointer group"
-            title="Tap card to switch currency ($ USD / ៛ KHR / SAR)"
           >
             {/* Back Card Edge (Visible Behind Main Stacked Card) */}
             <div
-              className="w-[88%] mx-auto h-3 rounded-t-[20px] bg-[#3b0764] border-t border-purple-300/30 opacity-80"
+              className="w-[88%] mx-auto h-3 rounded-t-[20px] bg-[#3b0764] border-t border-purple-300/30 opacity-80 relative overflow-hidden"
               style={{
                 boxShadow: "0 -2px 6px rgba(0,0,0,0.3)",
               }}
-            />
+            >
+              <div
+                className="absolute inset-0 pointer-events-none opacity-25"
+                style={{
+                  backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
+                  backgroundPosition: "center top",
+                  backgroundSize: "cover",
+                }}
+              />
+            </div>
 
-            {/* Front Stacked Card (Stable Outside Container) */}
+            {/* Front Stacked Card (Stable Outside Container with +25% Contrast) */}
             <div
-              className="relative w-[95%] mx-auto rounded-t-[26px] overflow-hidden px-5 pt-4 pb-14 text-white select-none"
+              className="relative w-[95%] mx-auto rounded-t-[26px] overflow-hidden px-5 pt-4 pb-14 text-white select-none transition-all duration-300"
               style={{
                 background:
                   currency === "USD"
-                    ? "linear-gradient(135deg, #d8b4fe 0%, #c084fc 40%, #a855f7 75%, #9333ea 100%)"
-                    : currency === "KHR"
-                    ? "linear-gradient(135deg, #e9d5ff 0%, #c084fc 35%, #7e22ce 70%, #581c87 100%)"
-                    : "linear-gradient(135deg, #d8b4fe 0%, #a855f7 50%, #6b21a8 100%)",
+                    ? "linear-gradient(135deg, #c084fc 0%, #a855f7 35%, #7e22ce 70%, #4c1d95 100%)"
+                    : "linear-gradient(135deg, #d8b4fe 0%, #9333ea 30%, #6b21a8 65%, #3b0764 100%)",
+                filter: "contrast(1.25) saturate(1.15)",
                 boxShadow:
-                  "0 -4px 16px rgba(0, 0, 0, 0.25), inset 0 1.5px 2px rgba(255, 255, 255, 0.6), inset 0 -2px 4px rgba(0, 0, 0, 0.15)",
+                  "0 -4px 16px rgba(0, 0, 0, 0.3), inset 0 1.5px 2px rgba(255, 255, 255, 0.65), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
+                transformStyle: "preserve-3d",
+                perspective: "800px",
               }}
             >
               {/* Card Specular Light Sheen */}
@@ -198,66 +219,47 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                 }}
               />
 
+              {/* Vector Guilloche Card Security Engraving from cardbanknote.svg (Optimized for Mobile) */}
+              <div
+                className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-30"
+                style={{
+                  backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center 25%",
+                  backgroundSize: "cover",
+                  filter: "contrast(1.35) brightness(1.1)",
+                }}
+              />
+
               {/* Simulated Suspension Eyelets */}
               <div className="absolute top-2 inset-x-8 flex justify-between pointer-events-none z-20 opacity-40">
                 <div className="w-1.5 h-1.5 rounded-full bg-white shadow-inner" />
                 <div className="w-1.5 h-1.5 rounded-full bg-white shadow-inner" />
               </div>
 
-              {/* Hanging Style Switching Content Plate */}
-              <div
-                className="relative z-10 will-change-transform"
-                style={{
-                  transformOrigin: switchDirection === "right" ? "top left" : "top right",
-                  transform: isHangingSwitch
-                    ? switchDirection === "right"
-                      ? "translateX(18px) rotate(3deg)"
-                      : "translateX(-18px) rotate(-3deg)"
-                    : "translateX(0px) rotate(0deg)",
-                  opacity: isHangingSwitch ? 0.75 : 1,
-                  transition: "transform 400ms cubic-bezier(0.22, 1, 0.36, 1), opacity 300ms ease-out",
-                }}
-              >
+              {/* Card Content Plate (Zero Animation on Currency Switch) */}
+              <div className="relative z-10">
+                {/* Card Content Layer */}
                 <div className="flex items-start justify-between">
-                  {/* Left Column: Telegram Owner @username & Crypto Address */}
+                  {/* Left Column: Telegram Owner @username & Encrypted Transparent Address (No Icons) */}
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <h3 className="text-base sm:text-lg font-bold text-white tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)] truncate max-w-[150px] sm:max-w-[185px]">
+                      <h3 className="text-base sm:text-lg font-bold text-white tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] truncate max-w-[200px] sm:max-w-[240px]">
                         {telegramUsername}
                       </h3>
                       <TelegramVerifiedBadge size={16} className="inline-flex drop-shadow-sm flex-shrink-0" />
                     </div>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
-                      <span className="text-[11px] sm:text-xs font-mono tracking-wider text-purple-100/90 font-medium truncate max-w-[150px] sm:max-w-[180px]">
-                        {walletAddress}
+
+                    {/* Address Wallet Section: Transparent Text & Encrypted Format Displaying Only Address (Zero Icons) */}
+                    <div
+                      onClick={handleCopyAddress}
+                      className="inline-flex items-center mt-1.5 px-3 py-1 rounded-full bg-black/25 hover:bg-black/40 active:scale-95 border border-white/15 backdrop-blur-md transition-all cursor-pointer select-none"
+                      title="Tap to copy address"
+                    >
+                      <span className="text-[11px] sm:text-xs font-mono tracking-widest text-white/60 hover:text-white/90 font-medium transition-colors">
+                        {copiedAddress ? "COPIED TO CLIPBOARD" : encryptedAddress}
                       </span>
                     </div>
-                  </div>
-
-                  {/* Right Column: Currency Sign (Dollar $ / Riel ៛ / SAR) & Valid Date */}
-                  <div className="flex flex-col items-end">
-                    <div
-                      className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 border border-white/30 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_6px_rgba(0,0,0,0.2)] transition-all"
-                    >
-                      {currency === "USD" ? (
-                        <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none flex items-center gap-1">
-                          $ <span className="text-[11px] font-black tracking-wider uppercase opacity-95">USD</span>
-                        </span>
-                      ) : currency === "KHR" ? (
-                        <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none flex items-center gap-1">
-                          ៛ <span className="text-[11px] font-black tracking-wider uppercase opacity-95">KHR</span>
-                        </span>
-                      ) : (
-                        <span className="text-lg sm:text-xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none">
-                          SAR
-                        </span>
-                      )}
-                    </div>
-
-                    <span className="text-[11px] sm:text-xs text-purple-100/90 font-medium mt-1">
-                      Valid: 05/29
-                    </span>
                   </div>
                 </div>
               </div>
@@ -274,6 +276,17 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                 "0 -8px 20px -4px rgba(25, 4, 45, 0.6), inset 0 2px 2px rgba(255, 255, 255, 0.4), inset 0 -3px 6px rgba(0, 0, 0, 0.45)",
             }}
           >
+            {/* Front Pocket Guilloche Banknote Security Texture from cardbanknote.svg (Optimized for Mobile) */}
+            <div
+              className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-25"
+              style={{
+                backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "center 70%",
+                backgroundSize: "cover",
+                filter: "contrast(1.3) brightness(1.05)",
+              }}
+            />
             {/* Front Lip Curved Stitching Simulation */}
             <div className="absolute top-2 inset-x-5 pointer-events-none">
               <svg className="w-full h-3 overflow-visible" xmlns="http://www.w3.org/2000/svg">
@@ -297,28 +310,35 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
             <div className="relative z-10 pt-1">
               <div className="flex items-center justify-between text-[13px] font-medium text-purple-200/90 tracking-wide mb-1">
                 <span>Total Balance</span>
-                <span
-                  onClick={handleCycleCurrency}
-                  className="text-[10px] text-purple-200/80 hover:text-white cursor-pointer transition-colors"
-                >
-                  {currency === "USD"
-                    ? "Tap card to switch to ៛ KHR"
-                    : currency === "KHR"
-                    ? "Tap card to switch to SAR"
-                    : "Tap card to switch to $ USD"}
-                </span>
               </div>
 
-              <div className="flex items-baseline">
-                <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-[0_1px_3px_rgba(0,0,0,0.3)] font-sans">
-                  {!showBalance
-                    ? "••••••••"
-                    : currency === "USD"
-                    ? `$${usdFormatted}`
-                    : currency === "KHR"
-                    ? `៛${khrFormatted}`
-                    : `SAR ${sarFormatted}`}
-                </span>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-baseline">
+                  <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-[0_1px_3px_rgba(0,0,0,0.3)] font-sans">
+                    {!showBalance
+                      ? "••••••••"
+                      : currency === "USD"
+                      ? usdFormatted
+                      : khrFormatted}
+                  </span>
+                </div>
+
+                {/* Currency Sign Pill (In Total Balance Section) */}
+                <div
+                  onClick={handleCycleCurrency}
+                  className="flex items-center justify-center px-4 py-1.5 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 border border-white/35 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.45),0_2px_8px_rgba(0,0,0,0.25)] transition-all min-w-[56px] cursor-pointer select-none"
+                  title="Tap to switch currency"
+                >
+                  {currency === "USD" ? (
+                    <span className="text-2xl sm:text-3xl font-black italic tracking-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)] leading-none">
+                      $
+                    </span>
+                  ) : (
+                    <span className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)] leading-none">
+                      ៛
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
