@@ -52,6 +52,16 @@ export default function MiniAppPage() {
     return DEFAULT_USER;
   });
   const [activeTab, setActiveTab] = useState<GameTab>("wallet");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get("tab") as GameTab;
+      if (tabParam && ["wallet", "tasks", "leaderboard", "profile"].includes(tabParam)) {
+        setActiveTab(tabParam);
+      }
+    }
+  }, []);
   const [activeCategory, setActiveCategory] = useState<NavCategory>("lobby");
   const [profileSubTab, setProfileSubTab] = useState<ProfileSubTab>("profile");
   const [showBalances, setShowBalances] = useState(true);
