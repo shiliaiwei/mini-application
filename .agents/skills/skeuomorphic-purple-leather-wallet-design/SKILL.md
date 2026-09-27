@@ -67,16 +67,22 @@ This specification establishes the authoritative, permanent Design and Component
 - **Zero Banknote Background Behind App**: `cardbanknote.svg` is strictly prohibited behind the entire app canvas or settings views.
 - **Card Wallet Texture**: Strictly uses `cardbanknote.svg` (`/backgrounds/cardbanknote.svg`) for the card wallet (card face, back card edge, and 3D banknote pocket).
 
-### 6. Frosted Glassmorphism Controls
-- **Translucent Pill Button (`+ Add Balance`)**:
-  - Background: `rgba(255, 255, 255, 0.15)` with `hover:bg-white/25`
-  - Border: `1px solid rgba(255, 255, 255, 0.20)`
-  - Backdrop Blur: `backdrop-blur-md`
-  - Tactile Bevel: `box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 4px 12px rgba(0, 0, 0, 0.18)`
-  - Active State: `active:scale-95`
-- **Circular Utility Buttons**:
+### 6. Frosted Glassmorphism Controls & Floating Coin Quick Actions
+- **Icon-Only Plus Sign Trigger (`+`)**:
+  - Zero text label (`Add Balance` removed).
   - Geometry: `42px x 42px` rounded circle (`rounded-full`).
-  - Visibility Toggle: Eye / EyeOff circular frosted button.
+  - Background: `rgba(255, 255, 255, 0.15)` with `hover:bg-white/25`.
+  - Active State: Smoothly rotates 45° into a close `x` with cyan glow (`bg-gradient-to-br from-[#0098ea] to-[#005f99]`, `ring-2 ring-cyan-400/40`).
+  - Action: Toggles the **Floating Quick Actions Coin Pod**.
+- **Floating Coin Quick Actions Pod**:
+  - Elevated dark glass container with top specular highlight rim (`h-[1.5px]`).
+  - Displays 3 tactile 3D coin buttons with milled rims and uppercase titles:
+    1. **Scan**: Sapphire Blue coin with `ScanLine` icon (navigates to camera QR scan).
+    2. **Receive**: Emerald Green coin with `ArrowDownLeft` icon (opens skeuomorphic QR deposit modal).
+    3. **Withdraw**: Amber/Gold coin with `ArrowUpRight` icon (opens withdrawal transfer subview).
+- **Circular Utility Buttons**:
+  - Visibility Toggle: Eye / EyeOff circular frosted button placed directly adjacent to the plus trigger.
+  - Address Chip: Compact pill chip (`0x...••••••••...`) with 1-click copy feedback.
 
 ---
 

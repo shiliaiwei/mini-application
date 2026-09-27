@@ -281,6 +281,7 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
           onOpenDeposit={onGoToEarn}
           onOpenSend={() => setSubView("send")}
           onOpenSwap={onGoToSwap}
+          onOpenScan={() => setSubView("scan")}
         />
 
         {/* 2. SKEUOMORPHIC BRAND MASCOT COMPANION CARD */}

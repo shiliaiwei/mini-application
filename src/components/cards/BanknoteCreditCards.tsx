@@ -1,7 +1,17 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
+import {
+  Plus,
+  ScanLine,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Check,
+  Copy,
+  X,
+  QrCode,
+  Sparkles,
+  ShieldCheck,
+} from "lucide-react";
 
 interface BanknoteCreditCardsProps {
   score: number;
@@ -24,6 +34,8 @@ interface BanknoteCreditCardsProps {
   onOpenSend?: () => void;
   onOpenSwap?: () => void;
   onOpenAddress?: () => void;
+  onOpenScan?: () => void;
+  onOpenReceive?: () => void;
 }
 
 type CurrencyMode = "USD" | "KHR";
@@ -35,17 +47,32 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
   user,
   tgApp,
   onOpenDeposit,
+  onOpenSend,
+  onOpenSwap,
+  onOpenAddress,
+  onOpenScan,
+  onOpenReceive,
 }) => {
   const [currency, setCurrency] = useState<CurrencyMode>("USD");
   const [switchDirection, setSwitchDirection] = useState<"left" | "right">("right");
   const [isHangingSwitch, setIsHangingSwitch] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState(false);
+  const [showQuickActions, setShowQuickActions] = useState(false);
+  const [showReceiveModal, setShowReceiveModal] = useState(false);
+  const [copiedReceiveAddress, setCopiedReceiveAddress] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("shi_wallet_currency");
       if (saved === "USD" || saved === "KHR") {
         setCurrency(saved as CurrencyMode);
+      }
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("quickActions") === "true") {
+        setShowQuickActions(true);
+      }
+      if (params.get("receive") === "true") {
+        setShowReceiveModal(true);
       }
     }
   }, []);
@@ -105,14 +132,46 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
     }, 400);
   };
 
-  const handleAddBalanceClick = (e: React.MouseEvent) => {
+  const handleToggleQuickActions = (e: React.MouseEvent) => {
     e.stopPropagation();
+    try {
+      tgApp?.HapticFeedback?.selectionChanged?.();
+      tgApp?.HapticFeedback?.impactOccurred?.("medium");
+    } catch {}
+    setShowQuickActions((prev) => !prev);
+  };
+
+  const handleActionClick = (action: "scan" | "receive" | "withdraw") => {
     try {
       tgApp?.HapticFeedback?.impactOccurred?.("medium");
     } catch {}
-    if (onOpenDeposit) {
-      onOpenDeposit();
+    setShowQuickActions(false);
+
+    if (action === "scan") {
+      if (onOpenScan) onOpenScan();
+      else if (onOpenDeposit) onOpenDeposit();
+    } else if (action === "receive") {
+      if (onOpenReceive) {
+        onOpenReceive();
+      } else {
+        setShowReceiveModal(true);
+      }
+    } else if (action === "withdraw") {
+      if (onOpenSend) onOpenSend();
+      else if (onOpenDeposit) onOpenDeposit();
     }
+  };
+
+  const handleCopyReceiveAddress = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        navigator.clipboard.writeText(walletAddress);
+      }
+      setCopiedReceiveAddress(true);
+      tgApp?.HapticFeedback?.notificationOccurred?.("success");
+      setTimeout(() => setCopiedReceiveAddress(false), 2000);
+    } catch {}
   };
 
   const handleToggleClick = (e: React.MouseEvent) => {
@@ -332,73 +391,323 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
               </div>
             </div>
 
-            {/* ACTION BUTTONS ROW (Eye button placed right next to Add Balance) */}
-            <div className="relative z-10 flex items-center gap-2.5 pt-5 mt-1">
-              {/* "+ Add Balance" Translucent Frosted Glass Pill Button */}
-              <button
-                type="button"
-                onClick={handleAddBalanceClick}
-                className="flex items-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition-all duration-200 ease-out border border-white/20 backdrop-blur-md text-white font-medium text-xs sm:text-sm cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_4px_12px_rgba(0,0,0,0.18)]"
-              >
-                {/* Plus Icon */}
-                <svg
-                  className="w-4 h-4 text-white stroke-[2.5]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+            {/* ACTION BUTTONS ROW (Only Plus sign & Eye button) */}
+            <div className="relative z-10 flex items-center justify-between pt-5 mt-1">
+              <div className="flex items-center gap-2">
+                {/* Plus Sign Button (Icon Only - Toggles Floating Quick Actions) */}
+                <button
+                  type="button"
+                  onClick={handleToggleQuickActions}
+                  aria-label={showQuickActions ? "Close Actions" : "Quick Actions"}
+                  title={showQuickActions ? "Close Actions" : "Quick Actions"}
+                  className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full active:scale-95 transition-all duration-300 ease-out border backdrop-blur-md flex items-center justify-center text-white cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_6px_16px_rgba(0,0,0,0.25)] ${
+                    showQuickActions
+                      ? "bg-gradient-to-br from-[#0098ea] to-[#005f99] border-cyan-300 ring-2 ring-cyan-400/40 rotate-45 shadow-[0_0_16px_rgba(0,152,234,0.6)]"
+                      : "bg-white/15 hover:bg-white/25 border-white/20"
+                  }`}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                <span>Add Balance</span>
-              </button>
+                  <Plus size={19} className="transition-transform duration-300 stroke-[2.5]" />
+                </button>
 
-              {/* Eye / Visibility Toggle Circular Button (Placed Right Next to Add Balance) */}
+                {/* Eye / Visibility Toggle Circular Button */}
+                <button
+                  type="button"
+                  onClick={handleToggleClick}
+                  aria-label={showBalance ? "Hide Balance" : "Show Balance"}
+                  title={showBalance ? "Hide Balance" : "Show Balance"}
+                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition-all duration-200 ease-out border border-white/20 backdrop-blur-md flex items-center justify-center text-white cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_4px_12px_rgba(0,0,0,0.18)]"
+                >
+                  {showBalance ? (
+                    <svg
+                      className="w-4 h-4 text-white stroke-[2]"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-4 h-4 text-white stroke-[2]"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
+
+              {/* Quick Wallet Address Chip */}
               <button
                 type="button"
-                onClick={handleToggleClick}
-                aria-label={showBalance ? "Hide Balance" : "Show Balance"}
-                title={showBalance ? "Hide Balance" : "Show Balance"}
-                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition-all duration-200 ease-out border border-white/20 backdrop-blur-md flex items-center justify-center text-white cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_4px_12px_rgba(0,0,0,0.18)]"
+                onClick={handleCopyAddress}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur-xs text-[11px] font-mono text-purple-200/90 cursor-pointer active:scale-95 transition-all"
+                title="Copy wallet address"
               >
-                {showBalance ? (
-                  /* Eye Open Icon */
-                  <svg
-                    className="w-4 h-4 text-white stroke-[2]"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
+                <span>{encryptedAddress}</span>
+                {copiedAddress ? (
+                  <span className="text-[9px] font-black text-emerald-300 ml-0.5">COPIED</span>
                 ) : (
-                  /* Eye Slashed / Hidden Icon */
-                  <svg
-                    className="w-4 h-4 text-white stroke-[2]"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
-                    />
-                  </svg>
+                  <Copy size={11} className="text-purple-200/70 ml-0.5" />
                 )}
               </button>
             </div>
+
+            {/* FLOATING QUICK ACTION BUTTONS POD (COIN / WALLET SKEUOMORPHIC DESIGN) */}
+            {showQuickActions && (
+              <div className="relative z-20 mt-4 pt-3.5 pb-3 px-3 rounded-2xl bg-gradient-to-b from-[#180528]/95 via-[#0e021a]/95 to-[#080110]/95 border border-purple-300/25 backdrop-blur-xl shadow-[0_16px_36px_rgba(0,0,0,0.65),inset_0_1px_2px_rgba(255,255,255,0.35)] animate-fadeIn">
+                {/* Specular Rim Highlight */}
+                <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent pointer-events-none" />
+
+                <div className="flex items-center justify-between mb-3 px-1">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-cyan-200">
+                      Floating Quick Actions
+                    </span>
+                  </div>
+                  <span className="text-[9px] font-mono font-bold text-white/50 px-2 py-0.5 rounded-full bg-white/10 border border-white/10">
+                    WALLET COIN
+                  </span>
+                </div>
+
+                {/* 3 Floating 3D Coin Buttons */}
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                  {/* 1. SCAN */}
+                  <button
+                    type="button"
+                    onClick={() => handleActionClick("scan")}
+                    className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-white/10 active:scale-95 transition-all cursor-pointer group"
+                  >
+                    <div
+                      className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#0098ea] via-[#0088cc] to-[#005f99] border-2 border-cyan-300/50 flex items-center justify-center text-white"
+                      style={{
+                        boxShadow:
+                          "0 8px 20px -3px rgba(0, 152, 234, 0.6), inset 0 2px 3px rgba(255, 255, 255, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.4)",
+                      }}
+                    >
+                      {/* 3D Coin Milled Rim */}
+                      <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
+                      <ScanLine size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
+                    </div>
+                    <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-xs">
+                      Scan
+                    </span>
+                  </button>
+
+                  {/* 2. RECEIVE */}
+                  <button
+                    type="button"
+                    onClick={() => handleActionClick("receive")}
+                    className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-white/10 active:scale-95 transition-all cursor-pointer group"
+                  >
+                    <div
+                      className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#10b981] via-[#059669] to-[#047857] border-2 border-emerald-300/50 flex items-center justify-center text-white"
+                      style={{
+                        boxShadow:
+                          "0 8px 20px -3px rgba(16, 185, 129, 0.6), inset 0 2px 3px rgba(255, 255, 255, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.4)",
+                      }}
+                    >
+                      {/* 3D Coin Milled Rim */}
+                      <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
+                      <ArrowDownLeft size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
+                    </div>
+                    <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-xs">
+                      Receive
+                    </span>
+                  </button>
+
+                  {/* 3. WITHDRAW */}
+                  <button
+                    type="button"
+                    onClick={() => handleActionClick("withdraw")}
+                    className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-white/10 active:scale-95 transition-all cursor-pointer group"
+                  >
+                    <div
+                      className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#f59e0b] via-[#d97706] to-[#b45309] border-2 border-amber-300/50 flex items-center justify-center text-white"
+                      style={{
+                        boxShadow:
+                          "0 8px 20px -3px rgba(245, 158, 11, 0.6), inset 0 2px 3px rgba(255, 255, 255, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.4)",
+                      }}
+                    >
+                      {/* 3D Coin Milled Rim */}
+                      <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
+                      <ArrowUpRight size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
+                    </div>
+                    <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-xs">
+                      Withdraw
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* SKEUOMORPHIC RECEIVE QR & ADDRESS MODAL */}
+      {showReceiveModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md animate-fadeIn"
+          onClick={() => setShowReceiveModal(false)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-[32px] overflow-hidden bg-gradient-to-b from-[#064e3b] via-[#043328] to-[#021f18] text-white p-5 sm:p-6 border border-emerald-400/35 shadow-[0_24px_60px_-12px_rgba(4,120,87,0.6)]"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              boxShadow:
+                "0 24px 60px -12px rgba(4, 120, 87, 0.6), inset 0 2px 3px rgba(255, 255, 255, 0.35), inset 0 -3px 6px rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            {/* Guilloche Overlay */}
+            <div
+              className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-25"
+              style={{
+                backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
+                backgroundPosition: "center center",
+                backgroundSize: "cover",
+                filter: "contrast(1.3) brightness(1.1)",
+              }}
+            />
+            {/* Specular Rim */}
+            <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-emerald-300/60 to-transparent pointer-events-none" />
+
+            {/* Header */}
+            <div className="relative z-10 flex items-center justify-between pb-3 border-b border-white/15">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-400/30 text-emerald-200">
+                  Receive Tokens
+                </span>
+                <h3 className="text-base font-bold text-white drop-shadow-sm mt-1">
+                  SHILIAIWEI Vault Deposit
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowReceiveModal(false)}
+                className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 flex items-center justify-center text-white cursor-pointer active:scale-95 transition-all"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* QR Code Container */}
+            <div className="relative z-10 my-4 p-4 rounded-2xl bg-white flex flex-col items-center justify-center shadow-inner mx-auto w-48 h-48 sm:w-52 sm:h-52">
+              <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
+                {/* Corner 1 */}
+                <rect x="5" y="5" width="26" height="26" rx="4" fill="#0f172a" />
+                <rect x="9" y="9" width="18" height="18" rx="2" fill="#ffffff" />
+                <rect x="13" y="13" width="10" height="10" rx="1" fill="#0098ea" />
+                {/* Corner 2 */}
+                <rect x="69" y="5" width="26" height="26" rx="4" fill="#0f172a" />
+                <rect x="73" y="9" width="18" height="18" rx="2" fill="#ffffff" />
+                <rect x="77" y="13" width="10" height="10" rx="1" fill="#0098ea" />
+                {/* Corner 3 */}
+                <rect x="5" y="69" width="26" height="26" rx="4" fill="#0f172a" />
+                <rect x="9" y="73" width="18" height="18" rx="2" fill="#ffffff" />
+                <rect x="13" y="77" width="10" height="10" rx="1" fill="#0098ea" />
+                {/* QR Data Pattern Dots */}
+                <rect x="36" y="8" width="5" height="5" rx="1" fill="#0f172a" />
+                <rect x="46" y="8" width="5" height="5" rx="1" fill="#0f172a" />
+                <rect x="56" y="8" width="5" height="5" rx="1" fill="#0f172a" />
+                <rect x="36" y="18" width="5" height="5" rx="1" fill="#0f172a" />
+                <rect x="46" y="24" width="8" height="5" rx="1" fill="#0f172a" />
+                <rect x="58" y="18" width="5" height="8" rx="1" fill="#0f172a" />
+                <rect x="8" y="36" width="5" height="5" rx="1" fill="#0f172a" />
+                <rect x="18" y="36" width="5" height="8" rx="1" fill="#0f172a" />
+                <rect x="28" y="36" width="5" height="5" rx="1" fill="#0f172a" />
+                <rect x="38" y="36" width="8" height="5" rx="1" fill="#0f172a" />
+                <rect x="50" y="36" width="5" height="5" rx="1" fill="#0f172a" />
+                <rect x="60" y="36" width="8" height="5" rx="1" fill="#0f172a" />
+                <rect x="72" y="36" width="5" height="5" rx="1" fill="#0f172a" />
+                <rect x="82" y="36" width="8" height="5" rx="1" fill="#0f172a" />
+                <rect x="36" y="46" width="5" height="8" rx="1" fill="#0f172a" />
+                <rect x="58" y="46" width="5" height="8" rx="1" fill="#0f172a" />
+                <rect x="36" y="58" width="8" height="5" rx="1" fill="#0f172a" />
+                <rect x="48" y="58" width="5" height="5" rx="1" fill="#0f172a" />
+                <rect x="58" y="58" width="5" height="8" rx="1" fill="#0f172a" />
+                <rect x="36" y="70" width="5" height="5" rx="1" fill="#0f172a" />
+                <rect x="46" y="70" width="8" height="5" rx="1" fill="#0f172a" />
+                <rect x="58" y="70" width="5" height="8" rx="1" fill="#0f172a" />
+                <rect x="70" y="70" width="8" height="8" rx="1" fill="#0f172a" />
+                <rect x="82" y="70" width="5" height="5" rx="1" fill="#0f172a" />
+                <rect x="36" y="82" width="8" height="5" rx="1" fill="#0f172a" />
+                <rect x="48" y="82" width="5" height="8" rx="1" fill="#0f172a" />
+                <rect x="58" y="82" width="8" height="5" rx="1" fill="#0f172a" />
+                <rect x="72" y="82" width="5" height="8" rx="1" fill="#0f172a" />
+                <rect x="82" y="82" width="8" height="5" rx="1" fill="#0f172a" />
+                {/* Center Brand Badge */}
+                <circle cx="50" cy="50" r="10" fill="#0098ea" stroke="#ffffff" strokeWidth="2" />
+                <text x="50" y="53" textAnchor="middle" fontSize="6" fontWeight="900" fill="#ffffff" fontFamily="sans-serif">
+                  WEI
+                </text>
+              </svg>
+            </div>
+
+            {/* Address Pill Box */}
+            <div className="relative z-10 mb-3 p-3 rounded-2xl bg-black/40 border border-white/15 flex items-center justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <span className="text-[9px] uppercase font-bold text-emerald-300 block mb-0.5">
+                  Destination Address
+                </span>
+                <span className="text-xs font-mono font-bold text-white truncate block">
+                  {walletAddress}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyReceiveAddress}
+                className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all ${
+                  copiedReceiveAddress
+                    ? "bg-emerald-500 border-emerald-400 text-white font-black"
+                    : "bg-white/15 hover:bg-white/25 border-white/20 text-white"
+                }`}
+              >
+                {copiedReceiveAddress ? (
+                  <>
+                    <Check size={13} />
+                    <span>COPIED</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={13} />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Network Info */}
+            <div className="relative z-10 text-[10px] text-emerald-100/70 text-center mb-4">
+              Network: SHILIAIWEI L2 • TON Mainnet (Zero Fee)
+            </div>
+
+            {/* Dismiss Button */}
+            <button
+              type="button"
+              onClick={() => setShowReceiveModal(false)}
+              className="relative z-10 w-full py-3.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider shadow-lg active:scale-98 transition-all cursor-pointer"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 });
