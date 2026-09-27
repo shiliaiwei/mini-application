@@ -3,218 +3,179 @@
 import React from "react";
 import { Gem, Zap, Coins, Crown, Flame, ShieldCheck } from "lucide-react";
 
-export const AsymmetricGemBanner: React.FC = () => {
+interface GemCardConfig {
+  id: string;
+  title: string;
+  description: string;
+  badgeText: string;
+  accentColor: string;
+  accentGlow: string;
+  icon: React.ReactNode;
+  delay: string;
+}
+
+const CARDS: GemCardConfig[] = [
+  {
+    id: "mining",
+    title: "Boost Mining Power",
+    description: "Claim daily crystalline points to accelerate passive yield and tier rank.",
+    badgeText: "+ BOOST YIELD",
+    accentColor: "#34d399",
+    accentGlow: "rgba(52, 211, 153, 0.35)",
+    icon: <Gem size={26} className="text-emerald-300 filter drop-shadow-[0_2px_8px_rgba(52,211,153,0.7)]" />,
+    delay: "0s",
+  },
+  {
+    id: "compounding",
+    title: "2.5x Points Compounding",
+    description: "Multiply your hourly score compounding across all simulated balances.",
+    badgeText: "+ ACTIVATE 2.5X",
+    accentColor: "#c084fc",
+    accentGlow: "rgba(192, 132, 252, 0.35)",
+    icon: <Zap size={26} className="text-purple-300 filter drop-shadow-[0_2px_8px_rgba(192,132,252,0.7)]" />,
+    delay: "0.4s",
+  },
+  {
+    id: "liquidity",
+    title: "Instant Liquidity Access",
+    description: "Swap simulated USD and Cambodian Khmer Riel with guaranteed 0% slippage.",
+    badgeText: "+ SWAP NOW",
+    accentColor: "#fbbf24",
+    accentGlow: "rgba(251, 191, 36, 0.35)",
+    icon: <Coins size={26} className="text-amber-300 filter drop-shadow-[0_2px_8px_rgba(251,191,36,0.7)]" />,
+    delay: "0.8s",
+  },
+  {
+    id: "staking",
+    title: "Automated Yield Staking",
+    description: "Lock simulated reserves to earn passive hourly staking rewards automatically.",
+    badgeText: "+ AUTO STAKE",
+    accentColor: "#60a5fa",
+    accentGlow: "rgba(96, 165, 250, 0.35)",
+    icon: <Crown size={26} className="text-blue-300 filter drop-shadow-[0_2px_8px_rgba(96,165,250,0.7)]" />,
+    delay: "1.2s",
+  },
+  {
+    id: "vip",
+    title: "Exclusive VIP Perks",
+    description: "Unlock high-roller transaction limits and zero network execution delay.",
+    badgeText: "+ VIP ACCESS",
+    accentColor: "#fb7185",
+    accentGlow: "rgba(251, 113, 133, 0.35)",
+    icon: <Flame size={26} className="text-rose-300 filter drop-shadow-[0_2px_8px_rgba(251,113,133,0.7)]" />,
+    delay: "1.6s",
+  },
+  {
+    id: "security",
+    title: "Quantum Security Shield",
+    description: "Hardware-grade end-to-end encrypted validation for all simulated transactions.",
+    badgeText: "+ VERIFIED",
+    accentColor: "#22d3ee",
+    accentGlow: "rgba(34, 211, 238, 0.35)",
+    icon: <ShieldCheck size={26} className="text-cyan-300 filter drop-shadow-[0_2px_8px_rgba(34,211,238,0.7)]" />,
+    delay: "2.0s",
+  },
+];
+
+export const AsymmetricGemBanner: React.FC = React.memo(() => {
   return (
     <div className="w-full space-y-3.5 select-none my-2.5">
-      {/* ============================================================== */}
-      {/* CARD 1: EMERALD TEAL - GEM                                     */}
-      {/* ============================================================== */}
-      <div className="group relative w-full overflow-visible cursor-pointer">
-        <div className="relative w-full rounded-[12px] overflow-hidden bg-gradient-to-r from-[#0c383d] via-[#104a50] to-[#176269] border-2 border-white/20 shadow-md shadow-teal-950/20 p-5 sm:p-6 text-white flex items-center justify-between transition-all duration-300 hover:shadow-xl hover:shadow-teal-950/30 hover:border-white/30 active:scale-[0.99]">
-          {/* Ambient Breathing Glow */}
-          <div className="absolute top-0 right-16 w-36 h-36 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none animate-gem-glow" />
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-cyan-400/10 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full bg-[#0c383d]/50 pointer-events-none" />
+      {CARDS.map((card) => (
+        <div key={card.id} className="group relative w-full overflow-visible cursor-pointer">
+          {/* Soft Backdrop Ambient Glow */}
+          <div
+            className="absolute -inset-1 rounded-[34px] blur-xl opacity-20 pointer-events-none transition-opacity duration-300 group-hover:opacity-40"
+            style={{ backgroundColor: card.accentColor }}
+          />
 
-          {/* Dynamic Light Sweep Shimmer on Hover */}
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 transition-transform bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+          {/* 3D Skeuomorphic Purple Leather Pocket Container */}
+          <div
+            className="relative w-full rounded-[28px] p-5 sm:p-6 overflow-hidden bg-gradient-to-b from-[#6420a7] via-[#4e1688] to-[#340b5c] transition-all duration-300 active:scale-[0.99] group-hover:shadow-[0_20px_40px_-10px_rgba(50,12,85,0.65)]"
+            style={{
+              boxShadow:
+                "0 16px 36px -10px rgba(45, 10, 80, 0.55), 0 8px 18px -6px rgba(30, 5, 55, 0.35), inset 0 2px 3px rgba(255, 255, 255, 0.32), inset 0 -3px 6px rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            {/* Simulated Leather Grain Texture Overlay */}
+            <div
+              className="absolute inset-0 rounded-[28px] opacity-15 pointer-events-none mix-blend-overlay"
+              style={{
+                backgroundImage: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4) 1px, transparent 1px), radial-gradient(circle at 0% 0%, rgba(0,0,0,0.5) 1px, transparent 1px)`,
+                backgroundSize: "6px 6px, 8px 8px",
+              }}
+            />
 
-          {/* Left Content */}
-          <div className="relative z-10 flex-1 pr-16 sm:pr-24 space-y-1">
-            <h3 className="text-base sm:text-lg font-black tracking-tight text-white leading-tight group-hover:text-teal-200 transition-colors duration-200">
-              Boost Mining Power
-            </h3>
-            <p className="text-xs text-teal-100/80 leading-relaxed line-clamp-2">
-              Claim daily crystalline points to accelerate passive yield and tier rank.
-            </p>
-          </div>
+            {/* Perimeter Simulated Thread Stitching (Light Lavender Dashed Line) */}
+            <svg
+              className="absolute inset-0 w-full h-full pointer-events-none z-10"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect
+                x="7"
+                y="7"
+                width="calc(100% - 14px)"
+                height="calc(100% - 14px)"
+                rx="22"
+                ry="22"
+                fill="none"
+                stroke="#e9d5ff"
+                strokeWidth="1.2"
+                strokeDasharray="4 4"
+                strokeLinecap="round"
+                opacity="0.45"
+                style={{ filter: "drop-shadow(0px 1px 1px rgba(0,0,0,0.6))" }}
+              />
+            </svg>
 
-          {/* Floating 3D Framework Icon Badge */}
-          <div className="absolute -top-3 sm:-top-4 right-3 sm:right-5 z-20 pointer-events-none animate-gem-float" style={{ animationDelay: "0s" }}>
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-              <div className="absolute inset-0 bg-emerald-400/25 rounded-full blur-lg animate-gem-glow" />
-              <div className="relative w-full h-full rounded-full bg-gradient-to-br from-emerald-300/35 via-teal-500/25 to-emerald-950/75 border-2 border-emerald-300/40 backdrop-blur-xl shadow-lg shadow-teal-950/50 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                <Gem size={32} className="text-emerald-300 filter drop-shadow-[0_2px_8px_rgba(52,211,153,0.6)] transition-transform duration-300 group-hover:scale-115 group-hover:rotate-6" />
+            {/* 3D Top Specular Rim Highlight */}
+            <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none" />
+
+            {/* Content Flex Container */}
+            <div className="relative z-10 flex items-center justify-between gap-4">
+              {/* Left Column: Title, Description, and Frosted Glass Pill */}
+              <div className="flex-1 space-y-2 pr-2">
+                <div className="space-y-1">
+                  <h3 className="text-base sm:text-lg font-bold tracking-tight text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)] group-hover:text-purple-200 transition-colors duration-200">
+                    {card.title}
+                  </h3>
+                  <p className="text-xs text-purple-100/85 leading-relaxed line-clamp-2">
+                    {card.description}
+                  </p>
+                </div>
+
+                {/* Translucent Frosted Glass Action Pill Button */}
+                <div className="pt-1">
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/15 group-hover:bg-white/25 border border-white/20 backdrop-blur-md text-white font-semibold text-[11px] tracking-wider uppercase shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_2px_8px_rgba(0,0,0,0.2)] transition-all">
+                    {card.badgeText}
+                  </span>
+                </div>
+              </div>
+
+              {/* Right Column: 3D Frosted Glass Icon Badge */}
+              <div className="shrink-0 relative pointer-events-none">
+                {/* Ambient Icon Glow */}
+                <div
+                  className="absolute inset-0 rounded-full blur-md opacity-70 animate-pulse"
+                  style={{ backgroundColor: card.accentGlow }}
+                />
+
+                {/* Frosted Glass Badge Frame */}
+                <div
+                  className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
+                  style={{
+                    boxShadow:
+                      "0 8px 20px -4px rgba(0, 0, 0, 0.35), inset 0 1.5px 2px rgba(255, 255, 255, 0.4)",
+                  }}
+                >
+                  {card.icon}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* ============================================================== */}
-      {/* CARD 2: ROYAL VIOLET - ZAP                                     */}
-      {/* ============================================================== */}
-      <div className="group relative w-full overflow-visible cursor-pointer">
-        <div className="relative w-full rounded-[12px] overflow-hidden bg-gradient-to-r from-[#1e1b4b] via-[#2e1065] to-[#3b0764] border-2 border-white/20 shadow-md shadow-purple-950/20 p-5 sm:p-6 text-white flex items-center justify-between transition-all duration-300 hover:shadow-xl hover:shadow-purple-950/30 hover:border-white/30 active:scale-[0.99]">
-          {/* Ambient Breathing Glow */}
-          <div className="absolute top-0 right-16 w-36 h-36 bg-purple-400/25 rounded-full blur-2xl pointer-events-none animate-gem-glow" />
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-fuchsia-400/15 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full bg-[#1e1b4b]/50 pointer-events-none" />
-
-          {/* Dynamic Light Sweep Shimmer on Hover */}
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 transition-transform bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
-
-          {/* Left Content */}
-          <div className="relative z-10 flex-1 pr-16 sm:pr-24 space-y-1">
-            <h3 className="text-base sm:text-lg font-black tracking-tight text-white leading-tight group-hover:text-purple-200 transition-colors duration-200">
-              2.5x Points Compounding
-            </h3>
-            <p className="text-xs text-purple-100/80 leading-relaxed line-clamp-2">
-              Multiply your hourly score compounding across all simulated balances.
-            </p>
-          </div>
-
-          {/* Floating 3D Framework Icon Badge */}
-          <div className="absolute -top-3 sm:-top-4 right-3 sm:right-5 z-20 pointer-events-none animate-gem-float" style={{ animationDelay: "0.6s" }}>
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-              <div className="absolute inset-0 bg-purple-400/30 rounded-full blur-lg animate-gem-glow" />
-              <div className="relative w-full h-full rounded-full bg-gradient-to-br from-purple-300/35 via-violet-500/25 to-purple-950/75 border-2 border-purple-300/40 backdrop-blur-xl shadow-lg shadow-purple-950/50 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                <Zap size={32} className="text-purple-300 filter drop-shadow-[0_2px_8px_rgba(192,132,252,0.6)] transition-transform duration-300 group-hover:scale-115 group-hover:rotate-6" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ============================================================== */}
-      {/* CARD 3: AMBER GOLD - COINS                                     */}
-      {/* ============================================================== */}
-      <div className="group relative w-full overflow-visible cursor-pointer">
-        <div className="relative w-full rounded-[12px] overflow-hidden bg-gradient-to-r from-[#451a03] via-[#78350f] to-[#92400e] border-2 border-white/20 shadow-md shadow-amber-950/20 p-5 sm:p-6 text-white flex items-center justify-between transition-all duration-300 hover:shadow-xl hover:shadow-amber-950/30 hover:border-white/30 active:scale-[0.99]">
-          {/* Ambient Breathing Glow */}
-          <div className="absolute top-0 right-16 w-36 h-36 bg-amber-400/25 rounded-full blur-2xl pointer-events-none animate-gem-glow" />
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-yellow-400/15 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full bg-[#451a03]/50 pointer-events-none" />
-
-          {/* Dynamic Light Sweep Shimmer on Hover */}
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 transition-transform bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
-
-          {/* Left Content */}
-          <div className="relative z-10 flex-1 pr-16 sm:pr-24 space-y-1">
-            <h3 className="text-base sm:text-lg font-black tracking-tight text-white leading-tight group-hover:text-amber-200 transition-colors duration-200">
-              Instant Liquidity Access
-            </h3>
-            <p className="text-xs text-amber-100/80 leading-relaxed line-clamp-2">
-              Swap simulated USD and Cambodian Khmer Riel with guaranteed 0% slippage.
-            </p>
-          </div>
-
-          {/* Floating 3D Framework Icon Badge */}
-          <div className="absolute -top-3 sm:-top-4 right-3 sm:right-5 z-20 pointer-events-none animate-gem-float" style={{ animationDelay: "1.2s" }}>
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-              <div className="absolute inset-0 bg-amber-400/30 rounded-full blur-lg animate-gem-glow" />
-              <div className="relative w-full h-full rounded-full bg-gradient-to-br from-amber-300/35 via-yellow-500/25 to-amber-950/75 border-2 border-amber-300/40 backdrop-blur-xl shadow-lg shadow-amber-950/50 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                <Coins size={32} className="text-amber-300 filter drop-shadow-[0_2px_8px_rgba(251,191,36,0.6)] transition-transform duration-300 group-hover:scale-115 group-hover:rotate-6" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ============================================================== */}
-      {/* CARD 4: SAPPHIRE BLUE - CROWN                                  */}
-      {/* ============================================================== */}
-      <div className="group relative w-full overflow-visible cursor-pointer">
-        <div className="relative w-full rounded-[12px] overflow-hidden bg-gradient-to-r from-[#0f2942] via-[#1e3a8a] to-[#1d4ed8] border-2 border-white/20 shadow-md shadow-blue-950/20 p-5 sm:p-6 text-white flex items-center justify-between transition-all duration-300 hover:shadow-xl hover:shadow-blue-950/30 hover:border-white/30 active:scale-[0.99]">
-          {/* Ambient Breathing Glow */}
-          <div className="absolute top-0 right-16 w-36 h-36 bg-blue-400/25 rounded-full blur-2xl pointer-events-none animate-gem-glow" />
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-400/15 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full bg-[#0f2942]/50 pointer-events-none" />
-
-          {/* Dynamic Light Sweep Shimmer on Hover */}
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 transition-transform bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
-
-          {/* Left Content */}
-          <div className="relative z-10 flex-1 pr-16 sm:pr-24 space-y-1">
-            <h3 className="text-base sm:text-lg font-black tracking-tight text-white leading-tight group-hover:text-blue-200 transition-colors duration-200">
-              Automated Yield Staking
-            </h3>
-            <p className="text-xs text-blue-100/80 leading-relaxed line-clamp-2">
-              Lock simulated reserves to earn passive hourly staking rewards automatically.
-            </p>
-          </div>
-
-          {/* Floating 3D Framework Icon Badge */}
-          <div className="absolute -top-3 sm:-top-4 right-3 sm:right-5 z-20 pointer-events-none animate-gem-float" style={{ animationDelay: "1.8s" }}>
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-              <div className="absolute inset-0 bg-blue-400/30 rounded-full blur-lg animate-gem-glow" />
-              <div className="relative w-full h-full rounded-full bg-gradient-to-br from-blue-300/35 via-sky-500/25 to-blue-950/75 border-2 border-blue-300/40 backdrop-blur-xl shadow-lg shadow-blue-950/50 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                <Crown size={32} className="text-blue-300 filter drop-shadow-[0_2px_8px_rgba(96,165,250,0.6)] transition-transform duration-300 group-hover:scale-115 group-hover:rotate-6" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ============================================================== */}
-      {/* CARD 5: RUBY CRIMSON - FLAME                                   */}
-      {/* ============================================================== */}
-      <div className="group relative w-full overflow-visible cursor-pointer">
-        <div className="relative w-full rounded-[12px] overflow-hidden bg-gradient-to-r from-[#450a0a] via-[#7f1d1d] to-[#991b1b] border-2 border-white/20 shadow-md shadow-red-950/20 p-5 sm:p-6 text-white flex items-center justify-between transition-all duration-300 hover:shadow-xl hover:shadow-red-950/30 hover:border-white/30 active:scale-[0.99]">
-          {/* Ambient Breathing Glow */}
-          <div className="absolute top-0 right-16 w-36 h-36 bg-rose-400/25 rounded-full blur-2xl pointer-events-none animate-gem-glow" />
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-red-400/15 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full bg-[#450a0a]/50 pointer-events-none" />
-
-          {/* Dynamic Light Sweep Shimmer on Hover */}
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 transition-transform bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
-
-          {/* Left Content */}
-          <div className="relative z-10 flex-1 pr-16 sm:pr-24 space-y-1">
-            <h3 className="text-base sm:text-lg font-black tracking-tight text-white leading-tight group-hover:text-rose-200 transition-colors duration-200">
-              Exclusive VIP Perks
-            </h3>
-            <p className="text-xs text-rose-100/80 leading-relaxed line-clamp-2">
-              Unlock high-roller transaction limits and zero network execution delay.
-            </p>
-          </div>
-
-          {/* Floating 3D Framework Icon Badge */}
-          <div className="absolute -top-3 sm:-top-4 right-3 sm:right-5 z-20 pointer-events-none animate-gem-float" style={{ animationDelay: "2.4s" }}>
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-              <div className="absolute inset-0 bg-rose-500/30 rounded-full blur-lg animate-gem-glow" />
-              <div className="relative w-full h-full rounded-full bg-gradient-to-br from-rose-300/35 via-red-500/25 to-rose-950/75 border-2 border-rose-300/40 backdrop-blur-xl shadow-lg shadow-rose-950/50 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                <Flame size={32} className="text-rose-300 filter drop-shadow-[0_2px_8px_rgba(251,113,133,0.6)] transition-transform duration-300 group-hover:scale-115 group-hover:rotate-6" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ============================================================== */}
-      {/* CARD 6: CYAN TEAL - SHIELDCHECK                                */}
-      {/* ============================================================== */}
-      <div className="group relative w-full overflow-visible cursor-pointer">
-        <div className="relative w-full rounded-[12px] overflow-hidden bg-gradient-to-r from-[#083344] via-[#0e7490] to-[#0284c7] border-2 border-white/20 shadow-md shadow-cyan-950/20 p-5 sm:p-6 text-white flex items-center justify-between transition-all duration-300 hover:shadow-xl hover:shadow-cyan-950/30 hover:border-white/30 active:scale-[0.99]">
-          {/* Ambient Breathing Glow */}
-          <div className="absolute top-0 right-16 w-36 h-36 bg-cyan-400/25 rounded-full blur-2xl pointer-events-none animate-gem-glow" />
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-sky-400/15 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full bg-[#083344]/50 pointer-events-none" />
-
-          {/* Dynamic Light Sweep Shimmer on Hover */}
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 transition-transform bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
-
-          {/* Left Content */}
-          <div className="relative z-10 flex-1 pr-16 sm:pr-24 space-y-1">
-            <h3 className="text-base sm:text-lg font-black tracking-tight text-white leading-tight group-hover:text-cyan-200 transition-colors duration-200">
-              Quantum Security Shield
-            </h3>
-            <p className="text-xs text-cyan-100/80 leading-relaxed line-clamp-2">
-              Hardware-grade end-to-end encrypted validation for all simulated transactions.
-            </p>
-          </div>
-
-          {/* Floating 3D Framework Icon Badge */}
-          <div className="absolute -top-3 sm:-top-4 right-3 sm:right-5 z-20 pointer-events-none animate-gem-float" style={{ animationDelay: "3.0s" }}>
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-              <div className="absolute inset-0 bg-cyan-400/30 rounded-full blur-lg animate-gem-glow" />
-              <div className="relative w-full h-full rounded-full bg-gradient-to-br from-cyan-300/35 via-teal-500/25 to-cyan-950/75 border-2 border-cyan-300/40 backdrop-blur-xl shadow-lg shadow-cyan-950/50 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                <ShieldCheck size={32} className="text-cyan-300 filter drop-shadow-[0_2px_8px_rgba(34,211,238,0.6)] transition-transform duration-300 group-hover:scale-115 group-hover:rotate-6" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      ))}
     </div>
   );
-};
+});
+
+AsymmetricGemBanner.displayName = "AsymmetricGemBanner";

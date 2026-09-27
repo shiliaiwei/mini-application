@@ -40,7 +40,7 @@ interface AuditLogEntry {
 }
 
 export type ProfileSubTab = "profile" | "swap" | "security" | "audit";
-export type CurrencyType = "PTS" | "USD" | "KHR";
+export type CurrencyType = "WEI" | "USD" | "KHR";
 
 type InnerView = "main" | "edit" | "swap" | "security" | "audit" | "notifications" | "wallet-detail";
 
@@ -170,7 +170,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
   const [copiedWallet, setCopiedWallet] = useState(false);
   const [bio, setBio] = useState("SHILIAIWEI Web3 Vault Member");
   const [savedSuccess, setSavedSuccess] = useState(false);
-  const [fromCurrency, setFromCurrency] = useState<CurrencyType>("PTS");
+  const [fromCurrency, setFromCurrency] = useState<CurrencyType>("WEI");
   const [toCurrency, setToCurrency] = useState<CurrencyType>("USD");
   const [inputAmount, setInputAmount] = useState("100");
   const [swapSuccess, setSwapSuccess] = useState<string | null>(null);
@@ -191,10 +191,10 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
 
   const swapConvertedAmount = () => {
     const amt = parseFloat(inputAmount) || 0;
-    if (fromCurrency === "PTS" && toCurrency === "USD") return `$${(amt / 100).toFixed(2)}`;
-    if (fromCurrency === "PTS" && toCurrency === "KHR") return `${Math.floor(amt * 41).toLocaleString()} ៛`;
-    if (fromCurrency === "USD" && toCurrency === "PTS") return `${(amt * 100).toFixed(0)} PTS`;
-    if (fromCurrency === "KHR" && toCurrency === "PTS") return `${(amt / 41).toFixed(0)} PTS`;
+    if (fromCurrency === "WEI" && toCurrency === "USD") return `$${(amt / 100).toFixed(2)}`;
+    if (fromCurrency === "WEI" && toCurrency === "KHR") return `${Math.floor(amt * 41).toLocaleString()} ៛`;
+    if (fromCurrency === "USD" && toCurrency === "WEI") return `${(amt * 100).toFixed(0)} WEI`;
+    if (fromCurrency === "KHR" && toCurrency === "WEI") return `${(amt / 41).toFixed(0)} WEI`;
     return `${amt} ${toCurrency}`;
   };
 
@@ -250,7 +250,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">From</label>
             <div className="flex gap-2">
-              {(["KHR", "PTS", "USD"] as CurrencyType[]).map((c) => (
+              {(["KHR", "WEI", "USD"] as CurrencyType[]).map((c) => (
                 <button key={c} type="button" onClick={() => setFromCurrency(c)}
                   className={`flex-1 py-2.5 rounded-full text-xs font-black border transition-all duration-300 ease-out cursor-pointer ${fromCurrency === c ? "bg-[#0098ea] text-white border-[#0098ea] shadow-sm" : "bg-slate-50 text-slate-700 border-slate-200"}`}>
                   {c}
@@ -271,7 +271,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">To</label>
             <div className="flex gap-2">
-              {(["KHR", "PTS", "USD"] as CurrencyType[]).map((c) => (
+              {(["KHR", "WEI", "USD"] as CurrencyType[]).map((c) => (
                 <button key={c} type="button" onClick={() => setToCurrency(c)}
                   className={`flex-1 py-2.5 rounded-full text-xs font-black border transition-all duration-300 ease-out cursor-pointer ${toCurrency === c ? "bg-emerald-500 text-white border-emerald-500 shadow-sm" : "bg-slate-50 text-slate-700 border-slate-200"}`}>
                   {c}
@@ -403,9 +403,9 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-1">
           {[
             { t: "Vault Sync Complete", s: "Your score has been saved to the cloud.", time: "Just now" },
-            { t: "Daily Spin Available", s: "Spin the lucky wheel today for bonus PTS!", time: "2h ago" },
+            { t: "Daily Spin Available", s: "Spin the lucky wheel today for bonus WEI Coin!", time: "2h ago" },
             { t: "Leaderboard Update", s: "Your rank has been refreshed.", time: "5h ago" },
-            { t: "Welcome Bonus", s: "You received 50 PTS as a welcome reward.", time: "Yesterday" },
+            { t: "Welcome Bonus", s: "You received 50 WEI Coin as a welcome reward.", time: "Yesterday" },
           ].map((n, i) => (
             <div key={i} className="py-3 border-b border-slate-100 last:border-0">
               <div className="flex items-center justify-between mb-0.5">
@@ -432,7 +432,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
               <span className="text-[10px] font-black uppercase tracking-widest text-blue-200 block">Total Balance</span>
               <div>
                 <span className="text-4xl font-black leading-none">{score.toLocaleString()}</span>
-                <span className="text-sm text-blue-200 font-bold ml-2">PTS</span>
+                <span className="text-sm text-blue-200 font-bold ml-2">WEI COIN</span>
               </div>
               <div className="flex items-center gap-4 pt-1">
                 <div>
@@ -458,7 +458,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
           </div>
           <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-2">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea] block">Exchange Rates</span>
-            {[{ from: "100 PTS", to: "$1.00 USD" }, { from: "100 PTS", to: "4,100 ៛ KHR" }, { from: "500 PTS", to: "~1 TON" }].map((r, i) => (
+            {[{ from: "100 WEI COIN", to: "$1.00 USD" }, { from: "100 WEI COIN", to: "4,100 ៛ KHR" }, { from: "500 WEI COIN", to: "~1 TON" }].map((r, i) => (
               <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
                 <span className="text-sm font-bold text-slate-800">{r.from}</span>
                 <span className="text-xs font-black text-[#0098ea]">= {r.to}</span>
@@ -598,7 +598,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         <div className="px-2 py-1">
           <MenuRow icon={<User size={17} />} title="Edit Profile" sub="Name, bio, handle" onClick={() => setView("edit")} />
           <MenuRow icon={<ShieldCheck size={17} />} title="Security & Wallet" sub="Keys, 2FA, address" onClick={() => setView("security")} />
-          <MenuRow icon={<Repeat size={17} />} title="Token Swap" sub="PTS → USD / KHR" onClick={() => setView("swap")} />
+          <MenuRow icon={<Repeat size={17} />} title="Token Swap" sub="WEI COIN → USD / KHR" onClick={() => setView("swap")} />
           <MenuRow icon={<Timer size={17} />} title="Activity Log" sub="Login & action history" onClick={() => { setView("audit"); fetchAuditLogs(); }} />
           <MenuRow icon={<Bell size={17} />} title="Notifications" sub="Alerts & rewards" onClick={() => setView("notifications")} />
         </div>

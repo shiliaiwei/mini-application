@@ -23,7 +23,7 @@ interface TopBrandNavBarProps {
  * 3. Scope: Rendered on all views EXCEPT when in the profile menu.
  * 4. Brand: Official SHILIAI [WEI] logo with zero extra text alongside it.
  */
-export const TopBrandNavBar: React.FC<TopBrandNavBarProps> = ({
+export const TopBrandNavBar: React.FC<TopBrandNavBarProps> = React.memo(({
   showBalances,
   onToggleBalances,
   onOpenNotifications,
@@ -83,4 +83,6 @@ export const TopBrandNavBar: React.FC<TopBrandNavBarProps> = ({
       </div>
     </header>
   );
-};
+});
+
+TopBrandNavBar.displayName = "TopBrandNavBar";

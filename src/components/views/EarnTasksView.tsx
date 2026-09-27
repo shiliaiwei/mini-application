@@ -135,7 +135,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
         body: JSON.stringify({
           telegram_id: user.id,
           action: "MISSION_CLAIMED",
-          details: `Completed mission ${questId} (+${rewardPoints} PTS)`,
+          details: `Completed mission ${questId} (+${rewardPoints} WEI COIN)`,
           platform: tgApp?.platform || "TELEGRAM_WEB",
         }),
       }).catch(() => {});
@@ -171,7 +171,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
         body: JSON.stringify({
           telegram_id: user.id,
           action: "DAILY_STREAK_CLAIMED",
-          details: `Claimed Day ${currentStreak} streak reward (+${reward} PTS)`,
+          details: `Claimed Day ${currentStreak} streak reward (+${reward} WEI COIN)`,
           platform: tgApp?.platform || "TELEGRAM_WEB",
         }),
       }).catch(() => {});
@@ -183,42 +183,81 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
 
   return (
     <div className="space-y-3.5 pb-28 font-body select-none text-slate-900 max-w-xl mx-auto w-full px-1">
-      {/* Top Banner Overview */}
-      <div className="liquid-glass rounded-[32px] p-4 border border-slate-200 shadow-xs relative overflow-hidden">
-        <div className="flex items-center justify-between">
+      {/* 3D Skeuomorphic Purple Leather Overview Pocket */}
+      <div
+        className="relative rounded-[30px] p-5 overflow-hidden bg-gradient-to-b from-[#6420a7] via-[#4e1688] to-[#340b5c] text-white"
+        style={{
+          boxShadow:
+            "0 16px 36px -10px rgba(45, 10, 80, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.35), inset 0 -3px 6px rgba(0, 0, 0, 0.5)",
+        }}
+      >
+        {/* Leather Grain Texture */}
+        <div
+          className="absolute inset-0 rounded-[30px] opacity-15 pointer-events-none mix-blend-overlay"
+          style={{
+            backgroundImage: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4) 1px, transparent 1px), radial-gradient(circle at 0% 0%, rgba(0,0,0,0.5) 1px, transparent 1px)`,
+            backgroundSize: "6px 6px, 8px 8px",
+          }}
+        />
+
+        {/* Perimeter Thread Stitching */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" xmlns="http://www.w3.org/2000/svg">
+          <rect
+            x="7"
+            y="7"
+            width="calc(100% - 14px)"
+            height="calc(100% - 14px)"
+            rx="23"
+            ry="23"
+            fill="none"
+            stroke="#e9d5ff"
+            strokeWidth="1.2"
+            strokeDasharray="4 4"
+            strokeLinecap="round"
+            opacity="0.45"
+            style={{ filter: "drop-shadow(0px 1px 1px rgba(0,0,0,0.6))" }}
+          />
+        </svg>
+
+        {/* Specular Top Rim */}
+        <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+
+        <div className="relative z-10 flex items-center justify-between">
           <div>
-            <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider block">
+            <span className="text-[11px] text-purple-200/90 font-medium uppercase tracking-wider block">
               TOTAL EARNED ASSETS (RIEL)
             </span>
-            <div className="text-2xl font-black text-[#0077b5] font-display mt-0.5">
+            <div className="text-2xl font-black text-white font-display mt-0.5 drop-shadow-sm">
               <span>៛{Math.floor(score * 41).toLocaleString()}</span>
-              <span className="text-slate-500 text-sm ml-1">KHR</span>
+              <span className="text-purple-200 text-sm ml-1">KHR</span>
             </div>
-            <div className="text-[11px] text-slate-600 font-semibold mt-0.5">
-              <span>{score.toLocaleString()} PTS</span>
-              <span className="mx-1">•</span>
+            <div className="text-[11px] text-purple-200/90 font-medium mt-1">
+              <span>{score.toLocaleString()} WEI COIN</span>
+              <span className="mx-1.5">•</span>
               <span>${(score / 100).toFixed(2)} USD</span>
             </div>
           </div>
           <div className="text-right">
-            <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider block">
+            <span className="text-[11px] text-purple-200/90 font-medium uppercase tracking-wider block">
               EARNING RATE
             </span>
-            <span className="text-xs font-black text-[#0077b5] block mt-1">
-              +{tapPower} PTS/Tap • +{passiveRate} PTS/s
-            </span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/20 backdrop-blur-md text-white font-bold text-xs mt-1 shadow-inner">
+              <span>+{tapPower} WEI/Tap</span>
+              <span>•</span>
+              <span>+{passiveRate} WEI/s</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Sub Tabs Selector */}
-      <div className="grid grid-cols-3 gap-1.5 bg-slate-100 p-1.5 rounded-full text-xs font-bold border border-slate-200 shadow-xs">
+      <div className="grid grid-cols-3 gap-1.5 bg-purple-950/5 p-1.5 rounded-full text-xs font-bold border border-purple-200/50 shadow-xs">
         <button
           type="button"
           onClick={() => setActiveSubTab("quests")}
-          className={`py-2 rounded-full transition-all duration-300 ease-out flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] ${
+          className={`py-2 rounded-full transition-all duration-300 ease-out flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] focus:outline-none ${
             activeSubTab === "quests"
-              ? "bg-[#0098ea] text-white shadow-xs"
+              ? "bg-[#6420a7] text-white shadow-md shadow-purple-950/20"
               : "text-slate-700 hover:text-slate-900"
           }`}
         >
@@ -229,9 +268,9 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveSubTab("boosts")}
-          className={`py-2 rounded-full transition-all duration-300 ease-out flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] ${
+          className={`py-2 rounded-full transition-all duration-300 ease-out flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] focus:outline-none ${
             activeSubTab === "boosts"
-              ? "bg-[#0098ea] text-white shadow-xs"
+              ? "bg-[#6420a7] text-white shadow-md shadow-purple-950/20"
               : "text-slate-700 hover:text-slate-900"
           }`}
         >
@@ -242,9 +281,9 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveSubTab("streak")}
-          className={`py-2 rounded-full transition-all duration-300 ease-out flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] ${
+          className={`py-2 rounded-full transition-all duration-300 ease-out flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] focus:outline-none ${
             activeSubTab === "streak"
-              ? "bg-[#0098ea] text-white shadow-xs"
+              ? "bg-[#6420a7] text-white shadow-md shadow-purple-950/20"
               : "text-slate-700 hover:text-slate-900"
           }`}
         >
@@ -284,7 +323,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
                 <div className="flex items-center gap-2 mt-1 text-[10px] font-bold">
                   <span className="text-[#0077b5]">+{Math.floor(quest.rewardPoints * 41).toLocaleString()} KHR (៛)</span>
                   <span className="text-slate-500">
-                    (+{quest.rewardPoints} PTS • ${(quest.rewardPoints / 100).toFixed(2)} USD)
+                    (+{quest.rewardPoints} WEI COIN • ${(quest.rewardPoints / 100).toFixed(2)} USD)
                   </span>
                 </div>
               </div>
@@ -323,12 +362,12 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
                     Mint Power (Lvl {tapPower})
                   </span>
                   <span className="text-[11px] text-slate-600 block">
-                    Earns +{tapPower} PTS per tap
+                    Earns +{tapPower} WEI Coin per tap
                   </span>
                 </div>
               </div>
               <span className="text-xs font-black text-[#14532d]">
-                +{tapPower + 1} PTS / Tap
+                +{tapPower + 1} WEI / Tap
               </span>
             </div>
 
@@ -342,7 +381,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
                   : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
               }`}
             >
-              <span>Upgrade for {tapUpgradeCost.toLocaleString()} PTS (≈ {Math.floor(tapUpgradeCost * 41).toLocaleString()} ៛)</span>
+              <span>Upgrade for {tapUpgradeCost.toLocaleString()} WEI COIN (≈ {Math.floor(tapUpgradeCost * 41).toLocaleString()} ៛)</span>
             </button>
           </div>
 
@@ -353,15 +392,15 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
                 <Zap size={22} className="text-[#16a34a] flex-shrink-0" />
                 <div>
                   <span className="text-xs font-bold text-slate-900 block font-display">
-                    Passive Point Generator (Lvl {passiveRate})
+                    Passive WEI Coin Generator (Lvl {passiveRate})
                   </span>
                   <span className="text-[11px] text-slate-600 block">
-                    Generates +{passiveRate} PTS every second
+                    Generates +{passiveRate} WEI Coin every second
                   </span>
                 </div>
               </div>
               <span className="text-xs font-black text-[#14532d]">
-                +{passiveRate + 1} PTS/s
+                +{passiveRate + 1} WEI/s
               </span>
             </div>
 
@@ -375,7 +414,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
                   : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
               }`}
             >
-              <span>Upgrade for {passiveUpgradeCost.toLocaleString()} PTS (≈ {Math.floor(passiveUpgradeCost * 41).toLocaleString()} ៛)</span>
+              <span>Upgrade for {passiveUpgradeCost.toLocaleString()} WEI COIN (≈ {Math.floor(passiveUpgradeCost * 41).toLocaleString()} ៛)</span>
             </button>
           </div>
         </div>

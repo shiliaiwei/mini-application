@@ -3,13 +3,10 @@
 import React, { useState } from "react";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
 import {
-  Wallet,
   ArrowUpRight,
   Repeat,
   Gift,
-  Copy,
   Check,
-  QrCode,
   Coins,
   ChevronLeft,
   ScanLine,
@@ -18,6 +15,7 @@ import {
 import { BrandFooter } from "@/components/brand/BrandFooter";
 import { BanknoteCreditCards } from "@/components/cards/BanknoteCreditCards";
 import { AsymmetricGemBanner } from "@/components/cards/AsymmetricGemBanner";
+import { ShiliaiweiMascot, MascotPose } from "@/components/brand/ShiliaiweiMascot";
 import { NavCategory } from "@/components/navigation/CategoryBar";
 
 type TapSubView = "none" | "send" | "scan" | "deposit";
@@ -36,7 +34,7 @@ interface TapGameViewProps {
   tgApp: TelegramWebApp | null;
 }
 
-export const TapGameView: React.FC<TapGameViewProps> = ({
+export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
   score,
   onAddScore,
   onGoToSwap,
@@ -52,8 +50,21 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
   const [sendAmount, setSendAmount] = useState("");
   const [sendCurrency, setSendCurrency] = useState<"USD" | "KHR">("USD");
   const [sendSuccess, setSendSuccess] = useState(false);
+  const [mascotPose, setMascotPose] = useState<MascotPose>("idle");
 
-  // Conversion rates: 100 PTS = $1.00 USD = 4,100 KHR (~500 PTS = 1 TON)
+  const handleCycleMascotPose = () => {
+    try {
+      tgApp?.HapticFeedback?.impactOccurred?.("light");
+    } catch {}
+    setMascotPose((prev) => {
+      if (prev === "idle") return "wave";
+      if (prev === "wave") return "announce";
+      if (prev === "announce") return "cheer";
+      return "idle";
+    });
+  };
+
+  // Conversion rates: 100 WEI COIN = $1.00 USD = 4,100 KHR (~500 WEI COIN = 1 TON)
   const usdValue = (score / 100).toFixed(2);
   const khrValue = Math.floor(score * 41).toLocaleString();
 
@@ -253,7 +264,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
   }
 
   // ==============================================================
-  // FULL PAGE SPA SUBVIEW: DEPOSIT / PTS BOOST
+  // FULL PAGE SPA SUBVIEW: DEPOSIT / WEI COIN BOOST
   // ==============================================================
   if (subView === "deposit") {
     return (
@@ -270,7 +281,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           <div className="flex items-center gap-2">
             <Coins size={18} className="text-[#0098ea]" />
             <span className="text-sm font-black uppercase text-slate-900">
-              ដាក់ប្រាក់ (Claim & Boost PTS)
+              ដាក់ប្រាក់ (Claim & Boost WEI Coin)
             </span>
           </div>
           <div className="w-14" />
@@ -278,9 +289,9 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
 
         <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-1">
-            <h4 className="text-sm font-black text-slate-900">Earn Points for Free</h4>
+            <h4 className="text-sm font-black text-slate-900">Earn WEI Coin for Free</h4>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Complete daily missions and check in regularly to earn PTS that you can exchange directly for USD ($) or KHR (៛)!
+              Complete daily missions and check in regularly to earn WEI Coin that you can exchange directly for USD ($) or KHR (៛)!
             </p>
           </div>
 
@@ -294,7 +305,7 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
               className="w-full py-3.5 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-colors duration-300 ease-out"
             >
               <Gift size={20} />
-              <span>Go to Missions (+1,000 PTS)</span>
+              <span>Go to Missions (+1,000 WEI COIN)</span>
             </button>
 
             <button
@@ -343,12 +354,73 @@ export const TapGameView: React.FC<TapGameViewProps> = ({
           onOpenSwap={onGoToSwap}
         />
 
-        {/* 2. ASYMMETRIC ROUNDED GEM BANNERS (3 COLOR SHOWCASE) */}
+        {/* 2. SKEUOMORPHIC BRAND MASCOT COMPANION CARD */}
+        <div
+          onClick={handleCycleMascotPose}
+          className="relative w-full rounded-[26px] p-4 overflow-hidden bg-gradient-to-b from-[#6420a7] via-[#4e1688] to-[#340b5c] text-white cursor-pointer active:scale-[0.99] transition-all group"
+          style={{
+            boxShadow:
+              "0 14px 30px -8px rgba(45, 10, 80, 0.5), inset 0 2px 3px rgba(255, 255, 255, 0.3), inset 0 -2px 6px rgba(0, 0, 0, 0.45)",
+          }}
+          title="Tap Weibot to change pose!"
+        >
+          {/* Simulated Thread Stitching */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" xmlns="http://www.w3.org/2000/svg">
+            <rect
+              x="6"
+              y="6"
+              width="calc(100% - 12px)"
+              height="calc(100% - 12px)"
+              rx="20"
+              ry="20"
+              fill="none"
+              stroke="#e9d5ff"
+              strokeWidth="1.2"
+              strokeDasharray="4 4"
+              strokeLinecap="round"
+              opacity="0.45"
+              style={{ filter: "drop-shadow(0px 1px 1px rgba(0,0,0,0.6))" }}
+            />
+          </svg>
+
+          {/* Top Specular Rim */}
+          <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none" />
+
+          <div className="relative z-10 flex items-center justify-between gap-3">
+            <div className="flex-1 space-y-1 pr-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-white/15 border border-white/20 text-purple-100">
+                  Vault Companion
+                </span>
+                <span className="text-[10px] text-purple-200/70">
+                  Tap to interact
+                </span>
+              </div>
+              <h4 className="text-base font-bold text-white drop-shadow-sm">
+                {mascotPose === "idle" && "Weibot is watching your vault"}
+                {mascotPose === "wave" && "Weibot waves hello!"}
+                {mascotPose === "announce" && "Weibot: Daily rewards live!"}
+                {mascotPose === "cheer" && "Weibot cheers your success!"}
+              </h4>
+              <p className="text-xs text-purple-100/80 leading-snug">
+                Official SHILIAIWEI companion mascot with auto-updating reactive poses.
+              </p>
+            </div>
+
+            <div className="shrink-0 transition-transform duration-300 group-hover:scale-105">
+              <ShiliaiweiMascot size={74} pose={mascotPose} />
+            </div>
+          </div>
+        </div>
+
+        {/* 3. ASYMMETRIC ROUNDED GEM BANNERS (3 COLOR SHOWCASE) */}
         <AsymmetricGemBanner />
 
-        {/* 3. Brand Footer for screen consistency */}
+        {/* 4. Brand Footer for screen consistency */}
         <BrandFooter height={16} className="mt-4 pb-2" />
       </div>
     </div>
   );
-};
+});
+
+TapGameView.displayName = "TapGameView";

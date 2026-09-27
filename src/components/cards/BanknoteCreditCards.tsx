@@ -1,161 +1,407 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  Repeat,
-  Send,
-  Copy,
-  Check,
-  Eye,
-  EyeOff,
-} from "@/components/icons/KeylineIcons";
+import React, { useState, useEffect } from "react";
+import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 
 interface BanknoteCreditCardsProps {
   score: number;
   showBalance?: boolean;
   onToggleBalance?: () => void;
-  user?: any;
-  tgApp?: any;
+  user?: {
+    id?: number | string;
+    first_name?: string;
+    last_name?: string;
+    username?: string;
+  } | null;
+  tgApp?: {
+    HapticFeedback?: {
+      impactOccurred?: (style: "light" | "medium" | "heavy" | "rigid" | "soft") => void;
+      notificationOccurred?: (type: "error" | "success" | "warning") => void;
+      selectionChanged?: () => void;
+    };
+  } | null;
   onOpenDeposit?: () => void;
   onOpenSend?: () => void;
   onOpenSwap?: () => void;
   onOpenAddress?: () => void;
 }
 
-export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = ({
+type CurrencyMode = "USD" | "KHR" | "SAR";
+
+export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.memo(({
   score,
   showBalance = true,
   onToggleBalance,
   user,
   tgApp,
-  onOpenSend,
-  onOpenSwap,
-  onOpenAddress,
+  onOpenDeposit,
 }) => {
-  const [copied, setCopied] = useState(false);
+  // Remember last selected currency from localStorage, defaulting to USD
+  const [currency, setCurrency] = useState<CurrencyMode>("USD");
+  const [isCardLifted, setIsCardLifted] = useState(false);
 
-  // Conversion calculations: 100 PTS = $1.00 USD = 4,100 KHR
-  const khrBalance = Math.floor(score * 41).toLocaleString();
-  const usdBalance = (score / 100).toFixed(2);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("shi_wallet_currency");
+      if (saved === "USD" || saved === "KHR" || saved === "SAR") {
+        setCurrency(saved as CurrencyMode);
+      }
+    }
+  }, []);
 
-  const walletAddress = user?.id
-    ? `wei_0x${Number(user.id).toString(16).padStart(8, "0")}...${String(user.id).slice(-4)}`
-    : "wei_0x78a19bc3...82f1";
+  // Telegram logged-in owner username with @ prefix
+  const telegramUsername = user?.username
+    ? `@${user.username}`
+    : user?.first_name
+    ? `@${user.first_name.toLowerCase().replace(/[^a-z0-9_]/g, "")}`
+    : "@shiliaiwei_holder";
 
-  const handleCopy = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(walletAddress);
-    setCopied(true);
+  const cardLastFour = user?.id ? String(user.id).slice(-4) : "5678";
+
+  // Currency conversions based on score points:
+  // 100 WEI COIN = $1.00 USD = 4,100 KHR (~3.75 SAR)
+  const usdFormatted = (score > 0 ? score / 100 : 268.48).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  const khrFormatted = Math.floor(score > 0 ? score * 41 : 1100768).toLocaleString("en-US");
+
+  const sarFormatted = (25867.40 + (score > 0 ? score * 0.0375 : 0)).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  // Cycle currency between USD ($), KHR (៛), and SAR and persist to localStorage
+  const handleCycleCurrency = () => {
+    setIsCardLifted(true);
     try {
-      tgApp?.HapticFeedback?.notificationOccurred("success");
+      tgApp?.HapticFeedback?.selectionChanged?.();
+      tgApp?.HapticFeedback?.impactOccurred?.("medium");
     } catch {}
-    setTimeout(() => setCopied(false), 2000);
+
+    setCurrency((prev) => {
+      const next: CurrencyMode = prev === "USD" ? "KHR" : prev === "KHR" ? "SAR" : "USD";
+      if (typeof window !== "undefined") {
+        localStorage.setItem("shi_wallet_currency", next);
+      }
+      return next;
+    });
+
+    setTimeout(() => {
+      setIsCardLifted(false);
+    }, 280);
+  };
+
+  const handleAddBalanceClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      tgApp?.HapticFeedback?.impactOccurred?.("medium");
+    } catch {}
+    if (onOpenDeposit) {
+      onOpenDeposit();
+    }
+  };
+
+  const handleToggleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      tgApp?.HapticFeedback?.selectionChanged?.();
+    } catch {}
+    if (onToggleBalance) {
+      onToggleBalance();
+    }
   };
 
   return (
-    <div className="w-full select-none">
-      {/* 1. OUTER ROUNDED CONTAINER */}
-      <div className="w-full rounded-[32px] p-2 sm:p-2.5 bg-gradient-to-b from-slate-100/90 via-white/80 to-slate-200/70 border border-slate-200/90 shadow-md shadow-slate-900/5">
-        {/* 2. INNER GLASSMORPHISM FINANCIAL CARD */}
-        <div className="relative w-full rounded-[26px] p-5 sm:p-6 overflow-hidden border border-white/80 bg-gradient-to-br from-white/95 via-sky-50/60 to-blue-50/40 backdrop-blur-xl shadow-inner flex flex-col justify-between">
-          {/* Banknote Guilloche Mesh: Top 20% opacity, fading symmetrically to bottom for white contrast */}
+    <div className="w-full select-none py-1">
+      {/* Soft Ambient Backdrop Container */}
+      <div className="relative w-full max-w-[430px] mx-auto">
+        {/* Soft Radial Ambient Glow */}
+        <div className="absolute -inset-2 bg-purple-600/15 rounded-[46px] blur-2xl pointer-events-none" />
+
+        {/* 3D Skeuomorphic Leather Pocket Container */}
+        <div
+          className="relative w-full rounded-[38px] p-2 bg-gradient-to-b from-[#6b22a8] via-[#52188f] to-[#380c63]"
+          style={{
+            boxShadow:
+              "0 24px 48px -12px rgba(45, 10, 80, 0.55), 0 12px 24px -6px rgba(30, 5, 55, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.35), inset 0 -3px 8px rgba(0, 0, 0, 0.55)",
+          }}
+        >
+          {/* Simulated Leather Grain Texture Overlay */}
           <div
-            className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-20"
+            className="absolute inset-0 rounded-[38px] opacity-15 pointer-events-none mix-blend-overlay"
             style={{
-              backgroundImage: "url('/backgrounds/cardbanknote.svg')",
-              maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0.3) 65%, rgba(0,0,0,0) 90%)",
-              WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0.3) 65%, rgba(0,0,0,0) 90%)",
+              backgroundImage: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4) 1px, transparent 1px), radial-gradient(circle at 0% 0%, rgba(0,0,0,0.5) 1px, transparent 1px)`,
+              backgroundSize: "6px 6px, 8px 8px",
             }}
           />
 
-          {/* Bottom Symmetrical Premium White Contrast Gradient */}
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white via-white/60 to-transparent pointer-events-none" />
+          {/* Perimeter Simulated Thread Stitching (Light Lavender Dashed Lines) */}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none z-10"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              x="9"
+              y="9"
+              width="calc(100% - 18px)"
+              height="calc(100% - 18px)"
+              rx="30"
+              ry="30"
+              fill="none"
+              stroke="#e9d5ff"
+              strokeWidth="1.25"
+              strokeDasharray="4 4"
+              strokeLinecap="round"
+              opacity="0.5"
+              style={{ filter: "drop-shadow(0px 1px 1px rgba(0,0,0,0.6))" }}
+            />
+          </svg>
 
-          {/* TOP BAR: Wallet Address */}
-          <div className="relative z-10 flex items-center justify-between gap-2">
-            {/* Wallet Address Chip */}
+          {/* ============================================================== */}
+          {/* 1. STACKED CARDS PEEKING FROM TOP SLOT (INTERACTIVE SWITCH)   */}
+          {/* ============================================================== */}
+          <div
+            onClick={handleCycleCurrency}
+            className="relative w-full pt-1 px-3 cursor-pointer group"
+            title="Tap card to switch currency ($ USD / ៛ KHR / SAR)"
+          >
+            {/* Back Card Edge (Visible Behind Main Stacked Card) */}
             <div
-              onClick={onOpenAddress || handleCopy}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/85 backdrop-blur-md border border-slate-200/90 shadow-2xs hover:bg-white active:scale-95 transition-all cursor-pointer group"
-              title="Click to view/copy address"
+              className="w-[88%] mx-auto h-3 rounded-t-[20px] bg-[#3b0764] border-t border-purple-300/30 opacity-80"
+              style={{
+                boxShadow: "0 -2px 6px rgba(0,0,0,0.3)",
+              }}
+            />
+
+            {/* Front Stacked Card with Dynamic Lift Animation on Switch */}
+            <div
+              className={`relative w-[95%] mx-auto rounded-t-[26px] overflow-hidden px-5 pt-4 pb-14 text-white transition-all duration-300 ease-out ${
+                isCardLifted
+                  ? "-translate-y-3.5 shadow-2xl scale-[1.01]"
+                  : "translate-y-0 group-hover:-translate-y-1.5"
+              }`}
+              style={{
+                background:
+                  currency === "USD"
+                    ? "linear-gradient(135deg, #d8b4fe 0%, #c084fc 40%, #a855f7 75%, #9333ea 100%)"
+                    : currency === "KHR"
+                    ? "linear-gradient(135deg, #e9d5ff 0%, #c084fc 35%, #7e22ce 70%, #581c87 100%)"
+                    : "linear-gradient(135deg, #d8b4fe 0%, #a855f7 50%, #6b21a8 100%)",
+                boxShadow:
+                  "0 -4px 16px rgba(0, 0, 0, 0.25), inset 0 1.5px 2px rgba(255, 255, 255, 0.6), inset 0 -2px 4px rgba(0, 0, 0, 0.15)",
+              }}
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
-              <span className="text-xs font-mono font-semibold text-slate-700 truncate max-w-[140px] sm:max-w-[180px]">
-                {walletAddress}
-              </span>
-              <button
-                type="button"
-                onClick={handleCopy}
-                aria-label="Copy wallet address"
-                className="text-slate-400 group-hover:text-slate-700 transition-colors ml-0.5 flex-shrink-0 cursor-pointer"
-              >
-                {copied ? (
-                  <Check size={14} className="text-emerald-600" />
-                ) : (
-                  <Copy size={14} />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* CENTER: Large Currency Balance */}
-          <div className="relative z-10 my-4 sm:my-5">
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-              <span>Total Balance</span>
-              <button
-                type="button"
-                onClick={onToggleBalance}
-                className="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
-                title={showBalance ? "Hide Balance" : "Show Balance"}
-                aria-label={showBalance ? "Hide Balance" : "Show Balance"}
-              >
-                {showBalance ? <Eye size={14} /> : <EyeOff size={14} />}
-              </button>
-            </div>
-
-            <div className="flex items-baseline gap-2">
-              <span className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight font-sans">
-                {showBalance ? `$${usdBalance}` : "••••••••"}
-              </span>
-              <span className="text-xs font-black text-slate-400 uppercase">
-                USD
-              </span>
-            </div>
-
-            {/* Secondary Dual Currency (Khmer Riel) */}
-            <div className="text-xs font-bold text-amber-700 font-mono mt-1.5 flex items-center gap-1">
-              <span className="font-extrabold text-sm text-amber-600">៛</span>
-              <span>{showBalance ? `${khrBalance} KHR` : "••••••"}</span>
-            </div>
-          </div>
-
-
-
-          {/* DUAL BOTTOM ACTION BUTTONS: SWAP & SEND */}
-          <div className="relative z-10 grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-200/70 mt-1">
-            <button
-              type="button"
-              onClick={onOpenSwap}
-              className="py-3 px-4 rounded-2xl bg-white/90 hover:bg-white text-slate-800 border border-slate-200/90 shadow-2xs hover:shadow-xs active:scale-95 transition-all flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-wider cursor-pointer group"
-            >
-              <Repeat
-                size={16}
-                className="text-emerald-600 group-hover:rotate-180 transition-transform duration-300"
+              {/* Card Specular Light Sheen */}
+              <div
+                className="absolute inset-0 pointer-events-none opacity-40"
+                style={{
+                  background:
+                    "linear-gradient(115deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.1) 45%, transparent 70%)",
+                }}
               />
-              <span>Swap</span>
-            </button>
 
-            <button
-              type="button"
-              onClick={onOpenSend}
-              className="py-3 px-4 rounded-2xl bg-[#0098ea] hover:bg-[#0088cc] text-white shadow-xs hover:shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-wider cursor-pointer"
-            >
-              <Send size={16} className="text-white" />
-              <span>Send</span>
-            </button>
+              {/* Card Content Row */}
+              <div className="relative z-10 flex items-start justify-between">
+                {/* Left Column: Telegram Owner @username with Blue Verified Badge */}
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-base sm:text-lg font-bold text-white tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)] truncate max-w-[170px] sm:max-w-[210px]">
+                      {telegramUsername}
+                    </h3>
+                    <TelegramVerifiedBadge size={16} className="inline-flex drop-shadow-sm flex-shrink-0" />
+                  </div>
+                  <p className="text-xs sm:text-sm font-mono tracking-widest text-purple-100/90 font-medium mt-1">
+                    •••• •••• •••• {cardLastFour}
+                  </p>
+                </div>
+
+                {/* Right Column: Currency Sign (Dollar $ / Riel ៛ / SAR) & Valid Date */}
+                <div className="flex flex-col items-end">
+                  {/* Currency Emblem (Replacing VISA) */}
+                  <div
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 group-hover:bg-white/30 border border-white/30 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_6px_rgba(0,0,0,0.2)] transition-all"
+                  >
+                    {currency === "USD" ? (
+                      <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none flex items-center gap-1">
+                        $ <span className="text-[11px] font-black tracking-wider uppercase opacity-95">USD</span>
+                      </span>
+                    ) : currency === "KHR" ? (
+                      <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none flex items-center gap-1">
+                        ៛ <span className="text-[11px] font-black tracking-wider uppercase opacity-95">KHR</span>
+                      </span>
+                    ) : (
+                      <span className="text-lg sm:text-xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none">
+                        SAR
+                      </span>
+                    )}
+                  </div>
+
+                  <span className="text-[11px] sm:text-xs text-purple-100/90 font-medium mt-1">
+                    Valid: 05/29
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ============================================================== */}
+          {/* 2. 3D FRONT LEATHER POCKET WITH CURVED LIP & STITCHING */}
+          {/* ============================================================== */}
+          <div
+            className="relative -mt-10 rounded-b-[32px] rounded-t-[26px] p-5 sm:p-6 overflow-hidden bg-gradient-to-b from-[#5c1c99] via-[#4c1482] to-[#340b5c]"
+            style={{
+              boxShadow:
+                "0 -8px 20px -4px rgba(25, 4, 45, 0.6), inset 0 2px 2px rgba(255, 255, 255, 0.4), inset 0 -3px 6px rgba(0, 0, 0, 0.45)",
+            }}
+          >
+            {/* Front Lip Curved Stitching Simulation */}
+            <div className="absolute top-2 inset-x-5 pointer-events-none">
+              <svg className="w-full h-3 overflow-visible" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M 2 2 Q 180 8 360 2"
+                  fill="none"
+                  stroke="#e9d5ff"
+                  strokeWidth="1.2"
+                  strokeDasharray="4 4"
+                  strokeLinecap="round"
+                  opacity="0.5"
+                  style={{ filter: "drop-shadow(0px 1px 1px rgba(0,0,0,0.6))" }}
+                />
+              </svg>
+            </div>
+
+            {/* Front Pocket Lip 3D Specular Highlight Edge */}
+            <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+
+            {/* BALANCE HEADER & VALUE */}
+            <div className="relative z-10 pt-1">
+              <div className="flex items-center justify-between text-[13px] font-medium text-purple-200/90 tracking-wide mb-1">
+                <span>Total Balance</span>
+                <span
+                  onClick={handleCycleCurrency}
+                  className="text-[10px] text-purple-200/80 hover:text-white cursor-pointer transition-colors"
+                >
+                  {currency === "USD"
+                    ? "Tap card to switch to ៛ KHR"
+                    : currency === "KHR"
+                    ? "Tap card to switch to SAR"
+                    : "Tap card to switch to $ USD"}
+                </span>
+              </div>
+
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+                  {!showBalance
+                    ? "••••••••"
+                    : currency === "USD"
+                    ? `$${usdFormatted}`
+                    : currency === "KHR"
+                    ? `៛${khrFormatted}`
+                    : sarFormatted}
+                </span>
+                <span className="text-xs sm:text-sm font-bold text-purple-200 uppercase tracking-wider">
+                  {currency}
+                </span>
+              </div>
+            </div>
+
+            {/* ACTION BUTTONS ROW */}
+            <div className="relative z-10 flex items-center justify-between gap-3 pt-5 mt-1">
+              {/* Left: "+ Add Balance" Translucent Frosted Glass Pill Button */}
+              <button
+                type="button"
+                onClick={handleAddBalanceClick}
+                className="flex items-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition-all duration-200 ease-out border border-white/20 backdrop-blur-md text-white font-medium text-xs sm:text-sm cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_4px_12px_rgba(0,0,0,0.18)]"
+              >
+                {/* Plus Icon */}
+                <svg
+                  className="w-4 h-4 text-white stroke-[2.5]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                <span>Add Balance</span>
+              </button>
+
+              {/* Right: Secondary Utility Icon Buttons */}
+              <div className="flex items-center gap-2.5">
+                {/* 1. Swap / Currency Switch Circular Button */}
+                <button
+                  type="button"
+                  onClick={handleCycleCurrency}
+                  aria-label="Switch Currency"
+                  title={`Switch Currency (Current: ${currency})`}
+                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition-all duration-200 ease-out border border-white/20 backdrop-blur-md flex items-center justify-center text-white cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_4px_12px_rgba(0,0,0,0.18)]"
+                >
+                  {/* Two Opposing Horizontal Arrows (Swap/Transfer) */}
+                  <svg
+                    className="w-4 h-4 text-white stroke-[2]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
+                    />
+                  </svg>
+                </button>
+
+                {/* 2. Eye / Visibility Toggle Circular Button */}
+                <button
+                  type="button"
+                  onClick={handleToggleClick}
+                  aria-label={showBalance ? "Hide Balance" : "Show Balance"}
+                  title={showBalance ? "Hide Balance" : "Show Balance"}
+                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition-all duration-200 ease-out border border-white/20 backdrop-blur-md flex items-center justify-center text-white cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_4px_12px_rgba(0,0,0,0.18)]"
+                >
+                  {showBalance ? (
+                    /* Eye Open Icon */
+                    <svg
+                      className="w-4 h-4 text-white stroke-[2]"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                  ) : (
+                    /* Eye Slashed / Hidden Icon */
+                    <svg
+                      className="w-4 h-4 text-white stroke-[2]"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-};
+});
+
+BanknoteCreditCards.displayName = "BanknoteCreditCards";

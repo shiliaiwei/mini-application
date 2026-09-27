@@ -46,3 +46,27 @@ test("Keyline Icons: KeylineIcons.tsx exports required two-tone 24x24 icons", ()
   assert.ok(code.includes("KeylineArrowUpDown"), "Must export KeylineArrowUpDown");
   assert.ok(code.includes("@keyline-icons/react/two-tone"), "Must import from two-tone package");
 });
+
+test("Brand Mascot: ShiliaiweiMascot file structure and poses definition", () => {
+  const mascotPath = path.resolve(__dirname, "../src/components/brand/ShiliaiweiMascot.tsx");
+  assert.equal(fs.existsSync(mascotPath), true, "ShiliaiweiMascot.tsx should exist");
+
+  const code = fs.readFileSync(mascotPath, "utf-8");
+  assert.ok(code.includes("export type MascotPose"));
+  assert.ok(code.includes("ShiliaiweiMascot"));
+  assert.ok(code.includes("idle"));
+  assert.ok(code.includes("wave"));
+  assert.ok(code.includes("announce"));
+  assert.ok(code.includes("cheer"));
+  assert.ok(code.includes("WEI"));
+});
+
+test("Currency Terminology: workspace-rules.md mandates WEI COIN and prohibits PTS", () => {
+  const rulesPath = path.resolve(__dirname, "../.agents/rules/workspace-rules.md");
+  assert.equal(fs.existsSync(rulesPath), true);
+
+  const content = fs.readFileSync(rulesPath, "utf-8");
+  assert.ok(content.includes("WEI Coin Terminology Rule"));
+  assert.ok(content.includes("WEI COIN"));
+  assert.ok(content.includes("Prohibition of \"PTS\""));
+});

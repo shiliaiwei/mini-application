@@ -129,7 +129,7 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-xs font-bold text-slate-800">
-                Play & Earn PTS
+                Play & Earn WEI Coin
               </div>
               <div className="text-[11px] text-slate-500">
                 Tap, complete tasks, and climb the leaderboard

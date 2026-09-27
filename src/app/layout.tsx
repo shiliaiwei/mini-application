@@ -68,6 +68,8 @@ export default function RootLayout({
       className={`${roboto.variable} ${googleSans.variable} ${facultyGlyphic.variable} h-full antialiased light`}
     >
       <head>
+        <link rel="preconnect" href="https://telegram.org" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://telegram.org" />
         <Script
           src="https://telegram.org/js/telegram-web-app.js"
           strategy="beforeInteractive"

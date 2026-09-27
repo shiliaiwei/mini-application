@@ -76,37 +76,74 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
 
   return (
     <div className="space-y-3.5 pb-28 font-body select-none text-slate-900 max-w-xl mx-auto w-full px-1">
-      {/* Current User Standings Card */}
-      <div className="liquid-glass rounded-[32px] p-4 flex items-center justify-between border border-slate-200 shadow-xs">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-sky-50 border border-sky-200 flex items-center justify-center text-[#0098ea] font-black text-lg shadow-xs relative overflow-hidden flex-shrink-0">
+      {/* 3D Skeuomorphic Purple Leather Current User Standings Card */}
+      <div
+        className="relative rounded-[30px] p-5 overflow-hidden bg-gradient-to-b from-[#6420a7] via-[#4e1688] to-[#340b5c] text-white flex items-center justify-between"
+        style={{
+          boxShadow:
+            "0 16px 36px -10px rgba(45, 10, 80, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.35), inset 0 -3px 6px rgba(0, 0, 0, 0.5)",
+        }}
+      >
+        {/* Leather Grain Texture */}
+        <div
+          className="absolute inset-0 rounded-[30px] opacity-15 pointer-events-none mix-blend-overlay"
+          style={{
+            backgroundImage: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4) 1px, transparent 1px), radial-gradient(circle at 0% 0%, rgba(0,0,0,0.5) 1px, transparent 1px)`,
+            backgroundSize: "6px 6px, 8px 8px",
+          }}
+        />
+
+        {/* Perimeter Thread Stitching */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" xmlns="http://www.w3.org/2000/svg">
+          <rect
+            x="7"
+            y="7"
+            width="calc(100% - 14px)"
+            height="calc(100% - 14px)"
+            rx="23"
+            ry="23"
+            fill="none"
+            stroke="#e9d5ff"
+            strokeWidth="1.2"
+            strokeDasharray="4 4"
+            strokeLinecap="round"
+            opacity="0.45"
+            style={{ filter: "drop-shadow(0px 1px 1px rgba(0,0,0,0.6))" }}
+          />
+        </svg>
+
+        {/* Specular Top Rim */}
+        <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-md flex items-center justify-center text-white font-black text-lg shadow-[inset_0_1px_1px_rgba(255,255,255,0.35)] flex-shrink-0">
             <span>#{userRank}</span>
           </div>
           <div>
-            <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider block">
+            <span className="text-[10px] text-purple-200/90 font-medium uppercase tracking-wider block">
               YOUR GLOBAL RANK
             </span>
-            <div className="flex items-center gap-1">
-              <span className="text-sm font-black text-slate-900 font-display block">
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="text-sm font-black text-white font-display block drop-shadow-sm">
                 {currentUserName}
               </span>
               {user && <TelegramVerifiedBadge size={14} />}
             </div>
-            <span className="text-[11px] text-slate-600 font-semibold block">
+            <span className="text-[11px] text-purple-200/80 font-medium block mt-0.5">
               Active: {formatTime(userSpendSeconds)}
             </span>
           </div>
         </div>
 
-        <div className="text-right">
-          <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider block">
+        <div className="relative z-10 text-right">
+          <span className="text-[10px] text-purple-200/90 font-medium uppercase tracking-wider block">
             VAULT VALUE (RIEL)
           </span>
-          <div className="text-base sm:text-lg font-black text-[#0077b5] font-display">
+          <div className="text-base sm:text-lg font-black text-white font-display drop-shadow-sm">
             ៛{Math.floor(userScore * 41).toLocaleString()}
           </div>
-          <span className="text-[10px] text-slate-600 font-bold block">
-            ${(userScore / 100).toFixed(2)} USD • {userScore.toLocaleString()} PTS
+          <span className="text-[10px] text-purple-200/80 font-medium block mt-0.5">
+            ${(userScore / 100).toFixed(2)} USD • {userScore.toLocaleString()} WEI COIN
           </span>
         </div>
       </div>

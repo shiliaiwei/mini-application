@@ -50,7 +50,7 @@ export async function sendStartMenu(chatId: number, firstName?: string) {
 SHILIAIWEI is an all-in-one Web3 Mini App and Tap-to-Earn gaming vault built natively inside Telegram.
 
 *Core Features:*
-- *Tap Vault & Multi-Currency:* Earn PTS points and manage live balances across USD, KHR (Riel), TON, and SHI tokens.
+- *Tap Vault & Multi-Currency:* Earn WEI Coin and manage live balances across USD, KHR (Riel), TON, and SHI tokens.
 - *6 Interactive Mini-Games:* Play Lucky Wheel, Word Flash, Guess Faster, Row 5 Gomoku, Number Match, and Flip Cards to win daily point rewards.
 - *33 Verified Institutional Partners:* Explore official Cambodian ministries and institutions, access public digital services, and claim rewards.
 - *Live Leaderboard & Claims:* Compete nationwide with real-time player claims and earn hourly bonuses.
@@ -71,7 +71,7 @@ Tap the button below to open the app:`;
           callback_data: "menu_about",
         },
         {
-          text: "How to Earn PTS",
+          text: "How to Earn WEI Coin",
           callback_data: "menu_earn",
         },
       ],
@@ -145,13 +145,13 @@ Direct WebApp Link: ${appUrl}`;
 
 export async function sendEarnDetails(chatId: number) {
   const appUrl = getAppUrl();
-  const text = `*How to Earn PTS & Rewards in SHILIAIWEI:*
+  const text = `*How to Earn WEI Coin & Rewards in SHILIAIWEI:*
 
 1. *Tap Vault:*
-   Tap the central vault on the home screen to harvest PTS continuously. Upgrade your tier to increase tap capacity.
+   Tap the central vault on the home screen to harvest WEI Coin continuously. Upgrade your tier to increase tap capacity.
 
 2. *Interactive Mini-Games:*
-   - *Daily Spin Wheel:* Test your luck to win high-multiplier PTS payouts.
+   - *Daily Spin Wheel:* Test your luck to win high-multiplier WEI Coin payouts.
    - *Word Flash:* Fast reflex word recognition game.
    - *Guess Faster:* Rapid quiz game testing speed and knowledge.
    - *Row 5 Gomoku:* Classic tactical 5-in-a-row board challenge.
@@ -159,7 +159,7 @@ export async function sendEarnDetails(chatId: number) {
    - *Flip Card:* Memory matching challenge with bonus rounds.
 
 3. *Institutional Services:*
-   Explore any of the 33 verified Cambodian ministry pages in the app and claim +100 to +300 PTS per verified public service.
+   Explore any of the 33 verified Cambodian ministry pages in the app and claim +100 to +300 WEI Coin per verified public service.
 
 4. *Daily Check-ins & Streaks:*
    Log in daily to claim escalating streak multipliers.`;
@@ -201,7 +201,7 @@ SHILIAIWEI features 33 official Cambodian ministries, government bodies, and pub
 - Ministry of Health
 - ...and 27 additional verified national institutions.
 
-Each partner card displays the official emblem, full titles in Khmer and English, and links to official public e-services where users earn PTS rewards for exploring national digital infrastructure.`;
+Each partner card displays the official emblem, full titles in Khmer and English, and links to official public e-services where users earn WEI Coin rewards for exploring national digital infrastructure.`;
 
   const replyMarkup = {
     inline_keyboard: [

@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
+import dynamic from "next/dynamic";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
 import { NavCategory } from "@/components/navigation/CategoryBar";
 import { GameDock, GameTab } from "@/components/dock/GameDock";
 import { TapGameView } from "@/components/views/TapGameView";
-import { EarnTasksView } from "@/components/views/EarnTasksView";
-import { LeaderboardView } from "@/components/views/LeaderboardView";
-import { GameProfileView, ProfileSubTab } from "@/components/views/GameProfileView";
-import { TelegramGateScreen } from "@/components/common/TelegramGateScreen";
+import type { ProfileSubTab } from "@/components/views/GameProfileView";
 import { TopBrandNavBar } from "@/components/navigation/TopBrandNavBar";
 import {
   Check,
@@ -17,10 +15,42 @@ import {
   ChevronLeft,
 } from "@/components/icons/KeylineIcons";
 
+// Lazy load non-landing tab views to reduce initial bundle and speed up load to <1s
+const EarnTasksView = dynamic(
+  () => import("@/components/views/EarnTasksView").then((mod) => mod.EarnTasksView),
+  { ssr: false }
+);
+const LeaderboardView = dynamic(
+  () => import("@/components/views/LeaderboardView").then((mod) => mod.LeaderboardView),
+  { ssr: false }
+);
+const GameProfileView = dynamic(
+  () => import("@/components/views/GameProfileView").then((mod) => mod.GameProfileView),
+  { ssr: false }
+);
+
+const DEFAULT_USER: TelegramUser = {
+  id: 88888888,
+  first_name: "SHILIAIWEI Holder",
+  username: "shiliaiwei_holder",
+};
+
 export default function MiniAppPage() {
   const [tgApp, setTgApp] = useState<TelegramWebApp | null>(null);
-  const [user, setUser] = useState<TelegramUser | null>(null);
-  const [isReady, setIsReady] = useState(false);
+  const [user, setUser] = useState<TelegramUser>(() => {
+    if (typeof window !== "undefined") {
+      const directUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      if (directUser?.id) return directUser;
+      try {
+        const cached = localStorage.getItem("shi_tg_user_cache");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed?.id) return parsed;
+        }
+      } catch {}
+    }
+    return DEFAULT_USER;
+  });
   const [activeTab, setActiveTab] = useState<GameTab>("wallet");
   const [activeCategory, setActiveCategory] = useState<NavCategory>("lobby");
   const [profileSubTab, setProfileSubTab] = useState<ProfileSubTab>("profile");
@@ -42,6 +72,8 @@ export default function MiniAppPage() {
 
   const scoreRef = useRef(score);
   const spendRef = useRef(spendSeconds);
+  const lastSyncedScoreRef = useRef(-1);
+  const lastSyncedSpendRef = useRef(-1);
   scoreRef.current = score;
   spendRef.current = spendSeconds;
 
@@ -143,9 +175,16 @@ export default function MiniAppPage() {
     }
   }, []);
 
-  // Sync to Neon Database
-  const syncWithDatabase = useCallback(async (currentScore: number, currentTime: number) => {
+  // Sync to Neon Database with smart change detection
+  const syncWithDatabase = useCallback(async (currentScore: number, currentTime: number, force = false) => {
     if (!user?.id) return;
+    // Skip redundant network requests if score hasn't changed and time delta < 30s
+    if (!force && currentScore === lastSyncedScoreRef.current && Math.abs(currentTime - lastSyncedSpendRef.current) < 30) {
+      return;
+    }
+    lastSyncedScoreRef.current = currentScore;
+    lastSyncedSpendRef.current = currentTime;
+
     try {
       const res = await fetch("/api/player/sync", {
         method: "POST",
@@ -166,16 +205,17 @@ export default function MiniAppPage() {
       }
       if (data?.player?.score && data.player.score > currentScore) {
         setScore(data.player.score);
+        lastSyncedScoreRef.current = data.player.score;
       }
     } catch {}
   }, [user]);
 
-  // Periodic database sync every 4 seconds
+  // Periodic database sync every 8 seconds (skips if no score change)
   useEffect(() => {
     if (!user?.id) return;
     const interval = setInterval(() => {
-      syncWithDatabase(scoreRef.current, spendRef.current);
-    }, 4000);
+      syncWithDatabase(scoreRef.current, spendRef.current, false);
+    }, 8000);
     return () => clearInterval(interval);
   }, [user, syncWithDatabase]);
 
@@ -247,9 +287,8 @@ export default function MiniAppPage() {
         try {
           localStorage.setItem("shi_tg_user_cache", JSON.stringify(tgUser));
         } catch {}
-        syncWithDatabase(scoreRef.current, spendRef.current);
+        syncWithDatabase(scoreRef.current, spendRef.current, true);
       }
-      setIsReady(true);
     };
 
     // Check immediately
@@ -269,7 +308,6 @@ export default function MiniAppPage() {
         setupApp(polledApp);
       } else if (pollCount >= 30) {
         clearInterval(interval);
-        setIsReady(true);
       }
     }, 20);
 
@@ -320,7 +358,7 @@ export default function MiniAppPage() {
     try {
       tgApp?.HapticFeedback?.impactOccurred("light");
     } catch {}
-    syncWithDatabase(scoreRef.current, spendRef.current);
+    syncWithDatabase(scoreRef.current, spendRef.current, true);
     setActiveTab(tab);
 
     // Sync category bar state
@@ -359,33 +397,6 @@ export default function MiniAppPage() {
       setActiveTopUpScreen(false);
     }, 1500);
   };
-
-  if (!isReady) {
-    return (
-      <div className="min-h-screen app-bg-white flex items-center justify-center text-[#0098ea] font-display text-sm">
-        <span className="uppercase tracking-widest animate-pulse">CONNECTING SHILIAIWEI VAULT...</span>
-      </div>
-    );
-  }
-
-  // Telegram Sync Gate: Users outside Telegram can connect a dev/browser session
-  if (!user?.id) {
-    return (
-      <TelegramGateScreen
-        onBypass={() => {
-          const devUser: TelegramUser = {
-            id: 88888888,
-            first_name: "SHILIAIWEI Holder",
-            username: "shiliaiwei_holder",
-          };
-          setUser(devUser);
-          syncWithDatabase(scoreRef.current, spendRef.current);
-        }}
-      />
-    );
-  }
-
-
 
   return (
     <div className="min-h-dvh flex flex-col justify-between app-bg-white text-slate-900 select-none overflow-x-hidden font-body relative">
@@ -462,7 +473,7 @@ export default function MiniAppPage() {
                   >
                     <span className="text-base font-black">+${amt}</span>
                     <span className={`text-[10px] ${topUpAmount === amt ? "text-sky-100" : "text-slate-400"}`}>
-                      +{amt * 100} PTS
+                      +{amt * 100} WEI COIN
                     </span>
                   </button>
                 ))}
@@ -471,7 +482,7 @@ export default function MiniAppPage() {
               {topUpSuccess && (
                 <div className="p-3 rounded-full bg-emerald-50 border border-emerald-200 text-[#16a34a] text-xs font-bold flex items-center justify-center gap-2 animate-fadeIn">
                   <Check size={18} className="w-4 h-4" />
-                  <span>Successfully added +${topUpAmount}.00 (+{topUpAmount * 100} PTS) to Vault!</span>
+                  <span>Successfully added +${topUpAmount}.00 (+{topUpAmount * 100} WEI COIN) to Vault!</span>
                 </div>
               )}
 

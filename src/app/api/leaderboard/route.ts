@@ -26,11 +26,18 @@ export async function GET() {
       LIMIT 100;
     `;
 
-    return NextResponse.json({
-      success: true,
-      count: players.length,
-      players,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        count: players.length,
+        players,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=5, stale-while-revalidate=15",
+        },
+      }
+    );
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : "Leaderboard fetch error";
     return NextResponse.json({ error: errMsg }, { status: 500 });

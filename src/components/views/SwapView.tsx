@@ -9,7 +9,7 @@ import {
   Sparkles,
 } from "@/components/icons/KeylineIcons";
 
-export type CurrencyType = "PTS" | "USD" | "KHR";
+export type CurrencyType = "WEI" | "USD" | "KHR";
 
 interface SwapViewProps {
   score: number;
@@ -24,30 +24,30 @@ export const SwapView: React.FC<SwapViewProps> = ({
   user,
   tgApp,
 }) => {
-  const [fromCurrency, setFromCurrency] = useState<CurrencyType>("PTS");
+  const [fromCurrency, setFromCurrency] = useState<CurrencyType>("WEI");
   const [toCurrency, setToCurrency] = useState<CurrencyType>("KHR");
   const [inputAmount, setInputAmount] = useState<string>("100");
   const [swapSuccess, setSwapSuccess] = useState<string | null>(null);
 
-  // Conversion rates in points (100 PTS = $1.00 USD = 4,100 KHR)
+  // Conversion rates in points (100 WEI COIN = $1.00 USD = 4,100 KHR)
   const getOutputAmount = (amount: number, from: CurrencyType, to: CurrencyType): number => {
     if (from === to) return amount;
 
-    // Normalize to PTS first
+    // Normalize to WEI first
     let pts = 0;
-    if (from === "PTS") pts = amount;
+    if (from === "WEI") pts = amount;
     else if (from === "USD") pts = amount * 100;
     else if (from === "KHR") pts = amount / 41;
 
-    // Convert PTS to target
-    if (to === "PTS") return pts;
+    // Convert WEI to target
+    if (to === "WEI") return pts;
     if (to === "USD") return pts / 100;
     if (to === "KHR") return pts * 41;
     return 0;
   };
 
   const getAvailableBalance = (curr: CurrencyType): number => {
-    if (curr === "PTS") return score;
+    if (curr === "WEI") return score;
     if (curr === "USD") return score / 100;
     if (curr === "KHR") return Math.floor(score * 41);
     return 0;
@@ -69,7 +69,7 @@ export const SwapView: React.FC<SwapViewProps> = ({
     const calculated = (currentAvailable * pct) / 100;
     setInputAmount(
       calculated > 0
-        ? fromCurrency === "KHR" || fromCurrency === "PTS"
+        ? fromCurrency === "KHR" || fromCurrency === "WEI"
           ? Math.floor(calculated).toString()
           : calculated.toFixed(2)
         : "0"
@@ -81,12 +81,12 @@ export const SwapView: React.FC<SwapViewProps> = ({
 
     // Calculate score impact
     let pointsSpent = 0;
-    if (fromCurrency === "PTS") pointsSpent = parsedInput;
+    if (fromCurrency === "WEI") pointsSpent = parsedInput;
     else if (fromCurrency === "USD") pointsSpent = parsedInput * 100;
     else if (fromCurrency === "KHR") pointsSpent = parsedInput / 41;
 
     let pointsGained = 0;
-    if (toCurrency === "PTS") pointsGained = calculatedOutput;
+    if (toCurrency === "WEI") pointsGained = calculatedOutput;
     else if (toCurrency === "USD") pointsGained = calculatedOutput * 100;
     else if (toCurrency === "KHR") pointsGained = calculatedOutput / 41;
 
@@ -98,7 +98,7 @@ export const SwapView: React.FC<SwapViewProps> = ({
         ? `${Math.floor(calculatedOutput).toLocaleString()} KHR`
         : toCurrency === "USD"
         ? `$${calculatedOutput.toFixed(2)} USD`
-        : `${Math.floor(calculatedOutput).toLocaleString()} PTS`;
+        : `${Math.floor(calculatedOutput).toLocaleString()} WEI COIN`;
 
     const successMsg = `Exchanged ${parsedInput.toLocaleString()} ${fromCurrency} for ${outputText} successfully!`;
 
@@ -182,7 +182,7 @@ export const SwapView: React.FC<SwapViewProps> = ({
               }}
               className="bg-white border border-slate-300 rounded-full px-4 py-2 text-xs font-black text-slate-900 focus:outline-none shadow-xs cursor-pointer min-h-[44px] transition-colors duration-300 ease-out"
             >
-              <option value="PTS">Points (PTS)</option>
+              <option value="WEI">WEI Coin (WEI)</option>
               <option value="KHR">KHR (៛)</option>
               <option value="USD">USD ($)</option>
             </select>
@@ -220,8 +220,8 @@ export const SwapView: React.FC<SwapViewProps> = ({
           <div className="flex items-center justify-between text-xs text-slate-700 font-bold">
             <span>YOU RECEIVE (ESTIMATED)</span>
             <span className="font-mono text-slate-600 text-[10px]">
-              {fromCurrency === "PTS" && toCurrency === "KHR" && "100 PTS = 4,100 KHR"}
-              {fromCurrency === "PTS" && toCurrency === "USD" && "100 PTS = $1.00 USD"}
+              {fromCurrency === "WEI" && toCurrency === "KHR" && "100 WEI = 4,100 KHR"}
+              {fromCurrency === "WEI" && toCurrency === "USD" && "100 WEI = $1.00 USD"}
               {fromCurrency === "USD" && toCurrency === "KHR" && "$1.00 USD = 4,100 KHR"}
               {fromCurrency === "KHR" && toCurrency === "USD" && "4,100 KHR = $1.00 USD"}
             </span>
@@ -233,7 +233,7 @@ export const SwapView: React.FC<SwapViewProps> = ({
                 ? `${Math.floor(calculatedOutput).toLocaleString()} KHR (៛)`
                 : toCurrency === "USD"
                 ? `$${calculatedOutput.toFixed(2)} USD`
-                : `${Math.floor(calculatedOutput).toLocaleString()} PTS`}
+                : `${Math.floor(calculatedOutput).toLocaleString()} WEI COIN`}
             </div>
 
             <select
@@ -248,7 +248,7 @@ export const SwapView: React.FC<SwapViewProps> = ({
             >
               <option value="KHR">KHR (៛)</option>
               <option value="USD">USD ($)</option>
-              <option value="PTS">Points (PTS)</option>
+              <option value="WEI">WEI Coin (WEI)</option>
             </select>
           </div>
         </div>
@@ -285,11 +285,11 @@ export const SwapView: React.FC<SwapViewProps> = ({
         </div>
         <div className="space-y-1 text-xs text-slate-600">
           <div className="flex justify-between py-1.5 border-b border-slate-200">
-            <span>100 Game Points (PTS)</span>
+            <span>100 WEI Coin (WEI)</span>
             <span className="font-mono text-[#0077b5] font-bold">4,100.00 KHR (Riel)</span>
           </div>
           <div className="flex justify-between py-1.5 border-b border-slate-200">
-            <span>100 Game Points (PTS)</span>
+            <span>100 WEI Coin (WEI)</span>
             <span className="font-mono text-[#14532d] font-bold">$1.00 USD</span>
           </div>
           <div className="flex justify-between py-1.5">
