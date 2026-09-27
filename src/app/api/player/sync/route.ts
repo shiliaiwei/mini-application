@@ -61,7 +61,10 @@ export async function POST(req: Request) {
           last_name = EXCLUDED.last_name,
           username = EXCLUDED.username,
           photo_url = COALESCE(EXCLUDED.photo_url, game_players.photo_url),
-          score = GREATEST(game_players.score, EXCLUDED.score),
+          score = CASE 
+            WHEN EXCLUDED.score > game_players.score AND (EXCLUDED.score - game_players.score) > 500000 THEN game_players.score + 500000
+            ELSE GREATEST(game_players.score, EXCLUDED.score)
+          END,
           spend_seconds = GREATEST(game_players.spend_seconds, EXCLUDED.spend_seconds),
           updated_at = NOW()
         RETURNING *

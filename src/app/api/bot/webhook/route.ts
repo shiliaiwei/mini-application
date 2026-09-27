@@ -3,10 +3,19 @@ import { processTelegramUpdate } from "@/lib/bot/engine";
 import { TelegramUpdate } from "@/lib/bot/types";
 
 export async function POST(req: Request) {
+  // Cloudflare Security Audit: Telegram Secret Token Verification
+  const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+  if (webhookSecret) {
+    const receivedSecret = req.headers.get("x-telegram-bot-api-secret-token");
+    if (receivedSecret !== webhookSecret) {
+      return NextResponse.json({ ok: false, error: "Unauthorized webhook origin" }, { status: 401 });
+    }
+  }
+
   try {
     const update = (await req.json()) as TelegramUpdate;
     if (!update || typeof update.update_id !== "number") {
-      return NextResponse.json({ ok: false, error: "Invalid Telegram update" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Invalid Telegram update format" }, { status: 400 });
     }
 
     await processTelegramUpdate(update);
@@ -14,7 +23,7 @@ export async function POST(req: Request) {
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : "Internal Bot Webhook Error";
     console.error("Webhook processing error:", errorMsg);
-    return NextResponse.json({ ok: false, error: errorMsg }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "Error processing webhook update" }, { status: 500 });
   }
 }
 
