@@ -137,10 +137,10 @@ export const SwapView: React.FC<SwapViewProps> = ({
       <div className="liquid-glass rounded-[32px] p-3.5 flex items-center justify-between border border-slate-200 shadow-xs">
         <div>
           <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider block">
-            SHILIAIWEI POINTS & CURRENCY EXCHANGE
+            SHILIAIWEI WEI COIN & CURRENCY EXCHANGE
           </span>
           <span className="text-sm font-black text-slate-900 font-display block mt-0.5">
-            Convert Game Points to Khmer Riel or USD
+            Convert WEI Coin to Khmer Riel (៛) or US Dollar ($)
           </span>
         </div>
         <div className="px-2.5 py-1 rounded-full bg-emerald-100 border border-emerald-300 text-[#14532d] text-[10px] font-black">

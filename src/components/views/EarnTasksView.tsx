@@ -441,7 +441,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
                 Daily Check-in Streak
               </span>
               <span className="text-[11px] text-slate-600 block mt-0.5">
-                Check in continuously for 7 days to unlock maximum point bonuses.
+                Check in continuously for 7 days to unlock maximum WEI Coin bonuses.
               </span>
             </div>
             <div className="px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-[#0077b5] font-black text-xs">

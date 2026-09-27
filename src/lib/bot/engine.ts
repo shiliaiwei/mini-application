@@ -50,10 +50,10 @@ export async function sendStartMenu(chatId: number, firstName?: string) {
 SHILIAIWEI is an all-in-one Web3 Mini App and Tap-to-Earn gaming vault built natively inside Telegram.
 
 *Core Features:*
-- *Tap Vault & Multi-Currency:* Earn WEI Coin and manage live balances across USD, KHR (Riel), TON, and SHI tokens.
-- *6 Interactive Mini-Games:* Play Lucky Wheel, Word Flash, Guess Faster, Row 5 Gomoku, Number Match, and Flip Cards to win daily point rewards.
-- *33 Verified Institutional Partners:* Explore official Cambodian ministries and institutions, access public digital services, and claim rewards.
-- *Live Leaderboard & Claims:* Compete nationwide with real-time player claims and earn hourly bonuses.
+- *Tap Vault & Multi-Currency:* Earn WEI Coin and manage live balances across USD ($) and KHR (៛) with secure Web3 wallet encryption.
+- *6 Interactive Mini-Games:* Play Lucky Wheel, Word Flash, Guess Faster, Row 5 Gomoku, Number Match, and Flip Cards to earn daily WEI Coin rewards.
+- *33 Verified Institutional Partners:* Explore official Cambodian ministries and public digital services to claim WEI Coin rewards.
+- *Live Leaderboard & Rewards:* Compete globally with real-time player rankings, daily streaks, and hourly bonuses.
 
 Tap the button below to open the app:`;
 

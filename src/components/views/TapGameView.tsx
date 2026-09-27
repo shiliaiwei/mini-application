@@ -4,10 +4,7 @@ import React, { useState } from "react";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
 import {
   ArrowUpRight,
-  Repeat,
-  Gift,
   Check,
-  Coins,
   ChevronLeft,
   ScanLine,
   Send,
@@ -18,7 +15,7 @@ import { AsymmetricGemBanner } from "@/components/cards/AsymmetricGemBanner";
 import { ShiliaiweiMascot, MascotPose } from "@/components/brand/ShiliaiweiMascot";
 import { NavCategory } from "@/components/navigation/CategoryBar";
 
-type TapSubView = "none" | "send" | "scan" | "deposit";
+type TapSubView = "none" | "send" | "scan";
 
 interface TapGameViewProps {
   score: number;
@@ -266,76 +263,6 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
   }
 
   // ==============================================================
-  // FULL PAGE SPA SUBVIEW: DEPOSIT / WEI COIN BOOST
-  // ==============================================================
-  if (subView === "deposit") {
-    return (
-      <div className="w-full max-w-xl mx-auto space-y-4 pt-1 pb-28 animate-fadeIn select-none font-sans text-slate-900">
-        <div className="flex items-center justify-between py-2 border-b border-slate-200/80 mb-2">
-          <button
-            type="button"
-            onClick={() => setSubView("none")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs shadow-2xs active:scale-95 transition-all duration-300 ease-out cursor-pointer"
-          >
-            <ChevronLeft size={16} className="text-[#0098ea]" />
-            <span>Back</span>
-          </button>
-          <div className="flex items-center gap-2">
-            <Coins size={18} className="text-[#0098ea]" />
-            <span className="text-sm font-black uppercase text-slate-900">
-              ដាក់ប្រាក់ (Claim & Boost WEI Coin)
-            </span>
-          </div>
-          <div className="w-14" />
-        </div>
-
-        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-1">
-            <h4 className="text-sm font-black text-slate-900">Earn WEI Coin for Free</h4>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Complete daily missions and check in regularly to earn WEI Coin that you can exchange directly for USD ($) or KHR (៛)!
-            </p>
-          </div>
-
-          <div className="space-y-2.5">
-            <button
-              type="button"
-              onClick={() => {
-                setSubView("none");
-                onGoToEarn?.();
-              }}
-              className="w-full py-3.5 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-colors duration-300 ease-out"
-            >
-              <Gift size={20} />
-              <span>Go to Missions (+1,000 WEI COIN)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setSubView("none");
-                onGoToSwap?.();
-              }}
-              className="w-full py-3.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-colors duration-300 ease-out"
-            >
-              <Repeat size={20} className="text-emerald-600" />
-              <span>Exchange Currency (DEX Swap)</span>
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setSubView("none")}
-            className="w-full py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors duration-300 ease-out cursor-pointer"
-          >
-            Exit to Home View
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ==============================================================
   // MAIN HOME VIEW (DEFAULT)
   // ==============================================================
   return (
@@ -351,7 +278,7 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
           })}
           user={user}
           tgApp={tgApp}
-          onOpenDeposit={() => setSubView("deposit")}
+          onOpenDeposit={onGoToEarn}
           onOpenSend={() => setSubView("send")}
           onOpenSwap={onGoToSwap}
         />
