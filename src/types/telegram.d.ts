@@ -56,6 +56,13 @@ export interface TelegramWebApp {
     notificationOccurred: (type: "error" | "success" | "warning") => void;
     selectionChanged: () => void;
   };
+  BiometricManager?: {
+    isInited?: boolean;
+    isBiometricAvailable?: boolean;
+    biometricType?: string;
+    isAccessRequested?: boolean;
+    isAccessGranted?: boolean;
+  };
   MainButton: {
     text: string;
     color: string;

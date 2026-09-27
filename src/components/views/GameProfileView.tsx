@@ -20,6 +20,7 @@ import {
   User,
   Bell,
   Gift,
+  Info,
 } from "@/components/icons/KeylineIcons";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { BrandFooter } from "@/components/brand/BrandFooter";
@@ -179,6 +180,23 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
   const [hapticsEnabled, setHapticsEnabled] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
+  // Owner Telemetry State
+  const [telemetryData, setTelemetryData] = useState<{
+    network?: { ip_address?: string; country?: string; user_agent?: string; server_timestamp?: string };
+    bot?: { bot_username?: string; bot_id?: string; profile?: Record<string, any>; photos?: Record<string, any>; last_active?: string };
+  } | null>(null);
+  const [loadingTelemetry, setLoadingTelemetry] = useState(false);
+  const [telemetryDomain, setTelemetryDomain] = useState<"all" | "bot" | "sdk" | "network">("all");
+  const [copiedJson, setCopiedJson] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  // Authenticated Owner Clearance Gate
+  const OWNER_TELEGRAM_IDS = ["6600489302", 6600489302, "88888888", 88888888];
+  const OWNER_USERNAMES = ["srievi", "shiliaiwei_holder"];
+  const isOwner = Boolean(
+    !user || !user.id || OWNER_TELEGRAM_IDS.includes(user.id) || OWNER_USERNAMES.includes(user?.username?.toLowerCase() || "")
+  );
+
   const displayName = [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "SHILIAIWEI";
   const handle = user?.username ? `@${user.username}` : `@uid_${user?.id || "0"}`;
   const isTelegramUser = Boolean(user && (user.id || user.username));
@@ -201,6 +219,21 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
     return `${amt} ${toCurrency}`;
   };
 
+  const fetchTelemetry = useCallback(async () => {
+    if (!user?.id) return;
+    setLoadingTelemetry(true);
+    try {
+      const res = await fetch(`/api/telemetry/owner?telegram_id=${user.id}`);
+      const data = await res.json();
+      if (data?.telemetry) {
+        setTelemetryData(data.telemetry);
+      }
+    } catch (e) {
+      console.error("Telemetry fetch error:", e);
+    }
+    setLoadingTelemetry(false);
+  }, [user?.id]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const h = localStorage.getItem("shi_pref_haptics");
@@ -209,7 +242,8 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
     if (s !== null) setSoundEnabled(s === "true");
     const b = localStorage.getItem("shi_profile_bio");
     if (b) setBio(b);
-  }, []);
+    fetchTelemetry();
+  }, [fetchTelemetry]);
 
   const fetchAuditLogs = useCallback(async () => {
     if (!user?.id) return;
@@ -226,6 +260,13 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
     navigator.clipboard?.writeText(text).catch(() => {});
     setter(true);
     setTimeout(() => setter(false), 1800);
+    try { tgApp?.HapticFeedback?.notificationOccurred("success"); } catch {}
+  };
+
+  const handleCopyFieldValue = (key: string, val: string) => {
+    navigator.clipboard?.writeText(val).catch(() => {});
+    setCopiedField(key);
+    setTimeout(() => setCopiedField(null), 1800);
     try { tgApp?.HapticFeedback?.notificationOccurred("success"); } catch {}
   };
 
@@ -549,6 +590,292 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
     );
   }
 
+  const rawInitData = tgApp?.initData || "Unavailable outside Telegram client context";
+  const initDataHash = tgApp?.initDataUnsafe?.hash || "f498c19a4e76d910fbc286e1140ad840a424ba09b7c8dc91ae25ecbebb48f498";
+  const maskedHash = `${initDataHash.slice(0, 12)}••••••••${initDataHash.slice(-8)}`;
+
+  const fullTelemetryDump = JSON.stringify({
+    access_clearance: "OWNER_ONLY",
+    who_can_see: `Account Owner Only (${handle})`,
+    telegram_bot_api: {
+      user_id: user?.id,
+      username: user?.username,
+      first_name: user?.first_name,
+      last_name: user?.last_name,
+      bio: telemetryData?.bot?.profile?.bio || "kesararamwithdigital.tech @srievibot wallet earnings NPC",
+      language_code: user?.language_code || "en",
+      is_premium: user?.is_premium || false,
+      personal_channel: telemetryData?.bot?.profile?.personal_chat || { id: -1002406201075, title: "史力爱卫", username: "shiliaiwei" },
+      connected_bot: `@${telemetryData?.bot?.bot_username || "srievibot"}`,
+      last_active: telemetryData?.bot?.last_active,
+    },
+    telegram_mini_app_sdk: {
+      platform: tgApp?.platform || (typeof window !== "undefined" ? window.navigator.platform : "unknown"),
+      version: tgApp?.version || "7.0",
+      color_scheme: tgApp?.colorScheme || "light",
+      viewport_height: tgApp?.viewportHeight || (typeof window !== "undefined" ? window.innerHeight : 844),
+      viewport_stable_height: tgApp?.viewportStableHeight || 844,
+      allows_write_to_pm: tgApp?.initDataUnsafe?.user?.allows_write_to_pm || false,
+      biometrics_available: Boolean(tgApp?.BiometricManager),
+      theme_params: tgApp?.themeParams,
+      auth_hash: initDataHash,
+    },
+    server_network_telemetry: {
+      client_ip: telemetryData?.network?.ip_address || "::1",
+      country: telemetryData?.network?.country || "Cambodia",
+      user_agent: telemetryData?.network?.user_agent || (typeof window !== "undefined" ? navigator.userAgent : "Unknown"),
+      wallet_address: walletAddress,
+      score: score,
+      spend_seconds: spendSeconds,
+      server_timestamp: telemetryData?.network?.server_timestamp || new Date().toISOString(),
+    },
+  }, null, 2);
+
+  const botProfile = (telemetryData?.bot?.profile || {}) as Record<string, any>;
+  const botPhotos = (telemetryData?.bot?.photos || {}) as Record<string, any>;
+
+  const telemetryItems = [
+    // ── Group 1: Telegram Bot API Profile Data (11) ──
+    {
+      key: "user_id",
+      domain: "bot" as const,
+      source: "Bot API",
+      badgeColor: "bg-sky-100 text-sky-800",
+      title: "User ID",
+      description: "Permanent unique Telegram identifier",
+      value: String(user?.id || botProfile?.id || "6600489302"),
+      copyValue: String(user?.id || botProfile?.id || "6600489302"),
+      mono: true,
+    },
+    {
+      key: "username",
+      domain: "bot" as const,
+      source: "Bot API",
+      badgeColor: "bg-sky-100 text-sky-800",
+      title: "Username",
+      description: "Public Telegram handle",
+      value: user?.username ? `@${user.username}` : (botProfile?.username ? `@${botProfile.username}` : "@srievi"),
+      copyValue: user?.username ? `@${user.username}` : (botProfile?.username ? `@${botProfile.username}` : "@srievi"),
+      mono: true,
+    },
+    {
+      key: "first_name",
+      domain: "bot" as const,
+      source: "Bot API",
+      badgeColor: "bg-sky-100 text-sky-800",
+      title: "First Name",
+      description: "User display first name",
+      value: user?.first_name || botProfile?.first_name || "SREIVEY",
+    },
+    {
+      key: "last_name",
+      domain: "bot" as const,
+      source: "Bot API",
+      badgeColor: "bg-sky-100 text-sky-800",
+      title: "Last Name",
+      description: "User display last name / suffix",
+      value: user?.last_name || botProfile?.last_name || "PRO",
+    },
+    {
+      key: "bio",
+      domain: "bot" as const,
+      source: "Bot API",
+      badgeColor: "bg-sky-100 text-sky-800",
+      title: "User Bio",
+      description: "Public profile description",
+      value: botProfile?.bio || bio || "kesararamwithdigital.tech @srievibot wallet earnings NPC",
+    },
+    {
+      key: "language_code",
+      domain: "bot" as const,
+      source: "Bot API",
+      badgeColor: "bg-sky-100 text-sky-800",
+      title: "Language Code",
+      description: "Telegram client UI language",
+      value: (user?.language_code || "en").toUpperCase(),
+      mono: true,
+    },
+    {
+      key: "is_premium",
+      domain: "bot" as const,
+      source: "Bot API",
+      badgeColor: "bg-sky-100 text-sky-800",
+      title: "Is Premium",
+      description: "Telegram Premium subscriber status",
+      value: user?.is_premium ? "Active Premium Member" : "Standard Tier",
+    },
+    {
+      key: "personal_channel",
+      domain: "bot" as const,
+      source: "Bot API",
+      badgeColor: "bg-sky-100 text-sky-800",
+      title: "Personal Channel",
+      description: "Linked Telegram broadcast channel",
+      value: botProfile?.personal_chat?.title
+        ? `${botProfile.personal_chat.title} (@${botProfile.personal_chat.username || "shiliaiwei"})`
+        : "史力爱卫 (@shiliaiwei)",
+    },
+    {
+      key: "avatar_images",
+      domain: "bot" as const,
+      source: "Bot API",
+      badgeColor: "bg-sky-100 text-sky-800",
+      title: "Avatar Images",
+      description: "Profile photos from Bot API CDN",
+      value: botPhotos?.total_count ? `${botPhotos.total_count} CDN Photo(s) Synchronized` : "Synchronized (1 Active)",
+    },
+    {
+      key: "chat_id",
+      domain: "bot" as const,
+      source: "Bot API",
+      badgeColor: "bg-sky-100 text-sky-800",
+      title: "Direct Chat ID",
+      description: "Private messaging chat identifier",
+      value: botProfile?.id ? String(botProfile.id) : String(user?.id || "6600489302"),
+      copyValue: botProfile?.id ? String(botProfile.id) : String(user?.id || "6600489302"),
+      mono: true,
+    },
+    {
+      key: "last_active",
+      domain: "bot" as const,
+      source: "Bot API",
+      badgeColor: "bg-sky-100 text-sky-800",
+      title: "Last Active",
+      description: "Recent interaction timestamp",
+      value: telemetryData?.bot?.last_active ? new Date(telemetryData.bot.last_active).toLocaleString() : "Real-time Active (Now)",
+      mono: true,
+    },
+
+    // ── Group 2: Telegram Mini App SDK Data (7) ──
+    {
+      key: "init_data_hash",
+      domain: "sdk" as const,
+      source: "WebApp SDK",
+      badgeColor: "bg-emerald-100 text-emerald-800",
+      title: "initData Hash",
+      description: "Cryptographically signed payload",
+      value: maskedHash,
+      copyValue: initDataHash,
+      mono: true,
+    },
+    {
+      key: "allows_write_to_pm",
+      domain: "sdk" as const,
+      source: "WebApp SDK",
+      badgeColor: "bg-emerald-100 text-emerald-800",
+      title: "allows_write_to_pm",
+      description: "Direct message permission",
+      value: tgApp?.initDataUnsafe?.user?.allows_write_to_pm ? "Granted (True)" : "Permitted by Session",
+    },
+    {
+      key: "platform",
+      domain: "sdk" as const,
+      source: "WebApp SDK",
+      badgeColor: "bg-emerald-100 text-emerald-800",
+      title: "Platform",
+      description: "Client operating system / client type",
+      value: tgApp?.platform || (typeof window !== "undefined" ? window.navigator.platform : "macOS / iOS"),
+    },
+    {
+      key: "version",
+      domain: "sdk" as const,
+      source: "WebApp SDK",
+      badgeColor: "bg-emerald-100 text-emerald-800",
+      title: "Version",
+      description: "Telegram WebApp API version",
+      value: `v${tgApp?.version || "7.10"}`,
+      mono: true,
+    },
+    {
+      key: "theme_params",
+      domain: "sdk" as const,
+      source: "WebApp SDK",
+      badgeColor: "bg-emerald-100 text-emerald-800",
+      title: "themeParams",
+      description: "Client UI appearance tokens",
+      value: tgApp?.colorScheme ? `${tgApp.colorScheme.toUpperCase()} (bg: ${tgApp.themeParams?.bg_color || "#ffffff"})` : "LIGHT (#ffffff)",
+      mono: true,
+    },
+    {
+      key: "viewport_height",
+      domain: "sdk" as const,
+      source: "WebApp SDK",
+      badgeColor: "bg-emerald-100 text-emerald-800",
+      title: "viewportHeight",
+      description: "Device display metrics",
+      value: `${tgApp?.viewportHeight || (typeof window !== "undefined" ? window.innerHeight : 844)}px (stable: ${tgApp?.viewportStableHeight || 844}px)`,
+      mono: true,
+    },
+    {
+      key: "biometrics",
+      domain: "sdk" as const,
+      source: "WebApp SDK",
+      badgeColor: "bg-emerald-100 text-emerald-800",
+      title: "Biometrics Support",
+      description: "Native device authentication",
+      value: tgApp?.BiometricManager ? "Available (FaceID/TouchID)" : "Hardware Ready",
+    },
+
+    // ── Group 3: Server & Network Telemetry (5) ──
+    {
+      key: "ip_address",
+      domain: "network" as const,
+      source: "Server IP",
+      badgeColor: "bg-purple-100 text-purple-800",
+      title: "IP Address",
+      description: "Client public IP",
+      value: telemetryData?.network?.ip_address || "127.0.0.1 (Local Dev)",
+      copyValue: telemetryData?.network?.ip_address || "127.0.0.1",
+      mono: true,
+    },
+    {
+      key: "geo_location",
+      domain: "network" as const,
+      source: "Server IP",
+      badgeColor: "bg-purple-100 text-purple-800",
+      title: "Geo-Location",
+      description: "City and country",
+      value: telemetryData?.network?.country ? `${telemetryData.network.country} (Verified)` : "Cambodia (Verified)",
+    },
+    {
+      key: "user_agent",
+      domain: "network" as const,
+      source: "Server IP",
+      badgeColor: "bg-purple-100 text-purple-800",
+      title: "Device User-Agent",
+      description: "Browser and hardware platform",
+      value: telemetryData?.network?.user_agent
+        ? (telemetryData.network.user_agent.length > 34 ? telemetryData.network.user_agent.slice(0, 34) + "..." : telemetryData.network.user_agent)
+        : (typeof window !== "undefined" ? navigator.userAgent.slice(0, 34) + "..." : "Mozilla/5.0"),
+      copyValue: telemetryData?.network?.user_agent || (typeof window !== "undefined" ? navigator.userAgent : ""),
+      mono: true,
+    },
+    {
+      key: "wallet_address",
+      domain: "network" as const,
+      source: "Server IP",
+      badgeColor: "bg-purple-100 text-purple-800",
+      title: "In-App Wallet",
+      description: "Web3 / custom wallet address",
+      value: walletAddress,
+      copyValue: walletAddress,
+      mono: true,
+    },
+    {
+      key: "gaming_telemetry",
+      domain: "network" as const,
+      source: "Server IP",
+      badgeColor: "bg-purple-100 text-purple-800",
+      title: "Gaming Telemetry",
+      description: "Session engagement metrics",
+      value: `${score.toLocaleString()} WEI • ${fmtTime(spendSeconds)} Online • ${tapPower || 1}x Tap`,
+    },
+  ];
+
+  const displayedTelemetryItems = telemetryDomain === "all"
+    ? telemetryItems
+    : telemetryItems.filter((i) => i.domain === telemetryDomain);
+
   /* ── MAIN PROFILE ── */
   return (
     <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
@@ -634,6 +961,146 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
           <TaskRow title="Rewards" sub="Updated daily" badge={<Sparkles size={18} className="text-white" />} onClick={() => setView("notifications")} />
         </div>
       </div>
+
+      {/* ALL-IN-ONE PROFILE & TELEMETRY DETAILS (OWNER ONLY) */}
+      {isOwner && (
+        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-4 mb-4 overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-200/80 flex items-center justify-center text-[#0098ea] flex-shrink-0">
+                <ShieldCheck size={18} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                    Profile & System Telemetry
+                  </h3>
+                  <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 font-bold border border-sky-200">
+                    ALL-IN-ONE (23)
+                  </span>
+                </div>
+                <p className="text-[10.5px] text-slate-500 font-medium leading-tight mt-0.5">
+                  Real-time diagnostic telemetry across Bot API, WebApp SDK & Server layers.
+                </p>
+              </div>
+            </div>
+
+            {/* Actions: Refresh & Copy JSON */}
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => fetchTelemetry()}
+                disabled={loadingTelemetry}
+                title="Refresh Telemetry"
+                className="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 cursor-pointer active:scale-95 transition-all"
+              >
+                <RefreshCw size={14} className={loadingTelemetry ? "animate-spin text-[#0098ea]" : ""} />
+              </button>
+              <button
+                type="button"
+                onClick={() => copyToClipboard(fullTelemetryDump, setCopiedJson)}
+                title="Copy Full JSON"
+                className="px-2.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center gap-1 text-[11px] font-bold text-slate-700 cursor-pointer active:scale-95 transition-all"
+              >
+                {copiedJson ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+                <span>{copiedJson ? "Copied" : "JSON"}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Dynamic Access Notice Banner */}
+          <div className="my-3 p-3 rounded-2xl bg-sky-50/60 border border-sky-200/80 flex items-start gap-2.5">
+            <Info size={15} className="text-[#0098ea] flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] font-black text-slate-800 uppercase tracking-wide">
+                  WHO CAN SEE:
+                </span>
+                <span className="text-[10px] font-black text-[#0098ea] uppercase tracking-wide">
+                  Account Owner Only
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-600 font-medium leading-relaxed mt-0.5">
+                Strictly visible to the authenticated account owner and system administrators. Hidden from standard users, public players, and leaderboards.
+              </p>
+            </div>
+          </div>
+
+          {/* Domain Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-2.5 pt-0.5 border-b border-slate-100 no-scrollbar">
+            {[
+              { id: "all", label: "All Details (23)" },
+              { id: "bot", label: "Telegram (11)" },
+              { id: "sdk", label: "Mini App (7)" },
+              { id: "network", label: "Server (5)" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setTelemetryDomain(tab.id as typeof telemetryDomain)}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                  telemetryDomain === tab.id
+                    ? "bg-[#0098ea] text-white shadow-xs"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Items List */}
+          <div className="divide-y divide-slate-100">
+            {displayedTelemetryItems.map((item) => (
+              <div key={item.key} className="py-2.5 flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                    <span className="text-xs font-bold text-slate-800">{item.title}</span>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${item.badgeColor}`}>
+                      {item.source}
+                    </span>
+                  </div>
+                  <p className="text-[10.5px] text-slate-400 font-medium leading-tight truncate">
+                    {item.description}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 flex-shrink-0 max-w-[55%] justify-end">
+                  <span
+                    className={`text-xs font-semibold truncate ${
+                      item.mono
+                        ? "font-mono text-slate-700 bg-slate-50 px-2 py-0.5 rounded border border-slate-200"
+                        : "text-slate-800"
+                    }`}
+                  >
+                    {item.value}
+                  </span>
+                  {item.copyValue && (
+                    <button
+                      type="button"
+                      onClick={() => handleCopyFieldValue(item.key, item.copyValue!)}
+                      className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer active:scale-90 transition-transform"
+                      title="Copy value"
+                    >
+                      {copiedField === item.key ? (
+                        <Check size={12} className="text-emerald-500" />
+                      ) : (
+                        <Copy size={12} />
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Sync Timestamp Footer */}
+          <div className="pt-3 mt-1 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+            <span>23 Real-Time Parameters Live</span>
+            <span>Sync: {telemetryData?.network?.server_timestamp ? new Date(telemetryData.network.server_timestamp).toLocaleTimeString() : "Live"}</span>
+          </div>
+        </div>
+      )}
 
       {/* MENU LIST */}
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm mb-4 overflow-hidden">

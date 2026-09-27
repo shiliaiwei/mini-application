@@ -48,3 +48,32 @@
 - **Supported Poses**: `idle`, `wave`, `announce` (with megaphone), `cheer` (with victory sparks).
 - **Accessibility**: Pure vector SVG with `role="img"` and descriptive `aria-label`.
 - **Mascot Placement Rule**: Never put the mascot in the wallet card or wallet container. The mascot belongs exclusively in companion widgets, game activities, onboarding, and dedicated companion viewports.
+
+## Telegram User Profile & Telemetry Data Collection Standard - MANDATORY
+- **Direct Telegram Bot API Data Source**: Extract live user properties via `@srievibot` Telegram Bot API (`getChat`, `getUserProfilePhotos`, webhook updates):
+  - Permanent Telegram User ID (`id`).
+  - Username (`username`), First Name (`first_name`), Last Name (`last_name`).
+  - Public User Bio (`bio`).
+  - Interface Language Code (`language_code`).
+  - Telegram Premium status (`is_premium`).
+  - Linked Personal Channel / Chat (`personal_chat`).
+  - Profile Photos (`small_file_id`, `big_file_id`).
+  - Real-time bot interaction history & commands (`message`, `command`, `chat_id`).
+- **Telegram Mini App SDK Data Source (`window.Telegram.WebApp`)**:
+  - Cryptographically signed authentication payload (`initData` / `hash`).
+  - Direct message permission (`allows_write_to_pm`).
+  - Operating system / client runtime (`platform`: `ios`, `android`, `tdesktop`, `macos`, `weba`).
+  - WebApp API client version (`version`).
+  - Client color and theme tokens (`themeParams`).
+  - Viewport display boundaries (`viewportHeight`, `viewportStableHeight`).
+  - Native biometric hardware capability (`BiometricManager`).
+- **Server & Network Telemetry Source (`/api/player/sync`)**:
+  - Client IP address (`ip_address`).
+  - Geographic location (`city_country` / `cf-ipcountry`).
+  - Browser and hardware user-agent (`user_agent`).
+  - Bound Web3 wallet address (`wei_0x...`).
+  - Real-time gaming metrics (`score`, `spend_seconds`, `missions_claimed`).
+- **Database Persistence & Isolation**:
+  - Persist real-time player data in `game_players` and append audit trails to `player_audit_logs`.
+  - Strictly isolate mock ID `88888888` (`SHILIAIWEI Holder`) to local development previews; never overwrite or substitute live Telegram users with mock data.
+
