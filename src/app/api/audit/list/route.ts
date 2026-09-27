@@ -38,10 +38,10 @@ export async function GET(req: Request) {
       success: true,
       logs,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Fetch audit logs error:", err);
     return NextResponse.json(
-      { error: "Failed to fetch audit logs", details: err.message },
+      { error: "Failed to fetch audit logs" },
       { status: 500 }
     );
   }
