@@ -8,6 +8,7 @@ import { GameDock, GameTab } from "@/components/dock/GameDock";
 import { TapGameView } from "@/components/views/TapGameView";
 import type { ProfileSubTab } from "@/components/views/GameProfileView";
 import { TopBrandNavBar } from "@/components/navigation/TopBrandNavBar";
+import { TelegramGateScreen } from "@/components/common/TelegramGateScreen";
 import {
   Check,
   Wallet,
@@ -37,6 +38,40 @@ const DEFAULT_USER: TelegramUser = {
 
 export default function MiniAppPage() {
   const [tgApp, setTgApp] = useState<TelegramWebApp | null>(null);
+
+  // Strict Telegram Mini App Verification
+  // Web browser access is closed on public domains (e.g. app.kesararamwithdigital.tech),
+  // and permitted ONLY for local production tests (localhost / 127.0.0.1).
+  const [isTelegramVerified, setIsTelegramVerified] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const host = window.location.hostname;
+      const isLocalTest =
+        host === "localhost" ||
+        host === "127.0.0.1" ||
+        host === "0.0.0.0" ||
+        host.endsWith(".local");
+
+      // On localhost (local production test or dev), web access is permitted
+      if (isLocalTest) {
+        if (window.location.search.includes("preview_gate=true")) {
+          return false;
+        }
+        return true;
+      }
+
+      // On public domain, strictly require verified Telegram Mini App environment
+      const directApp = window.Telegram?.WebApp;
+      const hasInit = typeof directApp?.initData === "string" && directApp.initData.trim().length > 0;
+      const hasUser = Boolean(directApp?.initDataUnsafe?.user?.id);
+      const hasHash = window.location.hash.includes("tgWebAppData=");
+      const hasUA = /Telegram/i.test(navigator.userAgent);
+      const hasPlatform = Boolean(directApp?.platform && directApp.platform !== "unknown");
+
+      return hasInit || hasUser || (hasHash && hasPlatform) || (hasUA && hasPlatform);
+    }
+    return false;
+  });
+
   const [user, setUser] = useState<TelegramUser>(() => {
     if (typeof window !== "undefined") {
       const directUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
@@ -292,6 +327,16 @@ export default function MiniAppPage() {
       setTgApp(app);
 
       const tgUser = app.initDataUnsafe?.user;
+      const hasInit = Boolean(app.initData && app.initData.length > 0);
+      const hasUser = Boolean(tgUser?.id);
+      const hasHash = typeof window !== "undefined" && window.location.hash.includes("tgWebAppData=");
+      const hasUA = typeof navigator !== "undefined" && navigator.userAgent.includes("Telegram");
+      const hasPlatform = Boolean(app.platform && app.platform !== "unknown");
+
+      if (hasInit || hasUser || hasHash || hasUA || (hasPlatform && app.initData !== undefined)) {
+        setIsTelegramVerified(true);
+      }
+
       if (tgUser && tgUser.id) {
         setUser(tgUser);
         try {
@@ -407,6 +452,28 @@ export default function MiniAppPage() {
       setActiveTopUpScreen(false);
     }, 1500);
   };
+
+  const isLocalTest =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname === "0.0.0.0" ||
+      window.location.hostname.endsWith(".local"));
+
+  // On public domains (e.g. app.kesararamwithdigital.tech), access is closed unless inside Telegram Mini App
+  if (!isTelegramVerified && !isLocalTest) {
+    return <TelegramGateScreen isDev={false} />;
+  }
+
+  // On local test environment, if developer wants to preview the gate screen via ?preview_gate=true
+  if (!isTelegramVerified && isLocalTest) {
+    return (
+      <TelegramGateScreen
+        onBypass={() => setIsTelegramVerified(true)}
+        isDev={true}
+      />
+    );
+  }
 
   return (
     <div className="min-h-dvh flex flex-col justify-between app-bg-white text-slate-900 select-none overflow-x-hidden font-body relative">
