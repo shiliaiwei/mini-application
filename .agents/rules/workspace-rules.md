@@ -38,3 +38,4 @@
 - **Official Character**: Weibot, the electric cyan/royal blue companion with feline ear tufts, large specular anime eyes, and `[WEI]` gold collar crest.
 - **Supported Poses**: `idle`, `wave`, `announce` (with megaphone), `cheer` (with victory sparks).
 - **Accessibility**: Pure vector SVG with `role="img"` and descriptive `aria-label`.
+- **Mascot Placement Rule**: Never put the mascot in the wallet card or wallet container. The mascot belongs exclusively in companion widgets, game activities, onboarding, and dedicated companion viewports.

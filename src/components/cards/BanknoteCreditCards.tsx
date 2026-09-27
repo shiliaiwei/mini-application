@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
-import { ShiliaiweiMascot, MascotPose } from "@/components/brand/ShiliaiweiMascot";
 
 interface BanknoteCreditCardsProps {
   score: number;
@@ -59,8 +58,6 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
   const walletAddress = user?.id
     ? `wei_0x${Number(user.id).toString(16).padStart(8, "0")}...${String(user.id).slice(-4)}`
     : "wei_0x78a19bc3...82f1";
-
-  const mascotPose: MascotPose = currency === "USD" ? "idle" : currency === "KHR" ? "wave" : "cheer";
 
   const usdFormatted = (score > 0 ? score / 100 : 268.48).toLocaleString("en-US", {
     minimumFractionDigits: 2,
@@ -238,32 +235,24 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                     </div>
                   </div>
 
-                  {/* Right Column: Brand Mascot (Weibot) & Currency Sign */}
+                  {/* Right Column: Currency Sign (Dollar $ / Riel ៛ / SAR) & Valid Date */}
                   <div className="flex flex-col items-end">
-                    <div className="flex items-center gap-2">
-                      <ShiliaiweiMascot
-                        size={38}
-                        pose={mascotPose}
-                        animated={true}
-                        className="drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
-                      />
-                      <div
-                        className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 border border-white/30 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_6px_rgba(0,0,0,0.2)] transition-all"
-                      >
-                        {currency === "USD" ? (
-                          <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none flex items-center gap-1">
-                            $ <span className="text-[11px] font-black tracking-wider uppercase opacity-95">USD</span>
-                          </span>
-                        ) : currency === "KHR" ? (
-                          <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none flex items-center gap-1">
-                            ៛ <span className="text-[11px] font-black tracking-wider uppercase opacity-95">KHR</span>
-                          </span>
-                        ) : (
-                          <span className="text-lg sm:text-xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none">
-                            SAR
-                          </span>
-                        )}
-                      </div>
+                    <div
+                      className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 border border-white/30 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_6px_rgba(0,0,0,0.2)] transition-all"
+                    >
+                      {currency === "USD" ? (
+                        <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none flex items-center gap-1">
+                          $ <span className="text-[11px] font-black tracking-wider uppercase opacity-95">USD</span>
+                        </span>
+                      ) : currency === "KHR" ? (
+                        <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none flex items-center gap-1">
+                          ៛ <span className="text-[11px] font-black tracking-wider uppercase opacity-95">KHR</span>
+                        </span>
+                      ) : (
+                        <span className="text-lg sm:text-xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none">
+                          SAR
+                        </span>
+                      )}
                     </div>
 
                     <span className="text-[11px] sm:text-xs text-purple-100/90 font-medium mt-1">
@@ -320,18 +309,15 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                 </span>
               </div>
 
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+              <div className="flex items-baseline">
+                <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-[0_1px_3px_rgba(0,0,0,0.3)] font-sans">
                   {!showBalance
                     ? "••••••••"
                     : currency === "USD"
                     ? `$${usdFormatted}`
                     : currency === "KHR"
                     ? `៛${khrFormatted}`
-                    : sarFormatted}
-                </span>
-                <span className="text-xs sm:text-sm font-bold text-purple-200 uppercase tracking-wider">
-                  {currency}
+                    : `SAR ${sarFormatted}`}
                 </span>
               </div>
             </div>
@@ -358,30 +344,7 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
 
               {/* Right: Secondary Utility Icon Buttons */}
               <div className="flex items-center gap-2.5">
-                {/* 1. Swap / Currency Switch Circular Button */}
-                <button
-                  type="button"
-                  onClick={handleCycleCurrency}
-                  aria-label="Switch Currency"
-                  title={`Switch Currency (Current: ${currency})`}
-                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition-all duration-200 ease-out border border-white/20 backdrop-blur-md flex items-center justify-center text-white cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_4px_12px_rgba(0,0,0,0.18)]"
-                >
-                  {/* Two Opposing Horizontal Arrows (Swap/Transfer) */}
-                  <svg
-                    className="w-4 h-4 text-white stroke-[2]"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
-                    />
-                  </svg>
-                </button>
-
-                {/* 2. Eye / Visibility Toggle Circular Button */}
+                {/* Eye / Visibility Toggle Circular Button */}
                 <button
                   type="button"
                   onClick={handleToggleClick}

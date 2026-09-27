@@ -71,7 +71,7 @@ test("Currency Terminology: workspace-rules.md mandates WEI COIN and prohibits P
   assert.ok(content.includes("Prohibition of \"PTS\""));
 });
 
-test("Card Component: BanknoteCreditCards includes crypto address, hanging animation, and mascot", () => {
+test("Card Component: BanknoteCreditCards includes crypto address, hanging animation, and excludes mascot", () => {
   const cardPath = path.resolve(__dirname, "../src/components/cards/BanknoteCreditCards.tsx");
   assert.equal(fs.existsSync(cardPath), true);
 
@@ -79,5 +79,13 @@ test("Card Component: BanknoteCreditCards includes crypto address, hanging anima
   assert.ok(code.includes("walletAddress"), "Must display crypto wallet address");
   assert.ok(code.includes("isHangingSwitch"), "Must have hanging switch state");
   assert.ok(code.includes("switchDirection"), "Must track left/right switch direction");
-  assert.ok(code.includes("ShiliaiweiMascot"), "Must include brand mascot");
+  assert.equal(code.includes("ShiliaiweiMascot"), false, "Wallet card must NOT include mascot");
+});
+
+test("Navbar Component: TopBrandNavBar excludes eye button", () => {
+  const navPath = path.resolve(__dirname, "../src/components/navigation/TopBrandNavBar.tsx");
+  assert.equal(fs.existsSync(navPath), true);
+
+  const code = fs.readFileSync(navPath, "utf-8");
+  assert.equal(code.includes("EyeOff"), false, "Navbar must NOT have eye balance toggle");
 });

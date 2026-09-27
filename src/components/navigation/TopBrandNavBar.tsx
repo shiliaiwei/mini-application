@@ -3,7 +3,7 @@
 import React from "react";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
-import { Eye, EyeOff, Bell } from "@/components/icons/KeylineIcons";
+import { Bell } from "@/components/icons/KeylineIcons";
 
 interface TopBrandNavBarProps {
   showBalances: boolean;
@@ -39,28 +39,8 @@ export const TopBrandNavBar: React.FC<TopBrandNavBarProps> = React.memo(({
           <ShiliaiweiBrand height={22} colorScheme="blue" />
         </div>
 
-        {/* Top Actions: Eye Toggle, Notifications, User Avatar */}
+        {/* Top Actions: Notifications */}
         <div className="flex items-center gap-1.5">
-          {/* Eye Balance Toggle */}
-          <button
-            type="button"
-            onClick={() => {
-              try {
-                tgApp?.HapticFeedback?.selectionChanged();
-              } catch {}
-              onToggleBalances();
-            }}
-            className="w-10 h-10 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 flex items-center justify-center transition-colors shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0098ea] cursor-pointer"
-            aria-label={showBalances ? "Hide Balances" : "Show Balances"}
-            title={showBalances ? "Hide Balances" : "Show Balances"}
-          >
-            {showBalances ? (
-              <Eye size={20} className="text-slate-700" />
-            ) : (
-              <EyeOff size={20} className="text-slate-500" />
-            )}
-          </button>
-
           {/* Bell Notifications */}
           <button
             type="button"
