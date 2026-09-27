@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
+import { ShiliaiweiMascot, MascotPose } from "@/components/brand/ShiliaiweiMascot";
 
 interface BanknoteCreditCardsProps {
   score: number;
@@ -36,9 +37,9 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
   tgApp,
   onOpenDeposit,
 }) => {
-  // Remember last selected currency from localStorage, defaulting to USD
   const [currency, setCurrency] = useState<CurrencyMode>("USD");
-  const [isCardLifted, setIsCardLifted] = useState(false);
+  const [switchDirection, setSwitchDirection] = useState<"left" | "right">("right");
+  const [isHangingSwitch, setIsHangingSwitch] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -49,17 +50,18 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
     }
   }, []);
 
-  // Telegram logged-in owner username with @ prefix
   const telegramUsername = user?.username
     ? `@${user.username}`
     : user?.first_name
     ? `@${user.first_name.toLowerCase().replace(/[^a-z0-9_]/g, "")}`
     : "@shiliaiwei_holder";
 
-  const cardLastFour = user?.id ? String(user.id).slice(-4) : "5678";
+  const walletAddress = user?.id
+    ? `wei_0x${Number(user.id).toString(16).padStart(8, "0")}...${String(user.id).slice(-4)}`
+    : "wei_0x78a19bc3...82f1";
 
-  // Currency conversions based on score points:
-  // 100 WEI COIN = $1.00 USD = 4,100 KHR (~3.75 SAR)
+  const mascotPose: MascotPose = currency === "USD" ? "idle" : currency === "KHR" ? "wave" : "cheer";
+
   const usdFormatted = (score > 0 ? score / 100 : 268.48).toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -72,9 +74,10 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
     maximumFractionDigits: 2,
   });
 
-  // Cycle currency between USD ($), KHR (៛), and SAR and persist to localStorage
   const handleCycleCurrency = () => {
-    setIsCardLifted(true);
+    setSwitchDirection((prev) => (prev === "right" ? "left" : "right"));
+    setIsHangingSwitch(true);
+
     try {
       tgApp?.HapticFeedback?.selectionChanged?.();
       tgApp?.HapticFeedback?.impactOccurred?.("medium");
@@ -89,8 +92,8 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
     });
 
     setTimeout(() => {
-      setIsCardLifted(false);
-    }, 280);
+      setIsHangingSwitch(false);
+    }, 400);
   };
 
   const handleAddBalanceClick = (e: React.MouseEvent) => {
@@ -175,13 +178,9 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
               }}
             />
 
-            {/* Front Stacked Card with Dynamic Lift Animation on Switch */}
+            {/* Front Stacked Card (Stable Outside Container) */}
             <div
-              className={`relative w-[95%] mx-auto rounded-t-[26px] overflow-hidden px-5 pt-4 pb-14 text-white transition-all duration-300 ease-out ${
-                isCardLifted
-                  ? "-translate-y-3.5 shadow-2xl scale-[1.01]"
-                  : "translate-y-0 group-hover:-translate-y-1.5"
-              }`}
+              className="relative w-[95%] mx-auto rounded-t-[26px] overflow-hidden px-5 pt-4 pb-14 text-white select-none"
               style={{
                 background:
                   currency === "USD"
@@ -202,45 +201,75 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                 }}
               />
 
-              {/* Card Content Row */}
-              <div className="relative z-10 flex items-start justify-between">
-                {/* Left Column: Telegram Owner @username with Blue Verified Badge */}
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="text-base sm:text-lg font-bold text-white tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)] truncate max-w-[170px] sm:max-w-[210px]">
-                      {telegramUsername}
-                    </h3>
-                    <TelegramVerifiedBadge size={16} className="inline-flex drop-shadow-sm flex-shrink-0" />
-                  </div>
-                  <p className="text-xs sm:text-sm font-mono tracking-widest text-purple-100/90 font-medium mt-1">
-                    •••• •••• •••• {cardLastFour}
-                  </p>
-                </div>
+              {/* Simulated Suspension Eyelets */}
+              <div className="absolute top-2 inset-x-8 flex justify-between pointer-events-none z-20 opacity-40">
+                <div className="w-1.5 h-1.5 rounded-full bg-white shadow-inner" />
+                <div className="w-1.5 h-1.5 rounded-full bg-white shadow-inner" />
+              </div>
 
-                {/* Right Column: Currency Sign (Dollar $ / Riel ៛ / SAR) & Valid Date */}
-                <div className="flex flex-col items-end">
-                  {/* Currency Emblem (Replacing VISA) */}
-                  <div
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 group-hover:bg-white/30 border border-white/30 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_6px_rgba(0,0,0,0.2)] transition-all"
-                  >
-                    {currency === "USD" ? (
-                      <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none flex items-center gap-1">
-                        $ <span className="text-[11px] font-black tracking-wider uppercase opacity-95">USD</span>
+              {/* Hanging Style Switching Content Plate */}
+              <div
+                className="relative z-10 will-change-transform"
+                style={{
+                  transformOrigin: switchDirection === "right" ? "top left" : "top right",
+                  transform: isHangingSwitch
+                    ? switchDirection === "right"
+                      ? "translateX(18px) rotate(3deg)"
+                      : "translateX(-18px) rotate(-3deg)"
+                    : "translateX(0px) rotate(0deg)",
+                  opacity: isHangingSwitch ? 0.75 : 1,
+                  transition: "transform 400ms cubic-bezier(0.22, 1, 0.36, 1), opacity 300ms ease-out",
+                }}
+              >
+                <div className="flex items-start justify-between">
+                  {/* Left Column: Telegram Owner @username & Crypto Address */}
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="text-base sm:text-lg font-bold text-white tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)] truncate max-w-[150px] sm:max-w-[185px]">
+                        {telegramUsername}
+                      </h3>
+                      <TelegramVerifiedBadge size={16} className="inline-flex drop-shadow-sm flex-shrink-0" />
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+                      <span className="text-[11px] sm:text-xs font-mono tracking-wider text-purple-100/90 font-medium truncate max-w-[150px] sm:max-w-[180px]">
+                        {walletAddress}
                       </span>
-                    ) : currency === "KHR" ? (
-                      <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none flex items-center gap-1">
-                        ៛ <span className="text-[11px] font-black tracking-wider uppercase opacity-95">KHR</span>
-                      </span>
-                    ) : (
-                      <span className="text-lg sm:text-xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none">
-                        SAR
-                      </span>
-                    )}
+                    </div>
                   </div>
 
-                  <span className="text-[11px] sm:text-xs text-purple-100/90 font-medium mt-1">
-                    Valid: 05/29
-                  </span>
+                  {/* Right Column: Brand Mascot (Weibot) & Currency Sign */}
+                  <div className="flex flex-col items-end">
+                    <div className="flex items-center gap-2">
+                      <ShiliaiweiMascot
+                        size={38}
+                        pose={mascotPose}
+                        animated={true}
+                        className="drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
+                      />
+                      <div
+                        className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 border border-white/30 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_6px_rgba(0,0,0,0.2)] transition-all"
+                      >
+                        {currency === "USD" ? (
+                          <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none flex items-center gap-1">
+                            $ <span className="text-[11px] font-black tracking-wider uppercase opacity-95">USD</span>
+                          </span>
+                        ) : currency === "KHR" ? (
+                          <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none flex items-center gap-1">
+                            ៛ <span className="text-[11px] font-black tracking-wider uppercase opacity-95">KHR</span>
+                          </span>
+                        ) : (
+                          <span className="text-lg sm:text-xl font-black italic tracking-tighter text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] leading-none">
+                            SAR
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <span className="text-[11px] sm:text-xs text-purple-100/90 font-medium mt-1">
+                      Valid: 05/29
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

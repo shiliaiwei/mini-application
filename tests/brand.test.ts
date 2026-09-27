@@ -70,3 +70,14 @@ test("Currency Terminology: workspace-rules.md mandates WEI COIN and prohibits P
   assert.ok(content.includes("WEI COIN"));
   assert.ok(content.includes("Prohibition of \"PTS\""));
 });
+
+test("Card Component: BanknoteCreditCards includes crypto address, hanging animation, and mascot", () => {
+  const cardPath = path.resolve(__dirname, "../src/components/cards/BanknoteCreditCards.tsx");
+  assert.equal(fs.existsSync(cardPath), true);
+
+  const code = fs.readFileSync(cardPath, "utf-8");
+  assert.ok(code.includes("walletAddress"), "Must display crypto wallet address");
+  assert.ok(code.includes("isHangingSwitch"), "Must have hanging switch state");
+  assert.ok(code.includes("switchDirection"), "Must track left/right switch direction");
+  assert.ok(code.includes("ShiliaiweiMascot"), "Must include brand mascot");
+});
