@@ -6,67 +6,39 @@ import { BrandFooter } from "@/components/brand/BrandFooter";
 interface StatusCodeDefinition {
   code: number;
   title: string;
-  category: "Client Error" | "Server Error" | "Cloudflare Error";
-  categoryCode: "4xx" | "5xx";
-  meaning: string;
   hostStatusText: string;
-  badgeTheme: "amber" | "rose";
 }
 
 const CLOUDFLARE_STATUS_CODES: StatusCodeDefinition[] = [
   {
     code: 403,
     title: "Forbidden",
-    category: "Client Error",
-    categoryCode: "4xx",
-    meaning: "The request contains bad syntax or cannot be fulfilled without verified session credentials.",
     hostStatusText: "Forbidden",
-    badgeTheme: "amber",
   },
   {
     code: 401,
     title: "Unauthorized",
-    category: "Client Error",
-    categoryCode: "4xx",
-    meaning: "Authentication credentials or Telegram initData cryptographic signature are missing.",
     hostStatusText: "Unauthorized",
-    badgeTheme: "amber",
   },
   {
     code: 502,
     title: "Bad Gateway",
-    category: "Server Error",
-    categoryCode: "5xx",
-    meaning: "The edge proxy received an invalid authentication response from the upstream origin host.",
     hostStatusText: "Bad Gateway",
-    badgeTheme: "rose",
   },
   {
     code: 503,
     title: "Service Unavailable",
-    category: "Server Error",
-    categoryCode: "5xx",
-    meaning: "The origin server is temporarily unable to handle direct requests without verified bot session.",
     hostStatusText: "Unavailable",
-    badgeTheme: "rose",
   },
   {
     code: 520,
     title: "Web Server Returned Unknown Error",
-    category: "Cloudflare Error",
-    categoryCode: "5xx",
-    meaning: "Cloudflare edge detected a non-standard handshake response from non-Telegram web client.",
     hostStatusText: "Origin Error",
-    badgeTheme: "rose",
   },
   {
     code: 522,
     title: "Connection Timed Out",
-    category: "Cloudflare Error",
-    categoryCode: "5xx",
-    meaning: "Connection to secure vault origin timed out due to missing cryptographic authorization token.",
     hostStatusText: "Timeout",
-    badgeTheme: "rose",
   },
 ];
 
@@ -106,7 +78,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
     <div className="min-h-screen bg-white text-[#222222] font-sans antialiased select-none flex flex-col justify-between">
       <div className="w-full">
         {/* Top Header Section (Authentic Cloudflare Mobile-First Header) */}
-        <header className="max-w-4xl mx-auto px-5 sm:px-8 pt-7 sm:pt-14 pb-5 space-y-2.5">
+        <header className="max-w-4xl mx-auto px-5 sm:px-8 pt-7 sm:pt-14 pb-5 space-y-2">
           <div className="flex flex-wrap items-baseline gap-2.5 sm:gap-3.5">
             <h1 className="text-3xl sm:text-5xl font-light text-[#222222] tracking-tight">
               {statusInfo.code} {statusInfo.title}
@@ -114,20 +86,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
             <span className="inline-block text-[11px] sm:text-xs font-medium px-2.5 py-0.5 rounded-full bg-[#efefef] text-[#555555] border border-[#e2e2e2] align-middle select-none">
               Error code {statusInfo.code}
             </span>
-            <span
-              className={`inline-block text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded border select-none ${
-                statusInfo.badgeTheme === "amber"
-                  ? "bg-amber-50 text-amber-800 border-amber-200/80"
-                  : "bg-rose-50 text-rose-800 border-rose-200/80"
-              }`}
-            >
-              {statusInfo.categoryCode} {statusInfo.category}
-            </span>
           </div>
-
-          <p className="text-[#475569] text-xs sm:text-sm font-normal leading-relaxed">
-            {statusInfo.meaning}
-          </p>
 
           <p className="text-[#555555] text-xs sm:text-base font-normal pt-0.5 leading-relaxed">
             Visit our{" "}
