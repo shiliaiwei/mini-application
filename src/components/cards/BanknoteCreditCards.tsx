@@ -401,11 +401,8 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
               </span>
             </div>
 
-            {/* PERMANENT QUICK ACTION BUTTONS POD (COIN / WALLET SKEUOMORPHIC DESIGN) */}
-            <div className="relative z-20 mt-3 pt-3.5 pb-3 px-3 rounded-[22px] bg-gradient-to-b from-[#180528]/95 via-[#0e021a]/95 to-[#080110]/95 border border-purple-300/25 backdrop-blur-xl shadow-[0_16px_36px_rgba(0,0,0,0.65),inset_0_1px_2px_rgba(255,255,255,0.35)]">
-              {/* Specular Rim Highlight */}
-              <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent pointer-events-none" />
-
+            {/* QUICK ACTION BUTTONS (MATCHING LEATHER POCKET FLAP - ZERO DARK BACKGROUND) */}
+            <div className="relative z-20 mt-3 pt-1 pb-1">
               {/* 3 Floating 3D Coin Buttons */}
               <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {/* 1. SCAN */}
@@ -425,7 +422,7 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                     <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
                     <ScanLine size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
                   </div>
-                  <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-xs">
+                  <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
                     SCAN
                   </span>
                 </button>
@@ -447,7 +444,7 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                     <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
                     <ArrowDownLeft size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
                   </div>
-                  <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-xs">
+                  <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
                     RECEIVE
                   </span>
                 </button>
@@ -469,7 +466,7 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                     <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
                     <ArrowUpRight size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
                   </div>
-                  <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-xs">
+                  <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
                     WITHDRAW
                   </span>
                 </button>
