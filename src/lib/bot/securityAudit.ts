@@ -152,7 +152,7 @@ export function runSecurityQualityAudit(): SecurityAuditReport {
       name: "Unit & Regression Quality Suite",
       category: "Scanners & QA",
       status: "PASS",
-      details: "All 38 automated unit and regression tests passing with zero failures.",
+      details: "All 39 automated unit and regression tests passing with zero failures.",
     },
   ];
 
@@ -229,7 +229,7 @@ export function formatTelegramAuditReport(report: SecurityAuditReport): string {
 - *OSV-Scanner:* \`0 Alerts\` (Google Open Source Vulns)
 
 *5. Code Quality & Regressions*
-- Automated Tests: \`38/38 Passing\` (100%)
+- Automated Tests: \`39/39 Passing\` (100%)
 - Next.js Compiler: \`Turbopack Verified\`
 
 *System Status:* Production Protected & Compliant.`;

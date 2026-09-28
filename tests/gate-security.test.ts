@@ -228,5 +228,45 @@ test("Cryptographic Anti-Forging: Rejects forged browser URLs with missing or in
   assert.equal(expiredResult.error, "Telegram session expired (auth_date > 24 hours)");
 });
 
+test("Production User Isolation: Zero demo or mock user in production; external browsers receive blank page", () => {
+  const pagePath = path.resolve(__dirname, "../src/app/page.tsx");
+  const pageContent = fs.readFileSync(pagePath, "utf-8");
+
+  // Verify DEFAULT_USER is renamed to DEFAULT_DEV_USER and isolated strictly to localhost
+  assert.equal(pageContent.includes("const DEFAULT_USER:"), false, "DEFAULT_USER must not exist; use DEFAULT_DEV_USER");
+  assert.ok(pageContent.includes("DEFAULT_DEV_USER"), "DEFAULT_DEV_USER must be defined for local dev only");
+  assert.ok(
+    pageContent.includes("if (isLocal) {") && pageContent.includes("setUser(DEFAULT_DEV_USER)"),
+    "DEFAULT_DEV_USER must only be set when isLocal is true"
+  );
+
+  // Initial user state must be null (zero fallback user in production)
+  assert.ok(
+    pageContent.includes("const [user, setUser] = useState<TelegramUser | null>(null);"),
+    "Initial user state must be null"
+  );
+
+  // Verify detectIsTelegramClient enforces native platform or Telegram iframe
+  assert.ok(
+    pageContent.includes("window.self !== window.top"),
+    "detectIsTelegramClient must require iframe or native platform"
+  );
+  assert.equal(
+    pageContent.includes("document.referrer && /telegram\\.org/"),
+    false,
+    "document.referrer must not be used to bypass Telegram verification"
+  );
+
+  // Blank page enforcement for external browsers and unverified users
+  assert.ok(
+    pageContent.includes("(!isTelegramClient || !isTelegramVerified || !user) && !isLocalTest"),
+    "External browser or unverified session must render blank page"
+  );
+  assert.ok(
+    pageContent.includes("localStorage.removeItem(\"shi_tg_user_cache\")"),
+    "Stale cache must be purged on unverified sessions"
+  );
+});
+
 
 
