@@ -24,19 +24,19 @@ test("Vercel Security Config: vercel.json restricts iframe embedding to Telegram
   const directiveMap = new Map(cspDirectives.map(([name, ...vals]) => [name, vals]));
 
   const frameTokens = directiveMap.get("frame-ancestors") || [];
-  assert.ok(frameTokens.includes("https://web.telegram.org"), "CSP must restrict frame-ancestors to Telegram domains");
+  assert.equal(frameTokens.some((t) => t === "https://web.telegram.org"), true, "CSP must restrict frame-ancestors to Telegram domains");
 
   const defaultTokens = directiveMap.get("default-src") || [];
-  assert.ok(defaultTokens.includes("'self'"), "CSP must define default-src 'self'");
+  assert.equal(defaultTokens.some((t) => t === "'self'"), true, "CSP must define default-src 'self'");
 
   const scriptTokens = directiveMap.get("script-src") || [];
-  assert.ok(scriptTokens.includes("https://telegram.org"), "CSP must whitelist Telegram scripts");
+  assert.equal(scriptTokens.some((t) => t === "https://telegram.org"), true, "CSP must whitelist Telegram scripts");
 
   const connectTokens = directiveMap.get("connect-src") || [];
-  assert.ok(connectTokens.includes("https://api.telegram.org"), "CSP must whitelist Telegram API connect endpoints");
+  assert.equal(connectTokens.some((t) => t === "https://api.telegram.org"), true, "CSP must whitelist Telegram API connect endpoints");
 
   const objectTokens = directiveMap.get("object-src") || [];
-  assert.ok(objectTokens.includes("'none'"), "CSP must disallow plugins with object-src 'none'");
+  assert.equal(objectTokens.some((t) => t === "'none'"), true, "CSP must disallow plugins with object-src 'none'");
 
   const robotsHeader = globalHeaders.headers.find((h: any) => h.key === "X-Robots-Tag");
   assert.ok(robotsHeader, "Must contain X-Robots-Tag");

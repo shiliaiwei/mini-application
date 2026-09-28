@@ -137,65 +137,44 @@ export function createInitialSettings(user: TelegramUser | null): UserSettings {
 }
 
 /**
- * Obfuscates sensitive PII before storing to client-side localStorage to prevent clear-text exposure.
- */
-function obfuscateStorageData(plainText: string): string {
-  try {
-    const salt = 0x5a;
-    let result = "";
-    for (let i = 0; i < plainText.length; i++) {
-      result += String.fromCharCode(plainText.charCodeAt(i) ^ salt);
-    }
-    return btoa(encodeURIComponent(result));
-  } catch {
-    return plainText;
-  }
-}
-
-/**
- * De-obfuscates client-side stored settings, with backwards-compatible fallback.
- */
-function deobfuscateStorageData(storedValue: string): string {
-  try {
-    const decoded = decodeURIComponent(atob(storedValue));
-    const salt = 0x5a;
-    let result = "";
-    for (let i = 0; i < decoded.length; i++) {
-      result += String.fromCharCode(decoded.charCodeAt(i) ^ salt);
-    }
-    return result;
-  } catch {
-    // Graceful fallback for existing plaintext JSON in storage
-    return storedValue;
-  }
-}
-
-/**
- * Synchronously loads cached settings from localStorage
+ * Synchronously loads cached preferences from localStorage (non-sensitive display settings only)
  */
 export function loadCachedUserSettings(user: TelegramUser | null): UserSettings {
+  const initial = createInitialSettings(user);
   if (typeof window === "undefined") {
-    return createInitialSettings(user);
+    return initial;
   }
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      const plain = deobfuscateStorageData(raw);
-      const parsed = JSON.parse(plain);
+      const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === "object") {
         return {
-          ...createInitialSettings(user),
-          ...parsed,
-          homeAddress: { ...DEFAULT_USER_SETTINGS.homeAddress, ...(parsed.homeAddress || {}) },
-          workAddress: { ...DEFAULT_USER_SETTINGS.workAddress, ...(parsed.workAddress || {}) },
-          otherAddress: { ...DEFAULT_USER_SETTINGS.otherAddress, ...(parsed.otherAddress || {}) },
+          ...initial,
+          photoUrl: parsed.photoUrl || initial.photoUrl,
+          photoSource: parsed.photoSource || initial.photoSource,
+          displayName: parsed.displayName || initial.displayName,
+          language: parsed.language || initial.language,
+          telegramCloudSync:
+            typeof parsed.telegramCloudSync === "boolean"
+              ? parsed.telegramCloudSync
+              : initial.telegramCloudSync,
+          hapticFeedback:
+            typeof parsed.hapticFeedback === "boolean"
+              ? parsed.hapticFeedback
+              : initial.hapticFeedback,
+          soundEffects:
+            typeof parsed.soundEffects === "boolean"
+              ? parsed.soundEffects
+              : initial.soundEffects,
+          updatedAt: parsed.updatedAt || initial.updatedAt,
         };
       }
     }
   } catch {}
 
-  return createInitialSettings(user);
+  return initial;
 }
 
 /**
@@ -222,10 +201,6 @@ export function loadTelegramCloudSettings(
               workAddress: { ...DEFAULT_USER_SETTINGS.workAddress, ...(parsed.workAddress || {}) },
               otherAddress: { ...DEFAULT_USER_SETTINGS.otherAddress, ...(parsed.otherAddress || {}) },
             };
-            // Cache to localStorage with obfuscation
-            try {
-              localStorage.setItem(STORAGE_KEY, obfuscateStorageData(JSON.stringify(merged)));
-            } catch {}
             callback(merged);
           }
         } catch {}
@@ -235,7 +210,8 @@ export function loadTelegramCloudSettings(
 }
 
 /**
- * Persists settings to localStorage and Telegram CloudStorage
+ * Persists settings to localStorage and Telegram CloudStorage.
+ * Sensitive PII (addresses, phone, email) is strictly stored in Telegram CloudStorage only.
  */
 export function saveUserSettings(
   settings: UserSettings,
@@ -248,14 +224,24 @@ export function saveUserSettings(
 
   const str = JSON.stringify(updated);
 
-  // 1. localStorage cache (obfuscated to protect sensitive PII)
+  // 1. In client-side localStorage, strictly store non-sensitive display preferences only
   if (typeof window !== "undefined") {
     try {
-      localStorage.setItem(STORAGE_KEY, obfuscateStorageData(str));
+      const nonSensitivePrefs = {
+        photoUrl: updated.photoUrl,
+        photoSource: updated.photoSource,
+        displayName: updated.displayName,
+        language: updated.language,
+        telegramCloudSync: updated.telegramCloudSync,
+        hapticFeedback: updated.hapticFeedback,
+        soundEffects: updated.soundEffects,
+        updatedAt: updated.updatedAt,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nonSensitivePrefs));
     } catch {}
   }
 
-  // 2. Telegram CloudStorage
+  // 2. Full profile with verified addresses is securely stored in Telegram CloudStorage
   if (tgApp?.CloudStorage?.setItem && settings.telegramCloudSync) {
     try {
       tgApp.CloudStorage.setItem(STORAGE_KEY, str, (err, ok) => {
