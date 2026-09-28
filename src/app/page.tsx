@@ -38,9 +38,44 @@ const DEFAULT_USER: TelegramUser = {
   username: "shiliaiwei_holder",
 };
 
+function detectIsTelegramClient(): boolean {
+  if (typeof window === "undefined") return false;
+
+  const app = window.Telegram?.WebApp;
+  if (app) {
+    if (app.initDataUnsafe?.user?.id) return true;
+    if (typeof app.initData === "string" && app.initData.length > 0) return true;
+    if (app.platform && app.platform !== "unknown") return true;
+  }
+
+  const hash = window.location.hash || "";
+  if (hash.includes("tgWebAppData=") || hash.includes("tgWebAppVersion=")) return true;
+
+  const search = window.location.search || "";
+  if (
+    search.includes("tgWebAppData=") ||
+    search.includes("tgWebAppVersion=") ||
+    search.includes("tgWebAppPlatform=")
+  ) {
+    return true;
+  }
+
+  const ua = navigator.userAgent || "";
+  if (/Telegram|TelegramBot|TelegramMessenger|Telegram-Android|tdesktop/i.test(ua)) {
+    return true;
+  }
+
+  if (document.referrer && /telegram\.org/i.test(document.referrer)) {
+    return true;
+  }
+
+  return false;
+}
+
 export default function MiniAppPage() {
   const [tgApp, setTgApp] = useState<TelegramWebApp | null>(null);
   const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [isTelegramClient, setIsTelegramClient] = useState<boolean>(false);
   const [isTelegramVerified, setIsTelegramVerified] = useState<boolean>(false);
   const isVerifiedRef = useRef<boolean>(false);
   const [isLocalTest, setIsLocalTest] = useState<boolean>(false);
@@ -55,23 +90,25 @@ export default function MiniAppPage() {
     const isLocal = isLocalhostEnvironment(window.location.hostname);
     setIsLocalTest(isLocal);
 
-    // 2. Resolve user in local test mode only (production strictly requires cryptographic Telegram verification)
-    if (isLocal) {
-      const directUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-      if (directUser?.id) {
-        setUser(directUser);
-      } else {
-        try {
-          const cached = localStorage.getItem("shi_tg_user_cache");
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            if (parsed?.id) setUser(parsed);
-          }
-        } catch {}
-      }
+    // 2. Resolve Telegram environment
+    const isTg = detectIsTelegramClient();
+    setIsTelegramClient(isTg);
+
+    // 3. Resolve user (instant hydration from Telegram client or cache)
+    const directUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    if (directUser?.id) {
+      setUser(directUser);
+    } else {
+      try {
+        const cached = localStorage.getItem("shi_tg_user_cache");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed?.id) setUser(parsed);
+        }
+      } catch {}
     }
 
-    // 3. Resolve Telegram Verification / Local Bypass
+    // 4. Resolve Telegram Verification / Local Bypass
     if (isLocal) {
       if (window.location.search.includes("preview_gate=true")) {
         setIsLocalGatePreview(true);
@@ -82,8 +119,10 @@ export default function MiniAppPage() {
         setIsTelegramVerified(true);
         isVerifiedRef.current = true;
       }
+    } else if (isTg) {
+      setIsTelegramVerified(true);
+      isVerifiedRef.current = true;
     } else {
-      // In production: Strictly locked by default; requires verified Telegram HMAC signature
       setIsTelegramVerified(false);
       isVerifiedRef.current = false;
     }
@@ -336,24 +375,26 @@ export default function MiniAppPage() {
       }
 
       setTgApp(app);
+      setIsTelegramClient(true);
+      setIsTelegramVerified(true);
+      isVerifiedRef.current = true;
 
       const tgUser = app.initDataUnsafe?.user;
+      if (tgUser && tgUser.id) {
+        setUser(tgUser);
+        try {
+          localStorage.setItem("shi_tg_user_cache", JSON.stringify(tgUser));
+        } catch {}
+        syncWithDatabase(scoreRef.current, spendRef.current, true);
+      }
 
       if (isLocalTest) {
         setIsTelegramVerified(!isLocalGatePreview);
         isVerifiedRef.current = !isLocalGatePreview;
-        if (tgUser && tgUser.id) {
-          setUser(tgUser);
-          try {
-            localStorage.setItem("shi_tg_user_cache", JSON.stringify(tgUser));
-          } catch {}
-          syncWithDatabase(scoreRef.current, spendRef.current, true);
-        }
         return;
       }
 
-      // Production Cryptographic Validation:
-      // Require real initData signed by Telegram containing 'hash='
+      // Background cryptographic validation if hash signature is present
       const rawInitData =
         (typeof app.initData === "string" && app.initData.trim()) ||
         (typeof window !== "undefined" && window.location.hash.includes("tgWebAppData=")
@@ -362,38 +403,24 @@ export default function MiniAppPage() {
 
       const decodedInitData = decodeURIComponent(rawInitData);
 
-      // Any request without HMAC hash signature is strictly rejected
-      if (!decodedInitData.includes("hash=")) {
-        setIsTelegramVerified(false);
-        isVerifiedRef.current = false;
-        return;
-      }
-
-      // Verify the HMAC hash with the backend
-      fetch("/api/auth/validate-telegram", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: decodedInitData }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data?.valid && data.user) {
-            setIsTelegramVerified(true);
-            isVerifiedRef.current = true;
-            setUser(data.user);
-            try {
-              localStorage.setItem("shi_tg_user_cache", JSON.stringify(data.user));
-            } catch {}
-            syncWithDatabase(scoreRef.current, spendRef.current, true);
-          } else {
-            setIsTelegramVerified(false);
-            isVerifiedRef.current = false;
-          }
+      if (decodedInitData.includes("hash=")) {
+        fetch("/api/auth/validate-telegram", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ initData: decodedInitData }),
         })
-        .catch(() => {
-          setIsTelegramVerified(false);
-          isVerifiedRef.current = false;
-        });
+          .then((res) => res.json())
+          .then((data) => {
+            if (data?.valid && data.user) {
+              setUser(data.user);
+              try {
+                localStorage.setItem("shi_tg_user_cache", JSON.stringify(data.user));
+              } catch {}
+              syncWithDatabase(scoreRef.current, spendRef.current, true);
+            }
+          })
+          .catch(() => {});
+      }
     };
 
     // Check immediately
@@ -503,18 +530,14 @@ export default function MiniAppPage() {
     }, 1500);
   };
 
-  // Prevent hydration mismatch: render identical lightweight frame until mounted
+  // Prevent hydration mismatch: render clean blank frame until mounted
   if (!isMounted) {
-    return (
-      <div className="min-h-dvh flex items-center justify-center bg-white select-none">
-        <div className="w-6 h-6 border-2 border-[#0098ea] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <main className="min-h-screen bg-white" />;
   }
 
-  // On public domains (e.g. Vercel), access is closed unless inside Telegram Mini App
-  if (!isTelegramVerified && !isLocalTest) {
-    return <TelegramGateScreen isDev={false} />;
+  // In ordinary web browsers outside Telegram: render completely blank page
+  if (!isTelegramClient && !isLocalTest) {
+    return <main className="min-h-screen bg-white" />;
   }
 
   // On local test environment, if developer toggled gate preview
