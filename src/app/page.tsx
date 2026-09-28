@@ -38,28 +38,46 @@ const DEFAULT_USER: TelegramUser = {
 
 export default function MiniAppPage() {
   const [tgApp, setTgApp] = useState<TelegramWebApp | null>(null);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [isTelegramVerified, setIsTelegramVerified] = useState<boolean>(false);
+  const [isLocalTest, setIsLocalTest] = useState<boolean>(false);
+  const [user, setUser] = useState<TelegramUser>(DEFAULT_USER);
+  const [activeTab, setActiveTab] = useState<GameTab>("wallet");
 
-  // Strict Telegram Mini App Verification
-  // Web browser access is closed on public domains (e.g. app.kesararamwithdigital.tech),
-  // and permitted ONLY for local production tests (localhost / 127.0.0.1).
-  const [isTelegramVerified, setIsTelegramVerified] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      const host = window.location.hostname;
-      const isLocalTest =
-        host === "localhost" ||
-        host === "127.0.0.1" ||
-        host === "0.0.0.0" ||
-        host.endsWith(".local");
+  useEffect(() => {
+    setIsMounted(true);
 
-      // On localhost (local production test or dev), web access is permitted
-      if (isLocalTest) {
-        if (window.location.search.includes("preview_gate=true")) {
-          return false;
+    // 1. Resolve host environment
+    const host = window.location.hostname;
+    const isLocal =
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host === "0.0.0.0" ||
+      host.endsWith(".local");
+    setIsLocalTest(isLocal);
+
+    // 2. Resolve user from Telegram or localStorage
+    const directUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    if (directUser?.id) {
+      setUser(directUser);
+    } else {
+      try {
+        const cached = localStorage.getItem("shi_tg_user_cache");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed?.id) setUser(parsed);
         }
-        return true;
-      }
+      } catch {}
+    }
 
-      // On public domain, strictly require verified Telegram Mini App environment
+    // 3. Resolve Telegram Verification / Local Bypass
+    if (isLocal) {
+      if (window.location.search.includes("preview_gate=true")) {
+        setIsTelegramVerified(false);
+      } else {
+        setIsTelegramVerified(true);
+      }
+    } else {
       const directApp = window.Telegram?.WebApp;
       const hasInit = typeof directApp?.initData === "string" && directApp.initData.trim().length > 0;
       const hasUser = Boolean(directApp?.initDataUnsafe?.user?.id);
@@ -67,34 +85,14 @@ export default function MiniAppPage() {
       const hasUA = /Telegram/i.test(navigator.userAgent);
       const hasPlatform = Boolean(directApp?.platform && directApp.platform !== "unknown");
 
-      return hasInit || hasUser || (hasHash && hasPlatform) || (hasUA && hasPlatform);
+      setIsTelegramVerified(hasInit || hasUser || (hasHash && hasPlatform) || (hasUA && hasPlatform));
     }
-    return false;
-  });
 
-  const [user, setUser] = useState<TelegramUser>(() => {
-    if (typeof window !== "undefined") {
-      const directUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-      if (directUser?.id) return directUser;
-      try {
-        const cached = localStorage.getItem("shi_tg_user_cache");
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (parsed?.id) return parsed;
-        }
-      } catch {}
-    }
-    return DEFAULT_USER;
-  });
-  const [activeTab, setActiveTab] = useState<GameTab>("wallet");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const tabParam = params.get("tab") as GameTab;
-      if (tabParam && ["wallet", "tasks", "leaderboard", "profile"].includes(tabParam)) {
-        setActiveTab(tabParam);
-      }
+    // 4. Resolve tab parameter from search params
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get("tab") as GameTab;
+    if (tabParam && ["wallet", "tasks", "leaderboard", "profile"].includes(tabParam)) {
+      setActiveTab(tabParam);
     }
   }, []);
   const [activeCategory, setActiveCategory] = useState<NavCategory>("lobby");
@@ -453,12 +451,14 @@ export default function MiniAppPage() {
     }, 1500);
   };
 
-  const isLocalTest =
-    typeof window !== "undefined" &&
-    (window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1" ||
-      window.location.hostname === "0.0.0.0" ||
-      window.location.hostname.endsWith(".local"));
+  // Prevent hydration mismatch: render identical lightweight frame until mounted
+  if (!isMounted) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center bg-white select-none">
+        <div className="w-6 h-6 border-2 border-[#0098ea] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   // On public domains (e.g. app.kesararamwithdigital.tech), access is closed unless inside Telegram Mini App
   if (!isTelegramVerified && !isLocalTest) {

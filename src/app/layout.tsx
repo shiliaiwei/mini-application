@@ -67,18 +67,16 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${roboto.variable} ${googleSans.variable} ${facultyGlyphic.variable} h-full antialiased light`}
     >
-      <head>
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col bg-white text-[#0f172a] antialiased font-sans selection:bg-[#0098ea] selection:text-white"
+      >
         <link rel="preconnect" href="https://telegram.org" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://telegram.org" />
         <Script
           src="https://telegram.org/js/telegram-web-app.js"
           strategy="beforeInteractive"
         />
-      </head>
-      <body
-        suppressHydrationWarning
-        className="min-h-full flex flex-col bg-white text-[#0f172a] antialiased font-sans selection:bg-[#0098ea] selection:text-white"
-      >
         {children}
       </body>
     </html>
