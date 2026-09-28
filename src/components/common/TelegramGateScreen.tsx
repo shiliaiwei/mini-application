@@ -9,10 +9,10 @@ interface StatusCodeDefinition {
   hostStatusText: string;
 }
 
-const STABLE_STATUS_520: StatusCodeDefinition = {
-  code: 520,
-  title: "Web server is returning an unknown error",
-  hostStatusText: "Error",
+const STABLE_STATUS_403: StatusCodeDefinition = {
+  code: 403,
+  title: "Forbidden",
+  hostStatusText: "Forbidden",
 };
 
 interface TelegramGateScreenProps {
@@ -21,12 +21,23 @@ interface TelegramGateScreenProps {
 }
 
 export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
-  const statusInfo = STABLE_STATUS_520;
+  const statusInfo = STABLE_STATUS_403;
   const [rayId, setRayId] = useState<string>("8e19c04a79b28f31");
   const [currentHost, setCurrentHost] = useState<string>("app.kesararamwithdigital.tech");
 
   const channelUrl = "https://t.me/shiliaiwei";
-  const botUrl = "https://t.me/srievibot";
+  // Direct Mini App launch URLs for Telegram
+  const botAppDirectUrl = "https://t.me/srievibot/app";
+  const botDeepLink = "tg://resolve?domain=srievibot&startapp=true";
+
+  const handleLaunchMiniApp = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // Attempt instant native protocol launch on mobile / desktop app
+    try {
+      if (typeof window !== "undefined") {
+        window.location.href = botDeepLink;
+      }
+    } catch {}
+  };
 
   useEffect(() => {
     try {
@@ -68,7 +79,8 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
             </a>{" "}
             for more information, then launch via{" "}
             <a
-              href={botUrl}
+              href={botAppDirectUrl}
+              onClick={handleLaunchMiniApp}
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#0051c3] hover:underline font-semibold"
@@ -242,7 +254,8 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               </a>{" "}
               សម្រាប់ព័ត៌មានបន្ថែម បន្ទាប់មកបើកតាមរយៈតេឡេក្រាមបូតផ្លូវការ{" "}
               <a
-                href={botUrl}
+                href={botAppDirectUrl}
+                onClick={handleLaunchMiniApp}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#0051c3] hover:underline font-medium"
