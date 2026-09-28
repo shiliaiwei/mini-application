@@ -1,0 +1,40 @@
+name: "Semgrep"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '20 2 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  semgrep:
+    name: "Semgrep SAST Scan"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep OSS
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/owasp-top-ten
+            p/javascript
+          generateSarif: "true"
+
+      - name: Upload Semgrep scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'semgrep.sarif'
+          category: 'semgrep'
