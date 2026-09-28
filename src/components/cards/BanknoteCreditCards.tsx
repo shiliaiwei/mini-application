@@ -409,7 +409,7 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                 <button
                   type="button"
                   onClick={() => handleActionClick("scan")}
-                  className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-white/10 active:scale-95 transition-all cursor-pointer group"
+                  className="flex flex-col items-center gap-1.5 py-1 px-2 active:scale-95 transition-transform cursor-pointer group select-none outline-none focus:outline-none"
                 >
                   <div
                     className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#0098ea] via-[#0088cc] to-[#005f99] border-2 border-cyan-300/50 flex items-center justify-center text-white"
@@ -431,7 +431,7 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                 <button
                   type="button"
                   onClick={() => handleActionClick("receive")}
-                  className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-white/10 active:scale-95 transition-all cursor-pointer group"
+                  className="flex flex-col items-center gap-1.5 py-1 px-2 active:scale-95 transition-transform cursor-pointer group select-none outline-none focus:outline-none"
                 >
                   <div
                     className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#10b981] via-[#059669] to-[#047857] border-2 border-emerald-300/50 flex items-center justify-center text-white"
@@ -453,7 +453,7 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                 <button
                   type="button"
                   onClick={() => handleActionClick("withdraw")}
-                  className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-white/10 active:scale-95 transition-all cursor-pointer group"
+                  className="flex flex-col items-center gap-1.5 py-1 px-2 active:scale-95 transition-transform cursor-pointer group select-none outline-none focus:outline-none"
                 >
                   <div
                     className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#f59e0b] via-[#d97706] to-[#b45309] border-2 border-amber-300/50 flex items-center justify-center text-white"
