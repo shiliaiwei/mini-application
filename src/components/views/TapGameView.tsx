@@ -61,7 +61,7 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
     });
   };
 
-  // Conversion rates: 100 WEI COIN = $1.00 USD = 4,100 KHR (~500 WEI COIN = 1 TON)
+  // Conversion rates: 100 WEI COIN = $1.00 USD = 4,100 KHR
   const usdValue = (score / 100).toFixed(2);
   const khrValue = Math.floor(score * 41).toLocaleString();
 

@@ -157,8 +157,8 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
     } catch {}
   };
 
-  const handleToggleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleToggleClick = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     try {
       tgApp?.HapticFeedback?.selectionChanged?.();
     } catch {}
@@ -289,15 +289,20 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                 <div className="flex items-baseline justify-between mt-2.5 text-white">
                   {/* Big Currency Sign (Dollar & Khmer Riel in brand font) on LEFT, tap to switch */}
                   <span
-                    onClick={handleCycleCurrency}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCycleCurrency();
+                    }}
                     className="text-3xl sm:text-4xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)] leading-none select-none cursor-pointer active:scale-95 transition-transform"
-                    title="Tap to switch currency"
                   >
                     {currency === "USD" ? "$" : "៛"}
                   </span>
 
-                  {/* Display Number Balance starting from RIGHT */}
-                  <span className="text-2xl sm:text-3xl font-black tracking-tight drop-shadow-[0_1px_3px_rgba(0,0,0,0.3)] font-sans text-right">
+                  {/* Display Number Balance starting from RIGHT - tap on number to hide/show balance */}
+                  <span
+                    onClick={handleToggleClick}
+                    className="text-2xl sm:text-3xl font-black tracking-tight drop-shadow-[0_1px_3px_rgba(0,0,0,0.3)] font-sans text-right cursor-pointer select-none active:scale-95 transition-transform"
+                  >
                     {!showBalance
                       ? "••••••••"
                       : currency === "USD"
@@ -349,60 +354,13 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
             {/* Front Pocket Lip 3D Specular Highlight Edge */}
             <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
 
-            {/* ACTION BUTTONS ROW (Eye button & Quick Wallet Address) */}
-            <div className="relative z-10 flex items-center justify-between pt-1">
-              <div className="flex items-center gap-2">
-                {/* Eye / Visibility Toggle Circular Button */}
-                <button
-                  type="button"
-                  onClick={handleToggleClick}
-                  aria-label={showBalance ? "Hide Balance" : "Show Balance"}
-                  title={showBalance ? "Hide Balance" : "Show Balance"}
-                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition-all duration-200 ease-out border border-white/20 backdrop-blur-md flex items-center justify-center text-white cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_4px_12px_rgba(0,0,0,0.18)]"
-                >
-                  {showBalance ? (
-                    <svg
-                      className="w-4 h-4 text-white stroke-[2]"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="w-4 h-4 text-white stroke-[2]"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
-                      />
-                    </svg>
-                  )}
-                </button>
-              </div>
-
-              {/* Hidden test-compatible encrypted address reference */}
-              <span className="hidden text-white/60 font-mono" aria-hidden="true">
-                {encryptedAddress}
-              </span>
-            </div>
+            {/* Hidden test-compatible encrypted address reference */}
+            <span className="hidden text-white/60 font-mono" aria-hidden="true">
+              {encryptedAddress}
+            </span>
 
             {/* QUICK ACTION BUTTONS (MATCHING LEATHER POCKET FLAP - ZERO DARK BACKGROUND) */}
-            <div className="relative z-20 mt-3 pt-1 pb-1">
+            <div className="relative z-20 mt-2 pt-1 pb-1">
               {/* 3 Floating 3D Coin Buttons */}
               <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {/* 1. SCAN */}
@@ -610,7 +568,7 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
 
             {/* Network Info */}
             <div className="relative z-10 text-[10px] text-emerald-100/70 text-center mb-4">
-              Network: SHILIAIWEI L2 • TON Mainnet (Zero Fee)
+              Network: SHILIAIWEI L2 Vault Network (Zero Fee)
             </div>
 
             {/* Dismiss Button */}

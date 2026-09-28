@@ -24,10 +24,14 @@
 ## No Emojis Rule - MANDATORY
 - Strictly NO EMOJIS in any responses or generated code.
 
-## WEI Coin Terminology Rule - MANDATORY
+## WEI Coin Terminology Rule & Supported Currencies - MANDATORY
+- **Strict Supported Currencies (3 Only)**: The platform strictly supports **WEI COIN** (in-game asset), **US Dollar** (`USD` / `$`), and **Cambodian Riel** (`KHR` / `៛`).
+- **Complete Exclusion of TON, PTS, and SAR**: All references to `TON`, `PTS` (generic points), and `SAR` are completely prohibited and excluded from the codebase, UI, and exchange engines.
 - **Strict In-Game Currency Terminology**: All in-game points, currency balances, mission rewards, and exchange rates MUST strictly use the term **WEI COIN** (or **WEI** / **$WEI**).
 - **Prohibition of "PTS"**: Generic abbreviations such as "PTS" or bare "points" are strictly prohibited in user-facing views, badges, headers, modals, and notifications.
-- **Conversion Standard**: 100 WEI COIN = $1.00 USD = 4,100 KHR. Dual currency strictly supports US Dollar ($) and Cambodian Riel (៛); SAR is strictly excluded.
+- **Conversion Standard**: 100 WEI COIN = $1.00 USD = 4,100 KHR.
+- **Economy Terms & Logic**: Users earn WEI Coin every day by claiming daily rewards, tapping to harvest, playing mini-games, and completing verified missions. Users exchange their collected WEI Coin directly into virtual currencies: Cambodian Riel (KHR ៛) and US Dollar (USD $).
+- **Balance Privacy Interaction**: Total balance visibility is toggled by tapping directly on the balance numbers without context guide or separate eye icon.
 
 ## 3D Skeuomorphic Purple Leather Design Standard - MANDATORY
 - **Wallet Container**: Rich purple textured leather pocket container (`#4a154b` / `#6420a7`) with simulated perimeter stitching lines (`stroke-dasharray="4 4"`).

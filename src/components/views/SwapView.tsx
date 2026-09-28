@@ -29,20 +29,20 @@ export const SwapView: React.FC<SwapViewProps> = ({
   const [inputAmount, setInputAmount] = useState<string>("100");
   const [swapSuccess, setSwapSuccess] = useState<string | null>(null);
 
-  // Conversion rates in points (100 WEI COIN = $1.00 USD = 4,100 KHR)
+  // Conversion rates: 100 WEI COIN = $1.00 USD = 4,100 KHR
   const getOutputAmount = (amount: number, from: CurrencyType, to: CurrencyType): number => {
     if (from === to) return amount;
 
     // Normalize to WEI first
-    let pts = 0;
-    if (from === "WEI") pts = amount;
-    else if (from === "USD") pts = amount * 100;
-    else if (from === "KHR") pts = amount / 41;
+    let wei = 0;
+    if (from === "WEI") wei = amount;
+    else if (from === "USD") wei = amount * 100;
+    else if (from === "KHR") wei = amount / 41;
 
     // Convert WEI to target
-    if (to === "WEI") return pts;
-    if (to === "USD") return pts / 100;
-    if (to === "KHR") return pts * 41;
+    if (to === "WEI") return wei;
+    if (to === "USD") return wei / 100;
+    if (to === "KHR") return wei * 41;
     return 0;
   };
 
@@ -80,17 +80,17 @@ export const SwapView: React.FC<SwapViewProps> = ({
     if (parsedInput <= 0 || parsedInput > currentAvailable) return;
 
     // Calculate score impact
-    let pointsSpent = 0;
-    if (fromCurrency === "WEI") pointsSpent = parsedInput;
-    else if (fromCurrency === "USD") pointsSpent = parsedInput * 100;
-    else if (fromCurrency === "KHR") pointsSpent = parsedInput / 41;
+    let weiSpent = 0;
+    if (fromCurrency === "WEI") weiSpent = parsedInput;
+    else if (fromCurrency === "USD") weiSpent = parsedInput * 100;
+    else if (fromCurrency === "KHR") weiSpent = parsedInput / 41;
 
-    let pointsGained = 0;
-    if (toCurrency === "WEI") pointsGained = calculatedOutput;
-    else if (toCurrency === "USD") pointsGained = calculatedOutput * 100;
-    else if (toCurrency === "KHR") pointsGained = calculatedOutput / 41;
+    let weiGained = 0;
+    if (toCurrency === "WEI") weiGained = calculatedOutput;
+    else if (toCurrency === "USD") weiGained = calculatedOutput * 100;
+    else if (toCurrency === "KHR") weiGained = calculatedOutput / 41;
 
-    const newScore = Math.max(0, Math.round(score - pointsSpent + pointsGained));
+    const newScore = Math.max(0, Math.round(score - weiSpent + weiGained));
     onSetScore(newScore);
 
     const outputText =
@@ -308,6 +308,24 @@ export const SwapView: React.FC<SwapViewProps> = ({
             <span>1 USD ($)</span>
             <span className="font-mono text-slate-900 font-bold">4,100.00 KHR</span>
           </div>
+        </div>
+      </div>
+
+      {/* Terms & Economy Policy Card */}
+      <div className="liquid-glass rounded-[32px] p-4 space-y-2 border border-slate-200 shadow-xs">
+        <span className="text-xs font-bold text-slate-900 uppercase tracking-wider block">
+          WEI Coin Economy & Usage Terms
+        </span>
+        <div className="space-y-1.5 text-xs text-slate-600 leading-relaxed">
+          <p>
+            • <strong className="text-slate-900">Earning WEI Coin:</strong> Users claim, play, collect, and earn WEI Coin every day through daily check-in, tapping, interactive mini-games, and completing verified missions.
+          </p>
+          <p>
+            • <strong className="text-slate-900">Virtual Currency Exchange:</strong> Collected WEI Coin can be exchanged directly into virtual currencies: Cambodian Riel (KHR ៛) and US Dollar (USD $) at fixed official rates.
+          </p>
+          <p>
+            • <strong className="text-slate-900">Exclusive Supported Currencies:</strong> The platform strictly supports WEI Coin, US Dollar ($), and Cambodian Riel (៛). All other currencies and tokens are excluded.
+          </p>
         </div>
       </div>
     </div>

@@ -763,7 +763,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
 
           {/* 7 Days Grid with Day 7 Highlight */}
           <div className="grid grid-cols-7 gap-1.5">
-            {[50, 100, 200, 350, 600, 1000, 2500].map((pts, idx) => {
+            {[50, 100, 200, 350, 600, 1000, 2500].map((rewardAmount, idx) => {
               const dayNum = idx + 1;
               const isPast = dayNum < currentStreak;
               const isToday = dayNum === currentStreak;
@@ -794,7 +794,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = ({
                       isToday ? "text-[#5c1a9c]" : isGrand ? "text-amber-800" : isPast ? "text-slate-400" : "text-slate-800"
                     }`}
                   >
-                    +{pts}
+                    +{rewardAmount}
                   </span>
 
                   <div className="mt-1 flex items-center justify-center">

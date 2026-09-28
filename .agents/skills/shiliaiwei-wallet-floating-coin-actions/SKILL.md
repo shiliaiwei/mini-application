@@ -123,4 +123,4 @@ The quick action pod hosts exactly 3 tactile coin tokens arranged in a 3-column 
 - Integrated copy button provides immediate feedback (`COPIED` indicator, green highlight, and Telegram success haptic feedback).
 
 ### 4. Network Badging
-- `Network: SHILIAIWEI L2 • TON Mainnet (Zero Fee)` in `text-[10px] text-emerald-100/70`.
+- `Network: SHILIAIWEI L2 Vault Network (Zero Fee)` in `text-[10px] text-emerald-100/70`.
