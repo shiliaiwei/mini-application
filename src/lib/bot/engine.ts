@@ -1,5 +1,6 @@
 import { TelegramUpdate, ManagedBot } from "./types";
 import * as db from "./db";
+import { runSecurityQualityAudit, formatTelegramAuditReport } from "./securityAudit";
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -83,6 +84,12 @@ Tap the button below to open the app:`;
         {
           text: "Bot Commands",
           callback_data: "menu_help",
+        },
+      ],
+      [
+        {
+          text: "Security & Quality Audit",
+          callback_data: "menu_audit",
         },
       ],
     ],
@@ -223,6 +230,27 @@ Each partner card displays the official emblem, full titles in Khmer and English
   return sendMessage(chatId, text, replyMarkup);
 }
 
+export async function sendSecurityAuditReport(chatId: number) {
+  const report = runSecurityQualityAudit();
+  const text = formatTelegramAuditReport(report);
+  const replyMarkup = {
+    inline_keyboard: [
+      [
+        {
+          text: "Re-run Audit Check",
+          callback_data: "menu_audit",
+        },
+        {
+          text: "Back to Menu",
+          callback_data: "menu_start",
+        },
+      ],
+    ],
+  };
+
+  return sendMessage(chatId, text, replyMarkup);
+}
+
 export async function sendHelpMenu(chatId: number) {
   const appUrl = getAppUrl();
   const replyMarkup = {
@@ -283,6 +311,10 @@ export const HELP_TEXT = `*SHILIAIWEI Bot Manager (Official BotFather-Standard)*
 /editgame - Edit game information
 /deletegame - Delete a game
 
+*Security & Auditing:*
+/audit - Run automated security & quality audit
+/security - Check system security headers, scanners & compliance
+
 /cancel - Cancel current active command`;
 
 // Main Update Processing Engine
@@ -327,6 +359,9 @@ export async function processTelegramUpdate(update: TelegramUpdate) {
     }
     if (data === "menu_help") {
       return sendHelpMenu(chatId);
+    }
+    if (data === "menu_audit") {
+      return sendSecurityAuditReport(chatId);
     }
 
     if (data.startsWith("bot_select:")) {
@@ -419,6 +454,18 @@ export async function processTelegramUpdate(update: TelegramUpdate) {
   if (lowerText === "/help" || lowerText === "help") {
     await db.clearConversationState(userId);
     return sendHelpMenu(chatId);
+  }
+
+  // Security & Quality Audit
+  if (
+    lowerText === "/audit" ||
+    lowerText === "audit" ||
+    lowerText === "/security" ||
+    lowerText === "security" ||
+    lowerText === "check security"
+  ) {
+    await db.clearConversationState(userId);
+    return sendSecurityAuditReport(chatId);
   }
 
   // Check Active State Machine
