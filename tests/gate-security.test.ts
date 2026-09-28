@@ -17,27 +17,26 @@ test("Vercel Security Config: vercel.json restricts iframe embedding to Telegram
     (h: any) => h.key === "Content-Security-Policy"
   );
   assert.ok(cspHeader, "Must contain Content-Security-Policy header");
-  assert.ok(
-    cspHeader.value.includes("frame-ancestors") &&
-      cspHeader.value.includes("https://web.telegram.org"),
-    "CSP must restrict frame-ancestors to Telegram domains"
-  );
-  assert.ok(
-    cspHeader.value.includes("default-src 'self'"),
-    "CSP must define default-src 'self'"
-  );
-  assert.ok(
-    cspHeader.value.includes("script-src") && cspHeader.value.includes("https://telegram.org"),
-    "CSP must whitelist Telegram scripts"
-  );
-  assert.ok(
-    cspHeader.value.includes("connect-src") && cspHeader.value.includes("api.telegram.org"),
-    "CSP must whitelist Telegram API connect endpoints"
-  );
-  assert.ok(
-    cspHeader.value.includes("object-src 'none'"),
-    "CSP must disallow plugins with object-src 'none'"
-  );
+
+  const cspDirectives = (cspHeader.value as string)
+    .split(";")
+    .map((d: string) => d.trim().split(/\s+/));
+  const directiveMap = new Map(cspDirectives.map(([name, ...vals]) => [name, vals]));
+
+  const frameTokens = directiveMap.get("frame-ancestors") || [];
+  assert.ok(frameTokens.includes("https://web.telegram.org"), "CSP must restrict frame-ancestors to Telegram domains");
+
+  const defaultTokens = directiveMap.get("default-src") || [];
+  assert.ok(defaultTokens.includes("'self'"), "CSP must define default-src 'self'");
+
+  const scriptTokens = directiveMap.get("script-src") || [];
+  assert.ok(scriptTokens.includes("https://telegram.org"), "CSP must whitelist Telegram scripts");
+
+  const connectTokens = directiveMap.get("connect-src") || [];
+  assert.ok(connectTokens.includes("https://api.telegram.org"), "CSP must whitelist Telegram API connect endpoints");
+
+  const objectTokens = directiveMap.get("object-src") || [];
+  assert.ok(objectTokens.includes("'none'"), "CSP must disallow plugins with object-src 'none'");
 
   const robotsHeader = globalHeaders.headers.find((h: any) => h.key === "X-Robots-Tag");
   assert.ok(robotsHeader, "Must contain X-Robots-Tag");
@@ -171,7 +170,7 @@ test("Primary Skill Documentation: telegram-bot-exclusive-access/SKILL.md is rec
 
 test("Cryptographic Anti-Forging: Rejects forged browser URLs with missing or invalid HMAC signature", async () => {
   const { verifyTelegramWebAppData } = await import("../src/lib/telegramCrypto");
-  const testBotToken = "8873981639:AAEguH_DdmL2gzcN4k9Uth4vd6-g007Kxrk";
+  const testBotToken = "mock_test_token_dev_environment_only_123456789";
 
   // 1. Exact forged URL reported by user (missing hash parameter)
   const forgedPayload =

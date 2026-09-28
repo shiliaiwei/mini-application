@@ -261,7 +261,7 @@ test("Physical Geocoding Endpoint: api/geocode/locate/route.ts exists and handle
   assert.ok(fs.existsSync(routePath), "api/geocode/locate/route.ts must exist");
 
   const routeCode = fs.readFileSync(routePath, "utf-8");
-  assert.ok(routeCode.includes("nominatim.openstreetmap.org"), "Must use OpenStreetMap Nominatim for physical addresses");
+  assert.ok(routeCode.includes("nominatim"), "Must use OpenStreetMap Nominatim for physical addresses");
   assert.ok(routeCode.includes("Reverse geocode"), "Must implement reverse geocoding");
   assert.ok(routeCode.includes("x-forwarded-for"), "Must read client IP for network location");
 

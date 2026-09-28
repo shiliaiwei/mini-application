@@ -137,6 +137,40 @@ export function createInitialSettings(user: TelegramUser | null): UserSettings {
 }
 
 /**
+ * Obfuscates sensitive PII before storing to client-side localStorage to prevent clear-text exposure.
+ */
+function obfuscateStorageData(plainText: string): string {
+  try {
+    const salt = 0x5a;
+    let result = "";
+    for (let i = 0; i < plainText.length; i++) {
+      result += String.fromCharCode(plainText.charCodeAt(i) ^ salt);
+    }
+    return btoa(encodeURIComponent(result));
+  } catch {
+    return plainText;
+  }
+}
+
+/**
+ * De-obfuscates client-side stored settings, with backwards-compatible fallback.
+ */
+function deobfuscateStorageData(storedValue: string): string {
+  try {
+    const decoded = decodeURIComponent(atob(storedValue));
+    const salt = 0x5a;
+    let result = "";
+    for (let i = 0; i < decoded.length; i++) {
+      result += String.fromCharCode(decoded.charCodeAt(i) ^ salt);
+    }
+    return result;
+  } catch {
+    // Graceful fallback for existing plaintext JSON in storage
+    return storedValue;
+  }
+}
+
+/**
  * Synchronously loads cached settings from localStorage
  */
 export function loadCachedUserSettings(user: TelegramUser | null): UserSettings {
@@ -147,7 +181,8 @@ export function loadCachedUserSettings(user: TelegramUser | null): UserSettings 
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      const parsed = JSON.parse(raw);
+      const plain = deobfuscateStorageData(raw);
+      const parsed = JSON.parse(plain);
       if (parsed && typeof parsed === "object") {
         return {
           ...createInitialSettings(user),
@@ -187,9 +222,9 @@ export function loadTelegramCloudSettings(
               workAddress: { ...DEFAULT_USER_SETTINGS.workAddress, ...(parsed.workAddress || {}) },
               otherAddress: { ...DEFAULT_USER_SETTINGS.otherAddress, ...(parsed.otherAddress || {}) },
             };
-            // Cache to localStorage
+            // Cache to localStorage with obfuscation
             try {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+              localStorage.setItem(STORAGE_KEY, obfuscateStorageData(JSON.stringify(merged)));
             } catch {}
             callback(merged);
           }
@@ -213,10 +248,10 @@ export function saveUserSettings(
 
   const str = JSON.stringify(updated);
 
-  // 1. localStorage cache
+  // 1. localStorage cache (obfuscated to protect sensitive PII)
   if (typeof window !== "undefined") {
     try {
-      localStorage.setItem(STORAGE_KEY, str);
+      localStorage.setItem(STORAGE_KEY, obfuscateStorageData(str));
     } catch {}
   }
 

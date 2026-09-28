@@ -6,9 +6,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { initData } = body;
 
-    const botToken =
-      process.env.TELEGRAM_BOT_TOKEN ||
-      "8873981639:AAEguH_DdmL2gzcN4k9Uth4vd6-g007Kxrk";
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
     if (!botToken) {
       return NextResponse.json(
         { valid: false, error: "Server authentication token not configured" },
