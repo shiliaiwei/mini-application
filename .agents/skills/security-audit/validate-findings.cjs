@@ -318,6 +318,7 @@ function collectSchemaErrors(schema, location = "schema") {
         errors.push(`${p}.pattern: expected string`);
       } else {
         try {
+          // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
           new RegExp(node.pattern);
         } catch (error) {
           errors.push(`${p}.pattern: invalid regular expression`);
@@ -448,6 +449,7 @@ function validate(value, schema, p, errors) {
         errors.push(`${p}: must contain a visible character`);
       }
     }
+    // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
     if (hasOwn(schema, "pattern") && !(new RegExp(schema.pattern).test(value))) {
       errors.push(`${p}: must match pattern ${JSON.stringify(schema.pattern)}`);
     }
