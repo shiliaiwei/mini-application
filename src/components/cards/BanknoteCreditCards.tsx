@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 import {
-  Plus,
   ScanLine,
   ArrowDownLeft,
   ArrowUpRight,
@@ -57,7 +56,6 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
   const [switchDirection, setSwitchDirection] = useState<"left" | "right">("right");
   const [isHangingSwitch, setIsHangingSwitch] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState(false);
-  const [showQuickActions, setShowQuickActions] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
   const [copiedReceiveAddress, setCopiedReceiveAddress] = useState(false);
 
@@ -68,9 +66,6 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
         setCurrency(saved as CurrencyMode);
       }
       const params = new URLSearchParams(window.location.search);
-      if (params.get("quickActions") === "true") {
-        setShowQuickActions(true);
-      }
       if (params.get("receive") === "true") {
         setShowReceiveModal(true);
       }
@@ -131,20 +126,10 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
     }, 400);
   };
 
-  const handleToggleQuickActions = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      tgApp?.HapticFeedback?.selectionChanged?.();
-      tgApp?.HapticFeedback?.impactOccurred?.("medium");
-    } catch {}
-    setShowQuickActions((prev) => !prev);
-  };
-
   const handleActionClick = (action: "scan" | "receive" | "withdraw") => {
     try {
       tgApp?.HapticFeedback?.impactOccurred?.("medium");
     } catch {}
-    setShowQuickActions(false);
 
     if (action === "scan") {
       if (onOpenScan) onOpenScan();
@@ -364,24 +349,9 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
             {/* Front Pocket Lip 3D Specular Highlight Edge */}
             <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
 
-            {/* ACTION BUTTONS ROW (Plus sign, Eye button & Quick Wallet Address) */}
-            <div className="relative z-10 flex items-center justify-between pt-2">
+            {/* ACTION BUTTONS ROW (Eye button & Quick Wallet Address) */}
+            <div className="relative z-10 flex items-center justify-between pt-1">
               <div className="flex items-center gap-2">
-                {/* Plus Sign Button (Icon Only - Toggles Floating Quick Actions) */}
-                <button
-                  type="button"
-                  onClick={handleToggleQuickActions}
-                  aria-label={showQuickActions ? "Close Actions" : "Quick Actions"}
-                  title={showQuickActions ? "Close Actions" : "Quick Actions"}
-                  className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full active:scale-95 transition-all duration-300 ease-out border backdrop-blur-md flex items-center justify-center text-white cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_6px_16px_rgba(0,0,0,0.25)] ${
-                    showQuickActions
-                      ? "bg-gradient-to-br from-[#0098ea] to-[#005f99] border-cyan-300 ring-2 ring-cyan-400/40 rotate-45 shadow-[0_0_16px_rgba(0,152,234,0.6)]"
-                      : "bg-white/15 hover:bg-white/25 border-white/20"
-                  }`}
-                >
-                  <Plus size={19} className="transition-transform duration-300 stroke-[2.5]" />
-                </button>
-
                 {/* Eye / Visibility Toggle Circular Button */}
                 <button
                   type="button"
@@ -431,82 +401,80 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
               </span>
             </div>
 
-            {/* FLOATING QUICK ACTION BUTTONS POD (COIN / WALLET SKEUOMORPHIC DESIGN) */}
-            {showQuickActions && (
-              <div className="relative z-20 mt-4 pt-3.5 pb-3 px-3 rounded-2xl bg-gradient-to-b from-[#180528]/95 via-[#0e021a]/95 to-[#080110]/95 border border-purple-300/25 backdrop-blur-xl shadow-[0_16px_36px_rgba(0,0,0,0.65),inset_0_1px_2px_rgba(255,255,255,0.35)] animate-fadeIn">
-                {/* Specular Rim Highlight */}
-                <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent pointer-events-none" />
+            {/* PERMANENT QUICK ACTION BUTTONS POD (COIN / WALLET SKEUOMORPHIC DESIGN) */}
+            <div className="relative z-20 mt-3 pt-3.5 pb-3 px-3 rounded-[22px] bg-gradient-to-b from-[#180528]/95 via-[#0e021a]/95 to-[#080110]/95 border border-purple-300/25 backdrop-blur-xl shadow-[0_16px_36px_rgba(0,0,0,0.65),inset_0_1px_2px_rgba(255,255,255,0.35)]">
+              {/* Specular Rim Highlight */}
+              <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent pointer-events-none" />
 
-                {/* 3 Floating 3D Coin Buttons */}
-                <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                  {/* 1. SCAN */}
-                  <button
-                    type="button"
-                    onClick={() => handleActionClick("scan")}
-                    className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-white/10 active:scale-95 transition-all cursor-pointer group"
+              {/* 3 Floating 3D Coin Buttons */}
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                {/* 1. SCAN */}
+                <button
+                  type="button"
+                  onClick={() => handleActionClick("scan")}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-white/10 active:scale-95 transition-all cursor-pointer group"
+                >
+                  <div
+                    className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#0098ea] via-[#0088cc] to-[#005f99] border-2 border-cyan-300/50 flex items-center justify-center text-white"
+                    style={{
+                      boxShadow:
+                        "0 8px 20px -3px rgba(0, 152, 234, 0.6), inset 0 2px 3px rgba(255, 255, 255, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.4)",
+                    }}
                   >
-                    <div
-                      className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#0098ea] via-[#0088cc] to-[#005f99] border-2 border-cyan-300/50 flex items-center justify-center text-white"
-                      style={{
-                        boxShadow:
-                          "0 8px 20px -3px rgba(0, 152, 234, 0.6), inset 0 2px 3px rgba(255, 255, 255, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.4)",
-                      }}
-                    >
-                      {/* 3D Coin Milled Rim */}
-                      <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
-                      <ScanLine size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
-                    </div>
-                    <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-xs">
-                      Scan
-                    </span>
-                  </button>
+                    {/* 3D Coin Milled Rim */}
+                    <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
+                    <ScanLine size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
+                  </div>
+                  <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-xs">
+                    SCAN
+                  </span>
+                </button>
 
-                  {/* 2. RECEIVE */}
-                  <button
-                    type="button"
-                    onClick={() => handleActionClick("receive")}
-                    className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-white/10 active:scale-95 transition-all cursor-pointer group"
+                {/* 2. RECEIVE */}
+                <button
+                  type="button"
+                  onClick={() => handleActionClick("receive")}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-white/10 active:scale-95 transition-all cursor-pointer group"
+                >
+                  <div
+                    className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#10b981] via-[#059669] to-[#047857] border-2 border-emerald-300/50 flex items-center justify-center text-white"
+                    style={{
+                      boxShadow:
+                        "0 8px 20px -3px rgba(16, 185, 129, 0.6), inset 0 2px 3px rgba(255, 255, 255, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.4)",
+                    }}
                   >
-                    <div
-                      className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#10b981] via-[#059669] to-[#047857] border-2 border-emerald-300/50 flex items-center justify-center text-white"
-                      style={{
-                        boxShadow:
-                          "0 8px 20px -3px rgba(16, 185, 129, 0.6), inset 0 2px 3px rgba(255, 255, 255, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.4)",
-                      }}
-                    >
-                      {/* 3D Coin Milled Rim */}
-                      <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
-                      <ArrowDownLeft size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
-                    </div>
-                    <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-xs">
-                      Receive
-                    </span>
-                  </button>
+                    {/* 3D Coin Milled Rim */}
+                    <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
+                    <ArrowDownLeft size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
+                  </div>
+                  <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-xs">
+                    RECEIVE
+                  </span>
+                </button>
 
-                  {/* 3. WITHDRAW */}
-                  <button
-                    type="button"
-                    onClick={() => handleActionClick("withdraw")}
-                    className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-white/10 active:scale-95 transition-all cursor-pointer group"
+                {/* 3. WITHDRAW */}
+                <button
+                  type="button"
+                  onClick={() => handleActionClick("withdraw")}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-white/10 active:scale-95 transition-all cursor-pointer group"
+                >
+                  <div
+                    className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#f59e0b] via-[#d97706] to-[#b45309] border-2 border-amber-300/50 flex items-center justify-center text-white"
+                    style={{
+                      boxShadow:
+                        "0 8px 20px -3px rgba(245, 158, 11, 0.6), inset 0 2px 3px rgba(255, 255, 255, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.4)",
+                    }}
                   >
-                    <div
-                      className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#f59e0b] via-[#d97706] to-[#b45309] border-2 border-amber-300/50 flex items-center justify-center text-white"
-                      style={{
-                        boxShadow:
-                          "0 8px 20px -3px rgba(245, 158, 11, 0.6), inset 0 2px 3px rgba(255, 255, 255, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.4)",
-                      }}
-                    >
-                      {/* 3D Coin Milled Rim */}
-                      <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
-                      <ArrowUpRight size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
-                    </div>
-                    <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-xs">
-                      Withdraw
-                    </span>
-                  </button>
-                </div>
+                    {/* 3D Coin Milled Rim */}
+                    <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
+                    <ArrowUpRight size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
+                  </div>
+                  <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-xs">
+                    WITHDRAW
+                  </span>
+                </button>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
