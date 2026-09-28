@@ -9,38 +9,11 @@ interface StatusCodeDefinition {
   hostStatusText: string;
 }
 
-const CLOUDFLARE_STATUS_CODES: StatusCodeDefinition[] = [
-  {
-    code: 403,
-    title: "Forbidden",
-    hostStatusText: "Forbidden",
-  },
-  {
-    code: 401,
-    title: "Unauthorized",
-    hostStatusText: "Unauthorized",
-  },
-  {
-    code: 502,
-    title: "Bad Gateway",
-    hostStatusText: "Bad Gateway",
-  },
-  {
-    code: 503,
-    title: "Service Unavailable",
-    hostStatusText: "Unavailable",
-  },
-  {
-    code: 520,
-    title: "Web Server Returned Unknown Error",
-    hostStatusText: "Origin Error",
-  },
-  {
-    code: 522,
-    title: "Connection Timed Out",
-    hostStatusText: "Timeout",
-  },
-];
+const STABLE_STATUS_520: StatusCodeDefinition = {
+  code: 520,
+  title: "Web server is returning an unknown error",
+  hostStatusText: "Error",
+};
 
 interface TelegramGateScreenProps {
   onBypass?: () => void;
@@ -48,7 +21,7 @@ interface TelegramGateScreenProps {
 }
 
 export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
-  const [statusInfo, setStatusInfo] = useState<StatusCodeDefinition>(CLOUDFLARE_STATUS_CODES[0]);
+  const statusInfo = STABLE_STATUS_520;
   const [rayId, setRayId] = useState<string>("8e19c04a79b28f31");
   const [currentHost, setCurrentHost] = useState<string>("app.kesararamwithdigital.tech");
 
@@ -57,11 +30,6 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
 
   useEffect(() => {
     try {
-      // Randomly pick a realistic Cloudflare status code per visit
-      const randomStatus =
-        CLOUDFLARE_STATUS_CODES[Math.floor(Math.random() * CLOUDFLARE_STATUS_CODES.length)];
-      setStatusInfo(randomStatus);
-
       // Generate a realistic 16-hex Cloudflare Ray ID
       const randomHex = Array.from({ length: 16 }, () =>
         Math.floor(Math.random() * 16).toString(16)
@@ -80,7 +48,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
         {/* Top Header Section (Authentic Cloudflare Mobile-First Header) */}
         <header className="max-w-4xl mx-auto px-5 sm:px-8 pt-7 sm:pt-14 pb-5 space-y-2">
           <div className="flex flex-wrap items-baseline gap-2.5 sm:gap-3.5">
-            <h1 className="text-3xl sm:text-5xl font-light text-[#222222] tracking-tight">
+            <h1 className="text-3xl sm:text-5xl font-bold text-[#222222] tracking-tight">
               {statusInfo.code} {statusInfo.title}
             </h1>
             <span className="inline-block text-[11px] sm:text-xs font-medium px-2.5 py-0.5 rounded-full bg-[#efefef] text-[#555555] border border-[#e2e2e2] align-middle select-none">
@@ -145,7 +113,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               </div>
 
               <div className="pt-0.5 space-y-0.5">
-                <div className="text-xs sm:text-lg font-normal text-[#444444]">
+                <div className="text-xs sm:text-lg font-bold text-[#444444]">
                   Browser
                 </div>
                 <div className="text-xs sm:text-base font-normal text-[#78be20]">
@@ -184,7 +152,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               </div>
 
               <div className="pt-0.5 space-y-0.5">
-                <div className="text-xs sm:text-lg font-normal text-[#0051c3] truncate max-w-full">
+                <div className="text-xs sm:text-lg font-bold text-[#0051c3] truncate max-w-full">
                   Cloudflare
                 </div>
                 <div className="text-xs sm:text-base font-normal text-[#78be20]">
@@ -225,7 +193,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               </div>
 
               <div className="pt-0.5 space-y-0.5">
-                <div className="text-xs sm:text-lg font-normal text-[#444444]">
+                <div className="text-xs sm:text-lg font-bold text-[#444444]">
                   Host
                 </div>
                 <div className="text-xs sm:text-base font-normal text-[#e74c3c]">
@@ -239,17 +207,17 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
           </div>
         </section>
 
-        {/* Real Cloudflare 2-Column Explanations in Khmer Bold Text */}
+        {/* Real Cloudflare 2-Column Explanations with Bold Titles and Non-Bold Descriptions */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pt-8 sm:pt-12 pb-8 grid grid-cols-1 md:grid-cols-2 gap-7 sm:gap-12">
           {/* What happened? */}
           <div className="space-y-2.5">
             <h2 className="text-xl sm:text-2xl font-bold text-[#222222] tracking-tight">
               តើមានអ្វីកើតឡើង?{" "}
-              <span className="text-xs sm:text-sm text-slate-400 font-normal block sm:inline">
+              <span className="text-xs sm:text-sm text-slate-500 font-bold block sm:inline">
                 What happened?
               </span>
             </h2>
-            <p className="text-[#1e293b] text-xs sm:text-sm leading-relaxed font-bold font-sans">
+            <p className="text-[#555555] text-xs sm:text-sm leading-relaxed font-normal font-sans">
               ការចូលមើលទំព័រនេះត្រូវបានដាក់កំហិតដើម្បីសុវត្ថិភាពរបស់អ្នក។ ម៉ាស៊ីនមេគេហទំព័រ (Host server) តម្រូវឱ្យមានសម័យប្រជុំដែលបានផ្ទៀងផ្ទាត់ត្រឹមត្រូវ មុនពេលបង្ហាញគណនីផ្ទាល់ខ្លួន និងទិន្នន័យកាបូបសុវត្ថិភាព (Vault data)។
             </p>
           </div>
@@ -258,17 +226,17 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
           <div className="space-y-2.5">
             <h2 className="text-xl sm:text-2xl font-bold text-[#222222] tracking-tight">
               តើខ្ញុំត្រូវធ្វើយ៉ាងណា?{" "}
-              <span className="text-xs sm:text-sm text-slate-400 font-normal block sm:inline">
+              <span className="text-xs sm:text-sm text-slate-500 font-bold block sm:inline">
                 What can I do?
               </span>
             </h2>
-            <p className="text-[#1e293b] text-xs sm:text-sm leading-relaxed font-bold font-sans">
+            <p className="text-[#555555] text-xs sm:text-sm leading-relaxed font-normal font-sans">
               សូមចូលមើល{" "}
               <a
                 href={channelUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#0051c3] hover:underline font-bold"
+                className="text-[#0051c3] hover:underline font-medium"
               >
                 channel ផ្លូវការរបស់យើង (@shiliaiwei)
               </a>{" "}
@@ -277,7 +245,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
                 href={botUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#0051c3] hover:underline font-bold"
+                className="text-[#0051c3] hover:underline font-medium"
               >
                 @srievibot
               </a>
