@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { isTelegramBotRequest, isLocalhostEnvironment } from "@/lib/telegramAuth";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -11,11 +12,7 @@ export function middleware(request: NextRequest) {
 
   // 2. Resolve hostname for local development bypass
   const host = request.headers.get("host") || "";
-  const isLocal =
-    host.startsWith("localhost") ||
-    host.startsWith("127.0.0.1") ||
-    host.startsWith("0.0.0.0") ||
-    host.includes(".local");
+  const isLocal = isLocalhostEnvironment(host);
 
   if (isLocal) {
     const response = NextResponse.next();
@@ -23,21 +20,11 @@ export function middleware(request: NextRequest) {
     return response;
   }
 
-  // 3. Detect Telegram client signatures (User-Agent, query tokens, and referer)
-  const userAgent = request.headers.get("user-agent") || "";
-  const isTelegramUA = /Telegram|TelegramBot|TelegramMessenger|Telegram-Android|tdesktop/i.test(
-    userAgent
+  // 3. Detect Telegram Mini App Bot client signatures via centralized utility
+  const isTelegramClient = isTelegramBotRequest(
+    request.headers,
+    request.nextUrl.searchParams
   );
-
-  const hasTelegramQuery =
-    request.nextUrl.searchParams.has("tgWebAppVersion") ||
-    request.nextUrl.searchParams.has("tgWebAppData") ||
-    request.nextUrl.searchParams.has("tgWebAppStartParam");
-
-  const referer = request.headers.get("referer") || "";
-  const isTelegramReferer = /telegram\.org/i.test(referer);
-
-  const isTelegramClient = isTelegramUA || hasTelegramQuery || isTelegramReferer;
 
   // 4. Handle API routes - Immediately terminate port access for external web browsers
   if (pathname.startsWith("/api/")) {

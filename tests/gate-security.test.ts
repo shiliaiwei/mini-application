@@ -58,12 +58,8 @@ test("Edge Middleware: src/middleware.ts restricts web browser access and whitel
 
   // Telegram detection
   assert.ok(
-    content.includes("Telegram") && content.includes("user-agent"),
-    "Middleware must inspect user-agent for Telegram"
-  );
-  assert.ok(
-    content.includes("tgWebAppVersion") || content.includes("tgWebAppData"),
-    "Middleware must inspect query parameters for Telegram WebApp"
+    content.includes("isTelegramBotRequest") && content.includes("@/lib/telegramAuth"),
+    "Middleware must reuse isTelegramBotRequest from telegramAuth"
   );
 
   // 403 Port Access Restriction
@@ -104,3 +100,72 @@ test("Dev Mode Controls: DevModeToolbar and Gate Screen bypass are wired", () =>
     "TelegramGateScreen must handle isDev and onBypass props"
   );
 });
+
+test("Telegram Auth Utility: src/lib/telegramAuth.ts validates Telegram signatures correctly", async () => {
+  const {
+    isTelegramUserAgent,
+    hasTelegramLaunchParams,
+    isTelegramBotRequest,
+    isLocalhostEnvironment,
+    parseTelegramInitData,
+  } = await import("../src/lib/telegramAuth");
+
+  // User-Agent validation
+  assert.equal(isTelegramUserAgent("TelegramMessenger"), true);
+  assert.equal(isTelegramUserAgent("Telegram-Android/10.0"), true);
+  assert.equal(
+    isTelegramUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0"),
+    false
+  );
+  assert.equal(isTelegramUserAgent(null), false);
+
+  // Launch parameters validation
+  const validParams = new URLSearchParams("tgWebAppVersion=7.0&tgWebAppData=auth_test");
+  assert.equal(hasTelegramLaunchParams(validParams), true);
+  const emptyParams = new URLSearchParams("utm_source=google");
+  assert.equal(hasTelegramLaunchParams(emptyParams), false);
+
+  // Consolidated request validation
+  const telegramHeaders = {
+    get: (key: string) => (key === "user-agent" ? "TelegramMessenger" : null),
+  };
+  assert.equal(isTelegramBotRequest(telegramHeaders), true);
+
+  const browserHeaders = {
+    get: (key: string) => (key === "user-agent" ? "Mozilla/5.0 Safari/537.36" : null),
+  };
+  assert.equal(isTelegramBotRequest(browserHeaders), false);
+
+  // Localhost resolution
+  assert.equal(isLocalhostEnvironment("localhost:3000"), true);
+  assert.equal(isLocalhostEnvironment("127.0.0.1"), true);
+  assert.equal(isLocalhostEnvironment("mini-application.vercel.app"), false);
+
+  // InitData parsing
+  const parsed = parseTelegramInitData("query_id=AAHd&user=%7B%22id%22%3A123%7D");
+  assert.equal(parsed.query_id, "AAHd");
+  assert.ok(parsed.user.includes("123"));
+});
+
+test("Primary Skill Documentation: telegram-bot-exclusive-access/SKILL.md is recorded", () => {
+  const skillPath = path.resolve(
+    __dirname,
+    "../.agents/skills/telegram-bot-exclusive-access/SKILL.md"
+  );
+  assert.equal(fs.existsSync(skillPath), true, "Primary skill file SKILL.md must exist");
+
+  const skillContent = fs.readFileSync(skillPath, "utf-8");
+  assert.ok(
+    skillContent.includes("name: telegram-bot-exclusive-access"),
+    "Skill must specify name: telegram-bot-exclusive-access"
+  );
+  assert.ok(
+    skillContent.includes("Deploy Checkpoint"),
+    "Skill must document Deploy Checkpoint gate"
+  );
+  assert.ok(
+    skillContent.includes("src/lib/telegramAuth.ts"),
+    "Skill must reference src/lib/telegramAuth.ts"
+  );
+});
+

@@ -10,6 +10,7 @@ import type { ProfileSubTab } from "@/components/views/GameProfileView";
 import { TopBrandNavBar } from "@/components/navigation/TopBrandNavBar";
 import { TelegramGateScreen } from "@/components/common/TelegramGateScreen";
 import { DevModeToolbar } from "@/components/common/DevModeToolbar";
+import { isLocalhostEnvironment } from "@/lib/telegramAuth";
 import {
   Check,
   Wallet,
@@ -50,12 +51,7 @@ export default function MiniAppPage() {
     setIsMounted(true);
 
     // 1. Resolve host environment
-    const host = window.location.hostname;
-    const isLocal =
-      host === "localhost" ||
-      host === "127.0.0.1" ||
-      host === "0.0.0.0" ||
-      host.endsWith(".local");
+    const isLocal = isLocalhostEnvironment(window.location.hostname);
     setIsLocalTest(isLocal);
 
     // 2. Resolve user from Telegram or localStorage
