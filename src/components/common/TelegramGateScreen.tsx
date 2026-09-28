@@ -1,7 +1,74 @@
 "use client";
 
-import React, { useState, useEffect, useId } from "react";
+import React, { useState, useEffect } from "react";
 import { BrandFooter } from "@/components/brand/BrandFooter";
+
+interface StatusCodeDefinition {
+  code: number;
+  title: string;
+  category: "Client Error" | "Server Error" | "Cloudflare Error";
+  categoryCode: "4xx" | "5xx";
+  meaning: string;
+  hostStatusText: string;
+  badgeTheme: "amber" | "rose";
+}
+
+const CLOUDFLARE_STATUS_CODES: StatusCodeDefinition[] = [
+  {
+    code: 403,
+    title: "Forbidden",
+    category: "Client Error",
+    categoryCode: "4xx",
+    meaning: "The request contains bad syntax or cannot be fulfilled without verified session credentials.",
+    hostStatusText: "Forbidden",
+    badgeTheme: "amber",
+  },
+  {
+    code: 401,
+    title: "Unauthorized",
+    category: "Client Error",
+    categoryCode: "4xx",
+    meaning: "Authentication credentials or Telegram initData cryptographic signature are missing.",
+    hostStatusText: "Unauthorized",
+    badgeTheme: "amber",
+  },
+  {
+    code: 502,
+    title: "Bad Gateway",
+    category: "Server Error",
+    categoryCode: "5xx",
+    meaning: "The edge proxy received an invalid authentication response from the upstream origin host.",
+    hostStatusText: "Bad Gateway",
+    badgeTheme: "rose",
+  },
+  {
+    code: 503,
+    title: "Service Unavailable",
+    category: "Server Error",
+    categoryCode: "5xx",
+    meaning: "The origin server is temporarily unable to handle direct requests without verified bot session.",
+    hostStatusText: "Unavailable",
+    badgeTheme: "rose",
+  },
+  {
+    code: 520,
+    title: "Web Server Returned Unknown Error",
+    category: "Cloudflare Error",
+    categoryCode: "5xx",
+    meaning: "Cloudflare edge detected a non-standard handshake response from non-Telegram web client.",
+    hostStatusText: "Origin Error",
+    badgeTheme: "rose",
+  },
+  {
+    code: 522,
+    title: "Connection Timed Out",
+    category: "Cloudflare Error",
+    categoryCode: "5xx",
+    meaning: "Connection to secure vault origin timed out due to missing cryptographic authorization token.",
+    hostStatusText: "Timeout",
+    badgeTheme: "rose",
+  },
+];
 
 interface TelegramGateScreenProps {
   onBypass?: () => void;
@@ -9,13 +76,20 @@ interface TelegramGateScreenProps {
 }
 
 export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
+  const [statusInfo, setStatusInfo] = useState<StatusCodeDefinition>(CLOUDFLARE_STATUS_CODES[0]);
   const [rayId, setRayId] = useState<string>("8e19c04a79b28f31");
   const [currentHost, setCurrentHost] = useState<string>("app.kesararamwithdigital.tech");
 
+  const channelUrl = "https://t.me/shiliaiwei";
   const botUrl = "https://t.me/srievibot";
 
   useEffect(() => {
     try {
+      // Randomly pick a realistic Cloudflare status code per visit
+      const randomStatus =
+        CLOUDFLARE_STATUS_CODES[Math.floor(Math.random() * CLOUDFLARE_STATUS_CODES.length)];
+      setStatusInfo(randomStatus);
+
       // Generate a realistic 16-hex Cloudflare Ray ID
       const randomHex = Array.from({ length: 16 }, () =>
         Math.floor(Math.random() * 16).toString(16)
@@ -32,23 +106,36 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
     <div className="min-h-screen bg-white text-[#222222] font-sans antialiased select-none flex flex-col justify-between">
       <div className="w-full">
         {/* Top Header Section (Authentic Cloudflare Mobile-First Header) */}
-        <header className="max-w-4xl mx-auto px-5 sm:px-8 pt-7 sm:pt-14 pb-5 space-y-2">
+        <header className="max-w-4xl mx-auto px-5 sm:px-8 pt-7 sm:pt-14 pb-5 space-y-2.5">
           <div className="flex flex-wrap items-baseline gap-2.5 sm:gap-3.5">
             <h1 className="text-3xl sm:text-5xl font-light text-[#222222] tracking-tight">
-              Page restricted
+              {statusInfo.code} {statusInfo.title}
             </h1>
             <span className="inline-block text-[11px] sm:text-xs font-medium px-2.5 py-0.5 rounded-full bg-[#efefef] text-[#555555] border border-[#e2e2e2] align-middle select-none">
-              Error code 403
+              Error code {statusInfo.code}
+            </span>
+            <span
+              className={`inline-block text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded border select-none ${
+                statusInfo.badgeTheme === "amber"
+                  ? "bg-amber-50 text-amber-800 border-amber-200/80"
+                  : "bg-rose-50 text-rose-800 border-rose-200/80"
+              }`}
+            >
+              {statusInfo.categoryCode} {statusInfo.category}
             </span>
           </div>
+
+          <p className="text-[#475569] text-xs sm:text-sm font-normal leading-relaxed">
+            {statusInfo.meaning}
+          </p>
 
           <p className="text-[#555555] text-xs sm:text-base font-normal pt-0.5 leading-relaxed">
             Visit our{" "}
             <a
-              href={botUrl}
+              href={channelUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#0051c3] hover:underline font-normal"
+              className="text-[#0051c3] hover:underline font-semibold"
             >
               channel
             </a>{" "}
@@ -57,7 +144,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               href={botUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#0051c3] hover:underline font-medium"
+              className="text-[#0051c3] hover:underline font-semibold"
             >
               @srievibot
             </a>{" "}
@@ -183,7 +270,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
                   Host
                 </div>
                 <div className="text-xs sm:text-base font-normal text-[#e74c3c]">
-                  Error
+                  {statusInfo.hostStatusText}
                 </div>
               </div>
 
@@ -193,25 +280,40 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
           </div>
         </section>
 
-        {/* Real Cloudflare 2-Column Explanations in Bold Khmer */}
+        {/* Real Cloudflare 2-Column Explanations in Khmer Bold Text */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pt-8 sm:pt-12 pb-8 grid grid-cols-1 md:grid-cols-2 gap-7 sm:gap-12">
           {/* What happened? */}
           <div className="space-y-2.5">
             <h2 className="text-xl sm:text-2xl font-bold text-[#222222] tracking-tight">
-              តើមានអ្វីកើតឡើង?
+              តើមានអ្វីកើតឡើង?{" "}
+              <span className="text-xs sm:text-sm text-slate-400 font-normal block sm:inline">
+                What happened?
+              </span>
             </h2>
-            <p className="text-[#333333] text-xs sm:text-sm leading-relaxed font-bold font-sans">
-              ការចូលមើលទំព័រនេះត្រូវបានដាក់កំហិតដើម្បីសុវត្ថិភាព។ ម៉ាស៊ីនមេគេហទំព័រត្រូវការការផ្ទៀងផ្ទាត់សម័យប្រជុំត្រឹមត្រូវ មុនពេលបង្ហាញទិន្នន័យគណនី និងកាបូបឌីជីថលរបស់អ្នក។
+            <p className="text-[#1e293b] text-xs sm:text-sm leading-relaxed font-bold font-sans">
+              ការចូលមើលទំព័រនេះត្រូវបានដាក់កំហិតដើម្បីសុវត្ថិភាពរបស់អ្នក។ ម៉ាស៊ីនមេគេហទំព័រ (Host server) តម្រូវឱ្យមានសម័យប្រជុំដែលបានផ្ទៀងផ្ទាត់ត្រឹមត្រូវ មុនពេលបង្ហាញគណនីផ្ទាល់ខ្លួន និងទិន្នន័យកាបូបសុវត្ថិភាព (Vault data)។
             </p>
           </div>
 
           {/* What can I do? */}
           <div className="space-y-2.5">
             <h2 className="text-xl sm:text-2xl font-bold text-[#222222] tracking-tight">
-              តើខ្ញុំត្រូវធ្វើយ៉ាងណា?
+              តើខ្ញុំត្រូវធ្វើយ៉ាងណា?{" "}
+              <span className="text-xs sm:text-sm text-slate-400 font-normal block sm:inline">
+                What can I do?
+              </span>
             </h2>
-            <p className="text-[#333333] text-xs sm:text-sm leading-relaxed font-bold font-sans">
-              សូមចូលមើល channel ផ្លូវការរបស់យើងសម្រាប់ព័ត៌មានបន្ថែម បន្ទាប់មកបើកតាមរយៈតេឡេក្រាមបូតផ្លូវការ{" "}
+            <p className="text-[#1e293b] text-xs sm:text-sm leading-relaxed font-bold font-sans">
+              សូមចូលមើល{" "}
+              <a
+                href={channelUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#0051c3] hover:underline font-bold"
+              >
+                channel ផ្លូវការរបស់យើង (@shiliaiwei)
+              </a>{" "}
+              សម្រាប់ព័ត៌មានបន្ថែម បន្ទាប់មកបើកតាមរយៈតេឡេក្រាមបូតផ្លូវការ{" "}
               <a
                 href={botUrl}
                 target="_blank"
@@ -220,7 +322,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               >
                 @srievibot
               </a>
-              ។ ប្រព័ន្ធបូតនឹងផ្ទៀងផ្ទាត់សម័យប្រជុំរបស់អ្នកដោយស្វ័យប្រវត្តិ និងអនុញ្ញាតឱ្យចូលប្រើប្រាស់បានភ្លាមៗ។
+              ។ ប្រព័ន្ធបូតនឹងផ្ទៀងផ្ទាត់សម័យប្រជុំរបស់អ្នកដោយស្វ័យប្រវត្តិ និងបើកការចូលប្រើប្រាស់ប្រកបដោយសុវត្ថិភាពភ្លាមៗ។
             </p>
           </div>
         </section>
@@ -237,4 +339,5 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
     </div>
   );
 };
+
 
