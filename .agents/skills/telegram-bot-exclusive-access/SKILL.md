@@ -69,7 +69,7 @@ All incoming requests are validated through [`src/lib/telegramAuth.ts`](file:///
 * **`isTelegramReferer(referer)`**: Validates origins from `telegram.org`.
 * **`isTelegramBotRequest(headers, searchParams)`**: Consolidated master validator returning `true` only when the request originates within the Telegram client.
 * **`isLocalhostEnvironment(host)`**: Identifies `localhost`, `127.0.0.1`, `0.0.0.0`, and `.local` to enable local developer testing.
-* **`verifyTelegramWebAppData(initData, botToken)`**: **Cryptographic Anti-Forging Engine**:
+* **`verifyTelegramWebAppData(initData, botToken)`** ([`src/lib/telegramCrypto.ts`](file:///Users/Apple16/Desktop/mini-app/src/lib/telegramCrypto.ts)): **Cryptographic Anti-Forging Engine**:
   * Recalculates secret key `HMAC_SHA256("WebAppData", botToken)`.
   * Computes hexadecimal HMAC-SHA256 signature across all alphabetically sorted parameters.
   * Rejects forged URLs missing the `hash` parameter (e.g. `#tgWebAppData=user=...`).
