@@ -4,8 +4,15 @@
 - Do not store temporary or test scripts in the workspace.
 - If a script is created and used for a task/test/migration, it MUST be deleted immediately after execution.
 
-## Git Remote Push Rule - MANDATORY
-- Never run `git push` or execute any remote push actions under any circumstances unless explicitly commanded by the user.
+## Git Remote Push & Pre-Push Checkpoint Rule - MANDATORY
+- **Strict Command Gate**: Never run `git push` or execute any remote push actions under any circumstances unless explicitly commanded by the user.
+- **Mandatory Pre-Push Checkpoint Verification**: Prior to executing any `git push` to GitHub or remote repositories, the system and developers MUST execute and pass all local checkpoints first:
+  1. **Checkpoint 1 (Unit & Regression Tests)**: Run `pnpm test` (or `npm test`) — all tests must pass 100% with zero failures.
+  2. **Checkpoint 2 (Production Build)**: Run `pnpm build` (or `npm run build`) — Next.js production build must compile cleanly without errors.
+  3. **Checkpoint 3 (Heavy Media Exclusion)**: Verify `.gitignore` excludes heavy media files (`.mov`, `.mp4`, `.zip`, `.pdf`, `.wav`, `.db`).
+  4. **Checkpoint 4 (Zero Emojis Standard)**: Verify zero emojis exist in commits, codebase, or UI messages.
+  5. **Checkpoint 5 (Push Buffer Setup)**: Ensure `git config http.postBuffer 524288000` is configured.
+- **Strict Abort on Failure**: If any checkpoint fails, the push MUST be aborted immediately and the failure fixed before attempting to push again.
 
 ## Brand Rule - MANDATORY
 - The application brand is strictly the specific word **SHILIAIWEI** only.
