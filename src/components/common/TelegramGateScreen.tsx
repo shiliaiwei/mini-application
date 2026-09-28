@@ -193,34 +193,34 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
           </div>
         </section>
 
-        {/* Real Cloudflare 2-Column Explanations in Pure English Standard */}
+        {/* Real Cloudflare 2-Column Explanations in Bold Khmer */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pt-8 sm:pt-12 pb-8 grid grid-cols-1 md:grid-cols-2 gap-7 sm:gap-12">
           {/* What happened? */}
           <div className="space-y-2.5">
-            <h2 className="text-2xl sm:text-3xl font-light text-[#222222] tracking-tight">
-              What happened?
+            <h2 className="text-xl sm:text-2xl font-bold text-[#222222] tracking-tight">
+              តើមានអ្វីកើតឡើង?
             </h2>
-            <p className="text-[#555555] text-xs sm:text-sm leading-relaxed font-normal font-sans">
-              Access to this page is restricted for your security. The host server requires an authenticated session before displaying private account and vault data.
+            <p className="text-[#333333] text-xs sm:text-sm leading-relaxed font-bold font-sans">
+              ការចូលមើលទំព័រនេះត្រូវបានដាក់កំហិតដើម្បីសុវត្ថិភាព។ ម៉ាស៊ីនមេគេហទំព័រត្រូវការការផ្ទៀងផ្ទាត់សម័យប្រជុំត្រឹមត្រូវ មុនពេលបង្ហាញទិន្នន័យគណនី និងកាបូបឌីជីថលរបស់អ្នក។
             </p>
           </div>
 
           {/* What can I do? */}
           <div className="space-y-2.5">
-            <h2 className="text-2xl sm:text-3xl font-light text-[#222222] tracking-tight">
-              What can I do?
+            <h2 className="text-xl sm:text-2xl font-bold text-[#222222] tracking-tight">
+              តើខ្ញុំត្រូវធ្វើយ៉ាងណា?
             </h2>
-            <p className="text-[#555555] text-xs sm:text-sm leading-relaxed font-normal font-sans">
-              Please visit our official channel for more information, then launch via our verified Telegram bot{" "}
+            <p className="text-[#333333] text-xs sm:text-sm leading-relaxed font-bold font-sans">
+              សូមចូលមើល channel ផ្លូវការរបស់យើងសម្រាប់ព័ត៌មានបន្ថែម បន្ទាប់មកបើកតាមរយៈតេឡេក្រាមបូតផ្លូវការ{" "}
               <a
                 href={botUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#0051c3] hover:underline font-semibold"
+                className="text-[#0051c3] hover:underline font-bold"
               >
                 @srievibot
               </a>
-              . The bot will automatically verify your session and unlock instant, secure access.
+              ។ ប្រព័ន្ធបូតនឹងផ្ទៀងផ្ទាត់សម័យប្រជុំរបស់អ្នកដោយស្វ័យប្រវត្តិ និងអនុញ្ញាតឱ្យចូលប្រើប្រាស់បានភ្លាមៗ។
             </p>
           </div>
         </section>
