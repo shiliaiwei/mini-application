@@ -9,8 +9,7 @@ import {
   X,
   QrCode,
   Sparkles,
-  ShieldCheck,
-} from "lucide-react";
+} from "@/components/icons/KeylineIcons";
 
 interface BanknoteCreditCardsProps {
   score: number;

@@ -88,11 +88,19 @@ export default function MiniAppPage() {
       setIsTelegramVerified(hasInit || hasUser || (hasHash && hasPlatform) || (hasUA && hasPlatform));
     }
 
-    // 4. Resolve tab parameter from search params
+    // 4. Resolve tab parameter from search params or Telegram Settings hash
     const params = new URLSearchParams(window.location.search);
     const tabParam = params.get("tab") as GameTab;
     if (tabParam && ["wallet", "tasks", "leaderboard", "profile"].includes(tabParam)) {
       setActiveTab(tabParam);
+    }
+    if (
+      params.get("subtab") === "settings" ||
+      tabParam === ("settings" as any) ||
+      window.location.hash.includes("tgWebAppShowSettings=1")
+    ) {
+      setProfileSubTab("settings");
+      setActiveTab("profile");
     }
   }, []);
   const [activeCategory, setActiveCategory] = useState<NavCategory>("lobby");
@@ -434,7 +442,7 @@ export default function MiniAppPage() {
     } else if (cat === "tournaments") {
       setActiveTab("leaderboard");
     } else if (cat === "settings") {
-      setProfileSubTab("profile");
+      setProfileSubTab("settings");
       setActiveTab("profile");
     }
   };
@@ -572,14 +580,6 @@ export default function MiniAppPage() {
                 <DollarSign size={18} />
                 <span>Confirm Top Up (${topUpAmount}.00)</span>
               </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTopUpScreen(false)}
-                className="w-full py-2.5 rounded-full text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors duration-300 ease-out cursor-pointer"
-              >
-                Exit to Home View
-              </button>
             </div>
           </div>
         ) : (
@@ -598,7 +598,7 @@ export default function MiniAppPage() {
                 }}
                 onGoToEarn={() => handleTabChange("earn")}
                 onGoToSettings={() => {
-                  setProfileSubTab("profile");
+                  setProfileSubTab("settings");
                   handleTabChange("profile");
                 }}
                 user={user}

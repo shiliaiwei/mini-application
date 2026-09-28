@@ -77,7 +77,18 @@
   - Browser and hardware user-agent (`user_agent`).
   - Bound Web3 wallet address (`wei_0x...`).
   - Real-time gaming metrics (`score`, `spend_seconds`, `missions_claimed`).
-- **Database Persistence & Isolation**:
-  - Persist real-time player data in `game_players` and append audit trails to `player_audit_logs`.
-  - Strictly isolate mock ID `88888888` (`SHILIAIWEI Holder`) to local development previews; never overwrite or substitute live Telegram users with mock data.
+  - Database Persistence & Isolation:
+    - Persist real-time player data in `game_players` and append audit trails to `player_audit_logs`.
+    - Strictly isolate mock ID `88888888` (`SHILIAIWEI Holder`) to local development previews; never overwrite or substitute live Telegram users with mock data.
+
+## Mandatory Official Keyline Icons Standard - MANDATORY
+- **Single Source of Truth**: Sourced exclusively from `https://keylineicons.com/icons` (`@keyline-icons/react/two-tone`).
+- **Export Gateway**: All icons across the entire codebase MUST be imported from `@/components/icons/KeylineIcons` (`src/components/icons/KeylineIcons.tsx`).
+- **Zero Outside Icon Libraries**: Strictly NO `lucide-react`, `@heroicons`, `react-icons`, or `fontawesome`.
+- **Zero Emojis**: Strictly NO EMOJIS in UI, code, responses, or metadata under any circumstances.
+
+## Mandatory Skeuomorphic Brand Shape Design Rule - MANDATORY
+- **Universal Application**: All agent skills, workflows, and UI views MUST ALWAYS apply the `skeuomorphic-purple-leather-wallet-design/` and Skeuomorphic Card Style across all brand shapes, card containers, dialogs, and settings modules.
+- **Card Pocket Tokens**: Every container must feature the multi-stop gradient (`#5c1c99` via `#48127f` to `#320a59` or designated pocket accent), `LeatherGrain` overlay, `GuillocheBackground` (`/backgrounds/cardbanknote.svg`), perimeter `ThreadStitching` (`stroke-dasharray="4 4"`, drop shadow), and `SpecularRim` top highlight.
+- **Modals & Dialogs**: Never use flat white or plain gray backgrounds. Modals must be physical stitched leather cardholder pockets with frosted glass inputs and tactile 3D buttons.
 

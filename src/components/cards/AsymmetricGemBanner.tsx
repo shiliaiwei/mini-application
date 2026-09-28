@@ -1,7 +1,5 @@
-"use client";
-
 import React from "react";
-import { Gem, Zap, Coins, Crown, Flame, ShieldCheck } from "lucide-react";
+import { Gem, Zap, Coins, Crown, Flame, ShieldCheck } from "@/components/icons/KeylineIcons";
 
 interface GemCardConfig {
   id: string;

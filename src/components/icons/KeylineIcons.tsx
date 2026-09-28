@@ -42,6 +42,30 @@ import {
   Award,
   CircleAlert,
   Info,
+  Camera,
+  Mail,
+  Phone,
+  Calendar,
+  MapPin,
+  Map,
+  Navigation,
+  CircleNavigation,
+  Compass,
+  Home,
+  Briefcase,
+  Building,
+  Globe,
+  Cloud,
+  SlidersHorizontal,
+  CircleCheck,
+  Settings,
+  Volume,
+  VolumeLow,
+  VolumeOff,
+  Smartphone,
+  Sun,
+  Moon,
+  Monitor,
 } from "@keyline-icons/react/two-tone";
 
 export interface KeylineIconProps extends React.SVGProps<SVGSVGElement> {
@@ -125,6 +149,45 @@ export const KeylineArrowUpDown: React.FC<KeylineIconProps> = ({
   </svg>
 );
 
+/**
+ * Keyline Two-Tone Crystalline Gem / Diamond on strict 24x24 grid
+ */
+export const KeylineGem: React.FC<KeylineIconProps> = ({
+  size = 24,
+  className = "",
+  ...props
+}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    aria-hidden="true"
+    focusable="false"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    {...props}
+  >
+    <path
+      d="M6 3h12l4 6-10 12L2 9l4-6z"
+      fill="currentColor"
+      fillOpacity="0.35"
+      stroke="none"
+    />
+    <path d="M6 3h12l4 6-10 12L2 9l4-6z" fill="none" />
+    <path d="M11 3L8 9l4 12 4-12-3-6M2 9h20" fill="none" />
+  </svg>
+);
+
+// Backward-compatible semantic aliases for Keyline icons
+export const Sliders = SlidersHorizontal;
+export const CheckCircle2 = CircleCheck;
+export const Gem = KeylineGem;
+
 export {
   Wallet,
   Trophy,
@@ -166,4 +229,28 @@ export {
   Award,
   CircleAlert,
   Info,
+  Camera,
+  Mail,
+  Phone,
+  Calendar,
+  MapPin,
+  Map,
+  Navigation,
+  CircleNavigation,
+  Compass,
+  Home,
+  Briefcase,
+  Building,
+  Globe,
+  Cloud,
+  SlidersHorizontal,
+  CircleCheck,
+  Settings,
+  Volume,
+  VolumeLow,
+  VolumeOff,
+  Smartphone,
+  Sun,
+  Moon,
+  Monitor,
 };

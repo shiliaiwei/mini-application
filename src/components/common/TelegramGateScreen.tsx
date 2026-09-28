@@ -230,29 +230,29 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               </span>
             </h2>
             <p className="text-[#555555] text-xs sm:text-sm leading-relaxed font-normal font-sans">
-              ការចូលមើលទំព័រនេះត្រូវបានដាក់កំហិតដើម្បីសុវត្ថិភាពរបស់អ្នក។ ម៉ាស៊ីនមេគេហទំព័រ (Host server) តម្រូវឱ្យមានសម័យប្រជុំដែលបានផ្ទៀងផ្ទាត់ត្រឹមត្រូវ មុនពេលបង្ហាញគណនីផ្ទាល់ខ្លួន និងទិន្នន័យកាបូបសុវត្ថិភាព (Vault data)។
+              ការចូលមើលទំព័រនេះត្រូវបានកំណត់ ដើម្បីរក្សាសុវត្ថិភាពជូនអ្នក។ មុនពេលបង្ហាញព័ត៌មានគណនី និងទិន្នន័យក្នុងឃ្លាំងសុវត្ថិភាព (Vault) ប្រព័ន្ធត្រូវតែផ្ទៀងផ្ទាត់សម័យចូលប្រើរបស់អ្នកជាមុនសិន។
             </p>
           </div>
 
-          {/* What can I do? */}
+          {/* What should I do? */}
           <div className="space-y-2.5">
             <h2 className="text-xl sm:text-2xl font-bold text-[#222222] tracking-tight">
-              តើខ្ញុំត្រូវធ្វើយ៉ាងណា?{" "}
+              តើខ្ញុំត្រូវធ្វើដូចម្តេច?{" "}
               <span className="text-xs sm:text-sm text-slate-500 font-bold block sm:inline">
-                What can I do?
+                What should I do?
               </span>
             </h2>
             <p className="text-[#555555] text-xs sm:text-sm leading-relaxed font-normal font-sans">
-              សូមចូលមើល{" "}
+              សូមចូលទៅកាន់{" "}
               <a
                 href={channelUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#0051c3] hover:underline font-medium"
               >
-                channel ផ្លូវការរបស់យើង (@shiliaiwei)
+                ឆានែលផ្លូវការរបស់យើង (@shiliaiwei)
               </a>{" "}
-              សម្រាប់ព័ត៌មានបន្ថែម បន្ទាប់មកបើកតាមរយៈតេឡេក្រាមបូតផ្លូវការ{" "}
+              ដើម្បីទទួលបានព័ត៌មានបន្ថែម រួចចាប់ផ្តើមតាមរយៈបូតតេឡេក្រាមផ្លូវការ{" "}
               <a
                 href={botAppDirectUrl}
                 onClick={handleLaunchMiniApp}
@@ -262,7 +262,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               >
                 @srievibot
               </a>
-              ។ ប្រព័ន្ធបូតនឹងផ្ទៀងផ្ទាត់សម័យប្រជុំរបស់អ្នកដោយស្វ័យប្រវត្តិ និងបើកការចូលប្រើប្រាស់ប្រកបដោយសុវត្ថិភាពភ្លាមៗ។
+              ។ បូតនឹងផ្ទៀងផ្ទាត់សម័យចូលប្រើរបស់អ្នកដោយស្វ័យប្រវត្តិ ហើយអ្នកអាចចូលប្រើបានភ្លាមៗដោយសុវត្ថិភាព។
             </p>
           </div>
         </section>

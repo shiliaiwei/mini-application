@@ -113,25 +113,39 @@ This specification establishes the authoritative, permanent Design and Component
 
 ---
 
-## 4. Universal Application Across All Shapes
+## 4. Universal Application Across All Shapes & Skeuomorphic Card Style
 
-When applying this style across secondary modules and shapes:
+All agent skills, workflows, and frontend components MUST ALWAYS apply the **3D Skeuomorphic Purple Leather Wallet Design & Skeuomorphic Card Style** across all brand shapes, card containers, dialogs, and settings modules:
 
-1. **Banners & Promo Cards**:
-   - Wrap containers in the 3D purple leather texture with perimeter simulated stitching (`strokeDasharray="4 4"`).
-   - Use inset curved card slots, satin gradient badges, and frosted glass action pills.
-2. **Bottom Navigation Dock**:
-   - Construct the dock frame with the deep purple leather gradient (`#5c1c99` -> `#340b5c`).
-   - Inset perimeter thread stitching and luminous indicator pill.
-3. **Modals & Dialogs**:
-   - Style dialog containers as leather pocket cards with embossed perimeter stitching and soft ambient backdrop glows.
-4. **Action Buttons**:
-   - Apply the frosted glassmorphism pill with white border and inner specular highlight.
+1. **Brand Shape Design & 5 Master Pocket Colorways**:
+   - **Master Purple Leather Pocket**: `from-[#5c1c99] via-[#48127f] to-[#320a59]`, thread stitching `#e9d5ff`, drop shadow `0 18px 40px -10px rgba(35, 6, 65, 0.75)`. Used for hero cards, wallet containers, and primary modals.
+   - **Banknote Blue Pocket**: `from-[#1d4ed8] via-[#1e40af] to-[#172554]`, thread stitching `#93c5fd`, shadow `0 16px 36px -10px rgba(30, 64, 175, 0.45)`. Used for Personal Info and Identity cards.
+   - **Emerald Green Pocket**: `from-[#0f766e] via-[#115e59] to-[#134e4a]`, thread stitching `#6ee7b7`, shadow `0 16px 36px -10px rgba(13, 148, 136, 0.45)`. Used for Contact, Security, and Verified badges.
+   - **Indigo Address Pocket**: `from-[#4338ca] via-[#3730a3] to-[#312e81]`, thread stitching `#c7d2fe`, shadow `0 16px 36px -10px rgba(67, 56, 202, 0.45)`. Used for physical and delivery addresses.
+   - **Slate System Pocket**: `from-[#1e293b] via-[#0f172a] to-[#020617]`, thread stitching `#94a3b8`, shadow `0 16px 36px -10px rgba(15, 23, 42, 0.55)`. Used for Display, Haptics, Device, and System settings.
+
+2. **Every Card & Pocket Shape Must Include**:
+   - `LeatherGrain`: Radial dot matrix overlay (`mix-blend-overlay`, opacity `0.15`).
+   - `GuillocheBackground`: Security banknote watermark overlay (`/backgrounds/cardbanknote.svg`, opacity `0.20-0.25`).
+   - `ThreadStitching`: Perimeter SVG dashed rectangle (`stroke-dasharray="4 4"`, strokeWidth `1.2px`, drop shadow `0 1px 1px rgba(0,0,0,0.6)`).
+   - `SpecularRim`: Top hairline gradient specular highlight (`h-[1.5px] bg-gradient-to-r from-transparent via-white/35 to-transparent`).
+   - Rounded corners: `rounded-[28px]` outer radius.
+
+3. **Modals, Dialogs & Edit Sheets**:
+   - Never use flat white or plain gray backgrounds for modals or settings sheets.
+   - Every modal container must be built as a physical 3D purple leather pocket with Guilloche background, perimeter thread stitching, and specular rim.
+   - Input fields: Frosted dark glass pills (`bg-white/10 border-white/20 text-white placeholder-white/40 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30`).
+   - Primary buttons: Cyan/Blue tactile bevel pills (`bg-gradient-to-r from-[#0098ea] to-[#0081c7] shadow-[0_4px_16px_rgba(0,152,234,0.4)]`).
+
+4. **Bottom Navigation Dock & Floating Controls**:
+   - Construct dock frames with the deep purple leather gradient (`#5c1c99` -> `#340b5c`).
+   - Inset perimeter thread stitching, Keyline icons, and luminous indicator pills.
 
 ---
 
 ## 5. Strict Compliance Rules
-- **ZERO EMOJIS**: Strictly no emojis anywhere in UI, copy, or code.
-- **Real SVG Vector Icons**: Use Keyline stroke-based vector icons exclusively.
+- **ZERO EMOJIS**: Strictly no emojis anywhere in UI, copy, responses, or code.
+- **Exclusive Keyline Icons**: Use Keyline stroke-based vector icons exclusively from `https://keylineicons.com/icons` (`@/components/icons/KeylineIcons`). Outside icon packages (lucide-react, heroicons, fontawesome) are strictly prohibited.
+- **All Agents Instruction**: Whenever designing, refactoring, or generating views, cards, or dialogs, all agent skills MUST ALWAYS apply the `skeuomorphic-purple-leather-wallet-design/` and Skeuomorphic Card Style standard.
 - **Performance Standard**: Sub-3-second load times via `next/dynamic` code splitting, `React.memo` re-render elimination, and throttled network sync.
-- **Single Source of Truth**: Component lives in `src/components/cards/BanknoteCreditCards.tsx` with unified props.
+- **Single Source of Truth**: Wallet component lives in `src/components/cards/BanknoteCreditCards.tsx` and Settings in `src/components/views/UserSettingsView.tsx`.

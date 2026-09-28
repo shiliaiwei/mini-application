@@ -199,14 +199,6 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
               </button>
             </form>
           )}
-
-          <button
-            type="button"
-            onClick={() => setSubView("none")}
-            className="w-full py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors duration-300 ease-out cursor-pointer"
-          >
-            Exit to Home View
-          </button>
         </div>
       </div>
     );
@@ -249,14 +241,6 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
           <p className="text-xs text-slate-600">
             Scan KHQR, Bakong, or SHILIAIWEI Web3 peer-to-peer addresses.
           </p>
-
-          <button
-            type="button"
-            onClick={() => setSubView("none")}
-            className="w-full py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-colors duration-300 ease-out cursor-pointer"
-          >
-            Exit to Home View
-          </button>
         </div>
       </div>
     );

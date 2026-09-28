@@ -5,6 +5,7 @@ import Image from "next/image";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
 import {
   ChevronLeft,
+  ChevronRight,
   Copy,
   Check,
   Timer,
@@ -18,10 +19,12 @@ import {
   Eye,
   EyeOff,
   KeylineGamepad,
+  Sliders,
 } from "@/components/icons/KeylineIcons";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { BrandFooter } from "@/components/brand/BrandFooter";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
+import { UserSettingsView } from "./UserSettingsView";
 
 /* ──────────────────────────────────────────────────────────── */
 /* Types & Interfaces                                           */
@@ -37,12 +40,13 @@ interface AuditLogEntry {
   created_at: string;
 }
 
-export type ProfileSubTab = "profile" | "swap" | "security" | "audit";
+export type ProfileSubTab = "profile" | "settings" | "swap" | "security" | "audit";
 export type CurrencyType = "WEI" | "USD" | "KHR";
 
 type InnerView =
   | "main"
   | "edit"
+  | "settings"
   | "swap"
   | "security"
   | "audit"
@@ -272,9 +276,23 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
   score,
   spendSeconds,
   tapPower = 1,
+  initialSubTab,
   onBack,
 }) => {
-  const [view, setView] = useState<InnerView>("main");
+  const [view, setView] = useState<InnerView>(() => {
+    if (initialSubTab === "settings") return "settings";
+    if (initialSubTab === "swap") return "swap";
+    if (initialSubTab === "security") return "security";
+    if (initialSubTab === "audit") return "audit";
+    return "main";
+  });
+
+  useEffect(() => {
+    if (initialSubTab === "settings") setView("settings");
+    else if (initialSubTab === "swap") setView("swap");
+    else if (initialSubTab === "security") setView("security");
+    else if (initialSubTab === "audit") setView("audit");
+  }, [initialSubTab]);
   const [copiedId, setCopiedId] = useState(false);
   const [copiedWallet, setCopiedWallet] = useState(false);
   const [bio, setBio] = useState("SHILIAIWEI Web3 Vault Member");
@@ -285,8 +303,6 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
   const [swapSuccess, setSwapSuccess] = useState<string | null>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [loadingAudit, setLoadingAudit] = useState(false);
-  const [hapticsEnabled, setHapticsEnabled] = useState(true);
-  const [soundEnabled, setSoundEnabled] = useState(true);
 
   // Cloudflare Zero Trust PII Masking Mode (Default TRUE: Hidden with Hints)
   const [piiMasked, setPiiMasked] = useState<boolean>(true);
@@ -400,10 +416,6 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const h = localStorage.getItem("shi_pref_haptics");
-    if (h !== null) setHapticsEnabled(h === "true");
-    const s = localStorage.getItem("shi_pref_sound");
-    if (s !== null) setSoundEnabled(s === "true");
     const b = localStorage.getItem("shi_profile_bio");
     if (b) setBio(b);
     fetchTelemetry();
@@ -606,6 +618,18 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
     );
   }
 
+  if (view === "settings") {
+    return (
+      <UserSettingsView
+        user={user}
+        tgApp={tgApp}
+        botProfile={botProfile}
+        telemetryData={telemetryData}
+        onBack={() => setView("main")}
+      />
+    );
+  }
+
   if (view === "audit") {
     return (
       <div className="min-h-screen bg-white text-slate-900 pb-28 pt-2 px-3 max-w-xl mx-auto font-sans select-none animate-fadeIn">
@@ -792,10 +816,23 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
             <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 type="button"
+                onClick={() => {
+                  try {
+                    tgApp?.HapticFeedback?.selectionChanged();
+                  } catch {}
+                  setView("settings");
+                }}
+                className="px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 border border-white/25 text-white text-[10px] font-bold cursor-pointer transition-all active:scale-95 flex items-center gap-1"
+              >
+                <Sliders size={11} />
+                <span>Settings</span>
+              </button>
+              <button
+                type="button"
                 onClick={() => setView("edit")}
                 className="px-3 py-1 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white text-[10px] font-bold cursor-pointer transition-all active:scale-95"
               >
-                Edit
+                Edit Bio
               </button>
             </div>
           </div>
@@ -840,227 +877,8 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
           </div>
         </div>
 
-        {/* 3. TELEGRAM IDENTITY SKEUOMORPHIC BLOCK CARD (BLUE POCKET) */}
-        {isOwner && (
-          <div
-            className="relative w-full rounded-[28px] p-4 sm:p-5 overflow-hidden bg-gradient-to-b from-[#1d4ed8] via-[#1e40af] to-[#172554] text-white"
-            style={{
-              boxShadow:
-                "0 16px 36px -10px rgba(30, 64, 175, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.32), inset 0 -3px 6px rgba(0, 0, 0, 0.5)",
-            }}
-          >
-            <GuillocheBackground opacity={0.22} />
-            <ThreadStitching strokeColor="#93c5fd" />
-            <SpecularRim />
-
-            <div className="relative z-10 flex items-center justify-between gap-4 pb-3 mb-3 border-b border-white/15">
-              <h3 className="text-base font-bold text-white drop-shadow-sm">
-                Telegram Bot API Profile
-              </h3>
-            </div>
-
-            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <InfoTile
-                label="Telegram UID"
-                source="Bot API"
-                displayValue={String(user?.id || botProfile?.id || "6600489302")}
-                realValue={String(user?.id || botProfile?.id || "6600489302")}
-                description="Permanent unique Telegram numerical UID"
-                mono
-                onCopy={() => handleCopyFieldValue("user_id", String(user?.id || botProfile?.id || "6600489302"))}
-                isCopied={copiedField === "user_id"}
-              />
-              <InfoTile
-                label="Handle"
-                source="Bot API"
-                displayValue={rawHandle}
-                realValue={rawHandle}
-                description="Public account Telegram handle"
-                mono
-                onCopy={() => handleCopyFieldValue("username", rawHandle)}
-                isCopied={copiedField === "username"}
-              />
-              <InfoTile
-                label="First Name"
-                source="Bot API"
-                displayValue={user?.first_name || botProfile?.first_name || "SREIVEY"}
-                realValue={user?.first_name || botProfile?.first_name || "SREIVEY"}
-                description="Account display first name"
-                onCopy={() => handleCopyFieldValue("first_name", user?.first_name || botProfile?.first_name || "SREIVEY")}
-                isCopied={copiedField === "first_name"}
-              />
-              <InfoTile
-                label="Last Name"
-                source="Bot API"
-                displayValue={user?.last_name || botProfile?.last_name || "PRO"}
-                realValue={user?.last_name || botProfile?.last_name || "PRO"}
-                description="Account family suffix / surname"
-                onCopy={() => handleCopyFieldValue("last_name", user?.last_name || botProfile?.last_name || "PRO")}
-                isCopied={copiedField === "last_name"}
-              />
-              <InfoTile
-                label="Full Name"
-                source="Bot API"
-                displayValue={`${user?.first_name || botProfile?.first_name || "SREIVEY"} ${user?.last_name || botProfile?.last_name || "PRO"}`.trim()}
-                realValue={`${user?.first_name || botProfile?.first_name || "SREIVEY"} ${user?.last_name || botProfile?.last_name || "PRO"}`.trim()}
-                description="Complete Telegram identity display name"
-                onCopy={() => handleCopyFieldValue("full_name", `${user?.first_name || botProfile?.first_name || "SREIVEY"} ${user?.last_name || botProfile?.last_name || "PRO"}`.trim())}
-                isCopied={copiedField === "full_name"}
-              />
-              <InfoTile
-                label="Bio Description"
-                source="Bot API"
-                displayValue={botProfile?.bio || bio}
-                realValue={botProfile?.bio || bio}
-                description="User public biography statement"
-                onCopy={() => handleCopyFieldValue("bio", botProfile?.bio || bio)}
-                isCopied={copiedField === "bio"}
-              />
-              <InfoTile
-                label="Broadcast Channel"
-                source="Bot API"
-                displayValue={botProfile?.personal_chat?.title ? `${botProfile.personal_chat.title} (@${botProfile.personal_chat.username || "shiliaiwei"})` : "史力爱卫 (@shiliaiwei)"}
-                realValue={botProfile?.personal_chat?.title ? `${botProfile.personal_chat.title} (@${botProfile.personal_chat.username || "shiliaiwei"})` : "史力爱卫 (@shiliaiwei)"}
-                description="Linked Telegram broadcast channel"
-                onCopy={() => handleCopyFieldValue("channel", "史力爱卫 (@shiliaiwei)")}
-                isCopied={copiedField === "channel"}
-              />
-              <InfoTile
-                label="Direct Chat ID"
-                source="Bot API"
-                displayValue={String(botProfile?.id || user?.id || "6600489302")}
-                realValue={String(botProfile?.id || user?.id || "6600489302")}
-                description="Private message chat route"
-                mono
-                onCopy={() => handleCopyFieldValue("chat_id", String(botProfile?.id || user?.id || "6600489302"))}
-                isCopied={copiedField === "chat_id"}
-              />
-              <InfoTile
-                label="Telegram Premium"
-                source="Bot API"
-                displayValue={user?.is_premium ? "Active Premium Member" : "Standard Tier"}
-                realValue={user?.is_premium ? "Active Premium Member" : "Standard Tier"}
-                description="Telegram subscriber status"
-                onCopy={() => handleCopyFieldValue("is_premium", user?.is_premium ? "Premium" : "Standard")}
-                isCopied={copiedField === "is_premium"}
-              />
-              <InfoTile
-                label="Language Code"
-                source="Bot API"
-                displayValue={user?.language_code ? `${user.language_code.toUpperCase()} (Client UI)` : "EN (English)"}
-                realValue={user?.language_code || "en"}
-                description="Telegram user client UI language"
-                onCopy={() => handleCopyFieldValue("language_code", user?.language_code || "en")}
-                isCopied={copiedField === "language_code"}
-              />
-              <InfoTile
-                label="Direct Messaging (PM)"
-                source="Bot API"
-                displayValue={user?.allows_write_to_pm !== false ? "Allowed (Active)" : "Restricted"}
-                realValue={user?.allows_write_to_pm !== false ? "Allowed" : "Restricted"}
-                description="Permission to send bot messages to private chat"
-                onCopy={() => handleCopyFieldValue("allows_write_to_pm", "Allowed")}
-                isCopied={copiedField === "allows_write_to_pm"}
-              />
-              <InfoTile
-                label="Account Status"
-                source="Bot API"
-                displayValue={isTelegramUser ? "Verified Telegram Account" : "Local Mock Profile"}
-                realValue={isTelegramUser ? "Verified Telegram Account" : "Local Mock Profile"}
-                description="Cryptographic initData authentication status"
-                onCopy={() => handleCopyFieldValue("account_status", "Verified")}
-                isCopied={copiedField === "account_status"}
-              />
-            </div>
-          </div>
-        )}
-
-
-
-
-
-        {/* 8. PREFERENCES SKEUOMORPHIC BLOCK CARD */}
-        {/* 7. SYSTEM SETTINGS & HAPTICS SKEUOMORPHIC CARD */}
-        <div
-          className="relative w-full rounded-[28px] p-4 sm:p-5 overflow-hidden bg-gradient-to-b from-[#1e293b] via-[#0f172a] to-[#020617] text-white"
-          style={{
-            boxShadow:
-              "0 16px 36px -10px rgba(15, 23, 42, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.32), inset 0 -3px 6px rgba(0, 0, 0, 0.5)",
-          }}
-        >
-          <GuillocheBackground opacity={0.25} />
-          <ThreadStitching strokeColor="#94a3b8" />
-          <SpecularRim />
-
-          <div className="relative z-10 flex items-center justify-between gap-4 pb-3 mb-3 border-b border-white/15">
-            <h3 className="text-base font-bold text-white drop-shadow-sm">
-              System Settings & Haptics
-            </h3>
-          </div>
-
-          <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {[
-              {
-                label: "Haptic Feedback",
-                sub: "Vibrations on tap and actions",
-                value: hapticsEnabled,
-                onToggle: () => {
-                  const n = !hapticsEnabled;
-                  setHapticsEnabled(n);
-                  localStorage.setItem("shi_pref_haptics", String(n));
-                },
-              },
-              {
-                label: "Game Sounds",
-                sub: "SFX audio during play",
-                value: soundEnabled,
-                onToggle: () => {
-                  const n = !soundEnabled;
-                  setSoundEnabled(n);
-                  localStorage.setItem("shi_pref_sound", String(n));
-                },
-              },
-            ].map((pref) => (
-              <div
-                key={pref.label}
-                className="bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur-md rounded-2xl p-3.5 flex items-center justify-between transition-all duration-200"
-              >
-                <div>
-                  <span className="text-xs font-bold text-white block">{pref.label}</span>
-                  <span className="text-[10px] text-white/60 font-medium">{pref.sub}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={pref.onToggle}
-                  className={`relative w-12 h-6 rounded-full border transition-all duration-300 ease-out cursor-pointer flex-shrink-0 shadow-inner ${
-                    pref.value
-                      ? "bg-[#0098ea] border-cyan-300 ring-2 ring-cyan-400/30 shadow-[0_0_12px_rgba(0,152,234,0.5)]"
-                      : "bg-slate-800/90 border-white/20"
-                  }`}
-                >
-                  <span
-                    className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-all duration-300 ease-out ${
-                      pref.value ? "left-6" : "left-0.5"
-                    }`}
-                  />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* 10. BRAND FOOTER (HOMEPAGE CONSISTENCY) */}
         <BrandFooter height={16} className="mt-3 pb-2" />
-
-        {onBack && (
-          <button
-            type="button"
-            onClick={onBack}
-            className="w-full py-3.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 font-bold text-xs shadow-2xs active:scale-98 transition-all duration-300 ease-out cursor-pointer"
-          >
-            Exit to Home View
-          </button>
-        )}
       </div>
     </div>
   );
