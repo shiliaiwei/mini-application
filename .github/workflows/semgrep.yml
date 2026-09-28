@@ -33,7 +33,7 @@ jobs:
 
       - name: Run Semgrep SAST scan
         run: |
-          semgrep scan --config auto --exclude '.agents' --sarif --output semgrep.sarif || true
+          semgrep scan --config p/owasp-top-ten --config p/security-audit --config p/javascript --exclude '.agents' --exclude '.github' --sarif --output semgrep.sarif || true
 
       - name: Upload Semgrep scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
