@@ -42,22 +42,34 @@ function detectIsTelegramClient(): boolean {
   if (typeof window === "undefined") return false;
 
   const app = window.Telegram?.WebApp;
+  if (!app) return false;
+
   const isInsideIframe = window.self !== window.top;
-  const platform = app?.platform;
+  const platform = app.platform;
   const isNativePlatform = Boolean(platform && !["unknown", ""].includes(platform));
 
   // 1. Direct Telegram WebApp injected with valid user ID
-  const hasDirectUser = Boolean(app?.initDataUnsafe?.user?.id && app.initDataUnsafe.user.id > 0);
-  const hasInitData = Boolean(typeof app?.initData === "string" && app.initData.includes("hash="));
-
-  // Running inside Telegram Web (nested in official Telegram iframe) or mobile/desktop webview
-  if ((hasDirectUser || hasInitData) && (isInsideIframe || isNativePlatform)) {
+  if (app.initDataUnsafe?.user?.id && app.initDataUnsafe.user.id > 0) {
     return true;
   }
 
-  // Telegram client user-agent inside Telegram native apps
+  // 2. Telegram WebApp running in official iframe or native client platform
+  if (isInsideIframe || isNativePlatform) {
+    return true;
+  }
+
+  // 3. Telegram WebApp runtime API functions (unique to Telegram)
+  if (
+    typeof app.ready === "function" &&
+    typeof app.close === "function" &&
+    (typeof app.initData === "string" || isInsideIframe)
+  ) {
+    return true;
+  }
+
+  // 4. Telegram client user-agent inside Telegram native apps
   const ua = navigator.userAgent || "";
-  if (/TelegramBot|TelegramMessenger|Telegram-Android|tdesktop/i.test(ua) && hasDirectUser) {
+  if (/TelegramBot|TelegramMessenger|Telegram-Android|tdesktop/i.test(ua)) {
     return true;
   }
 
@@ -101,11 +113,12 @@ export default function MiniAppPage() {
     } else {
       // In Production: strictly verify Telegram client and clear unverified caches
       const directUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-      if (isTg && directUser?.id) {
+      if (directUser?.id) {
         setUser(directUser);
         setIsTelegramVerified(true);
         isVerifiedRef.current = true;
-      } else {
+        setIsTelegramClient(true);
+      } else if (!isTg) {
         setUser(null);
         setIsTelegramVerified(false);
         isVerifiedRef.current = false;
@@ -370,10 +383,11 @@ export default function MiniAppPage() {
       const tgUser = app.initDataUnsafe?.user;
       const isTgClient = detectIsTelegramClient();
 
-      if (tgUser && tgUser.id && (isTgClient || isLocalTest)) {
+      if (tgUser && tgUser.id) {
         setUser(tgUser);
         setIsTelegramVerified(true);
         isVerifiedRef.current = true;
+        setIsTelegramClient(true);
         try {
           localStorage.setItem("shi_tg_user_cache", JSON.stringify(tgUser));
         } catch {}
@@ -412,8 +426,8 @@ export default function MiniAppPage() {
                 localStorage.setItem("shi_tg_user_cache", JSON.stringify(data.user));
               } catch {}
               syncWithDatabase(scoreRef.current, spendRef.current, true);
-            } else if (!isLocalTest) {
-              // Cryptographic validation failed - strictly reject session
+            } else if (!isLocalTest && !tgUser?.id) {
+              // Only reject if there is NO legitimate Telegram user
               setUser(null);
               setIsTelegramVerified(false);
               isVerifiedRef.current = false;
@@ -424,7 +438,7 @@ export default function MiniAppPage() {
             }
           })
           .catch(() => {});
-      } else if (!isLocalTest && (!tgUser?.id || !isTgClient)) {
+      } else if (!isLocalTest && !tgUser?.id && !isTgClient) {
         // External browser with no valid Telegram credentials
         setUser(null);
         setIsTelegramVerified(false);
