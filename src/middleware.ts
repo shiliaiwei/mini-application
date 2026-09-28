@@ -21,9 +21,11 @@ export function middleware(request: NextRequest) {
   }
 
   // 3. Detect Telegram Mini App Bot client signatures via centralized utility
+  // On API routes, strictly evaluate headers to prevent query parameter spoofing
+  const isApiRoute = pathname.startsWith("/api/");
   const isTelegramClient = isTelegramBotRequest(
     request.headers,
-    request.nextUrl.searchParams
+    isApiRoute ? undefined : request.nextUrl.searchParams
   );
 
   // 4. Handle API routes - Immediately terminate port access for external web browsers

@@ -22,7 +22,7 @@ export interface TelegramValidationResult {
 
 /**
  * Cryptographically verifies official Telegram initData using HMAC-SHA256.
- * Rejects forged URLs, missing signatures, or tampered user data.
+ * Rejects forged URLs, missing signatures, tampered user data, or missing user identities.
  */
 export function verifyTelegramWebAppData(
   initData: string | null | undefined,
@@ -68,19 +68,34 @@ export function verifyTelegramWebAppData(
       .update(dataCheckString)
       .digest("hex");
 
-    if (calculatedHash.toLowerCase() !== hash.toLowerCase()) {
+    // Timing-safe constant-time comparison to prevent timing side-channel attacks
+    const calcBuf = Buffer.from(calculatedHash.toLowerCase(), "utf-8");
+    const hashBuf = Buffer.from(hash.toLowerCase(), "utf-8");
+    if (calcBuf.length !== hashBuf.length || !crypto.timingSafeEqual(calcBuf, hashBuf)) {
       return { isValid: false, error: "Cryptographic HMAC signature mismatch" };
     }
 
-    const authDateStr = urlParams.get("auth_date");
-    const authDate = authDateStr ? parseInt(authDateStr, 10) : undefined;
-
+    // Double Check 1: User must specifically originate from Telegram with valid numeric ID
     const userRaw = urlParams.get("user");
     let user = undefined;
     if (userRaw) {
       try {
         user = JSON.parse(userRaw);
       } catch {}
+    }
+
+    if (!user || typeof user.id !== "number" || user.id <= 0) {
+      return { isValid: false, error: "Missing or invalid Telegram user identity" };
+    }
+
+    // Double Check 2: Session freshness verification (auth_date within 24 hours)
+    const authDateStr = urlParams.get("auth_date");
+    const authDate = authDateStr ? parseInt(authDateStr, 10) : undefined;
+    if (authDate) {
+      const now = Math.floor(Date.now() / 1000);
+      if (Math.abs(now - authDate) > 86400) {
+        return { isValid: false, error: "Telegram session expired (auth_date > 24 hours)" };
+      }
     }
 
     return { isValid: true, user, authDate };

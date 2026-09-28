@@ -204,6 +204,30 @@ test("Cryptographic Anti-Forging: Rejects forged browser URLs with missing or in
   const validResult = verifyTelegramWebAppData(validPayload, testBotToken);
   assert.equal(validResult.isValid, true);
   assert.equal(validResult.user?.id, 6600489302);
+
+  // 4. Missing or invalid Telegram user identity (must strictly reject)
+  const noUserDataCheck = `auth_date=${authDate}`;
+  const noUserHash = crypto
+    .createHmac("sha256", secretKey)
+    .update(noUserDataCheck)
+    .digest("hex");
+  const noUserPayload = `auth_date=${authDate}&hash=${noUserHash}`;
+  const noUserResult = verifyTelegramWebAppData(noUserPayload, testBotToken);
+  assert.equal(noUserResult.isValid, false);
+  assert.equal(noUserResult.error, "Missing or invalid Telegram user identity");
+
+  // 5. Expired Telegram session (auth_date older than 24 hours)
+  const expiredDate = authDate - 100000;
+  const expiredDataCheck = `auth_date=${expiredDate}\nuser=${userJson}`;
+  const expiredHash = crypto
+    .createHmac("sha256", secretKey)
+    .update(expiredDataCheck)
+    .digest("hex");
+  const expiredPayload = `auth_date=${expiredDate}&user=${encodeURIComponent(userJson)}&hash=${expiredHash}`;
+  const expiredResult = verifyTelegramWebAppData(expiredPayload, testBotToken);
+  assert.equal(expiredResult.isValid, false);
+  assert.equal(expiredResult.error, "Telegram session expired (auth_date > 24 hours)");
 });
+
 
 
