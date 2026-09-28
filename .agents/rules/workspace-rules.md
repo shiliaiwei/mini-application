@@ -92,3 +92,10 @@
 - **Card Pocket Tokens**: Every container must feature the multi-stop gradient (`#5c1c99` via `#48127f` to `#320a59` or designated pocket accent), `LeatherGrain` overlay, `GuillocheBackground` (`/backgrounds/cardbanknote.svg`), perimeter `ThreadStitching` (`stroke-dasharray="4 4"`, drop shadow), and `SpecularRim` top highlight.
 - **Modals & Dialogs**: Never use flat white or plain gray backgrounds. Modals must be physical stitched leather cardholder pockets with frosted glass inputs and tactile 3D buttons.
 
+## Mandatory Delivery Map & Address Pinning System Standard - MANDATORY
+- **Skill Reference**: Governed by `.agents/skills/shiliaiwei-delivery-map-address-system/SKILL.md`.
+- **Physical Pinpoint Standard**: All address collection (Home, Work, Other) MUST support interactive map pinpointing (`DeliveryMapPickerModal.tsx`) with 3D bouncing pin drop and reverse geocoding via OpenStreetMap Nominatim (`/api/geocode/locate`) using device GPS and local network IP fallback.
+- **Incomplete Placeholder Alert**: Empty addresses and profile fields MUST render prominent amber Action Required alert containers (`[ ACTION REQUIRED: Incomplete Address ]`) with direct `[ Pin on Delivery Map (GPS & IP) ]` CTA.
+- **Zero Redundant Navigation**: Never render `(Exit to Home View)` buttons; rely exclusively on top header Back navigation (`ChevronLeft`).
+- **Official Gate Screen Phrasing**: Gate screen Khmer copy strictly uses `តើមានអ្វីកើតឡើង?` and `តើខ្ញុំត្រូវធ្វើដូចម្តេច?` with verified session explanations.
+
