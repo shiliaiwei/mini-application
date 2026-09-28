@@ -31,28 +31,28 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
   return (
     <div className="min-h-screen bg-white text-[#222222] font-sans antialiased select-none flex flex-col justify-between">
       <div className="w-full">
-        {/* Top Header Section (Authentic Cloudflare Mobile-First Header in Khmer) */}
+        {/* Top Header Section (Authentic Cloudflare Mobile-First Header) */}
         <header className="max-w-4xl mx-auto px-5 sm:px-8 pt-7 sm:pt-14 pb-5 space-y-2">
           <div className="flex flex-wrap items-baseline gap-2.5 sm:gap-3.5">
-            <h1 className="text-2xl sm:text-4xl font-normal text-[#222222] tracking-tight">
-              ទំព័រត្រូវបានដាក់កំហិត
+            <h1 className="text-3xl sm:text-5xl font-light text-[#222222] tracking-tight">
+              Page restricted
             </h1>
             <span className="inline-block text-[11px] sm:text-xs font-medium px-2.5 py-0.5 rounded-full bg-[#efefef] text-[#555555] border border-[#e2e2e2] align-middle select-none">
-              កូដកំហុស 403
+              Error code 403
             </span>
           </div>
 
           <p className="text-[#555555] text-xs sm:text-base font-normal pt-0.5 leading-relaxed">
-            ចូលមើល{" "}
+            Visit our{" "}
             <a
-              href="https://telegram.org"
+              href={botUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#0051c3] hover:underline font-normal"
             >
-              telegram.org
+              channel
             </a>{" "}
-            ឬបើកតាមរយៈ{" "}
+            for more information, then launch via{" "}
             <a
               href={botUrl}
               target="_blank"
@@ -61,17 +61,17 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
             >
               @srievibot
             </a>{" "}
-            សម្រាប់ព័ត៌មានបន្ថែម។
+            to access this page.
           </p>
         </header>
 
-        {/* Real Cloudflare Status Band (Full-Width Gray Strip #efefef in Khmer) */}
+        {/* Real Cloudflare Status Band (Full-Width Gray Strip #efefef) */}
         <section className="w-full bg-[#efefef] border-y border-[#e2e2e2] py-8 sm:py-12 px-3 sm:px-6 relative my-1">
           <div className="max-w-3xl mx-auto grid grid-cols-3 gap-2 sm:gap-6 items-start text-center relative">
             {/* Column 1: Browser (You) */}
             <div className="flex flex-col items-center space-y-1 sm:space-y-2">
               <span className="text-[11px] sm:text-sm font-normal text-[#797979]">
-                អ្នក
+                You
               </span>
 
               {/* Authentic Cloudflare Monitor Device */}
@@ -99,11 +99,11 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               </div>
 
               <div className="pt-0.5 space-y-0.5">
-                <div className="text-xs sm:text-base font-normal text-[#444444]">
-                  កម្មវិធីរុករក
+                <div className="text-xs sm:text-lg font-normal text-[#444444]">
+                  Browser
                 </div>
-                <div className="text-xs sm:text-sm font-medium text-[#78be20]">
-                  ដំណើរការធម្មតា
+                <div className="text-xs sm:text-base font-normal text-[#78be20]">
+                  Working
                 </div>
               </div>
             </div>
@@ -111,7 +111,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
             {/* Column 2: Cloudflare (Phnom Penh Edge) */}
             <div className="flex flex-col items-center space-y-1 sm:space-y-2">
               <span className="text-[11px] sm:text-sm font-normal text-[#797979] truncate max-w-full">
-                ភ្នំពេញ
+                Phnom Penh
               </span>
 
               {/* Authentic Cloudflare Cloud Silhouette */}
@@ -138,11 +138,11 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               </div>
 
               <div className="pt-0.5 space-y-0.5">
-                <div className="text-xs sm:text-base font-normal text-[#0051c3] truncate max-w-full">
+                <div className="text-xs sm:text-lg font-normal text-[#0051c3] truncate max-w-full">
                   Cloudflare
                 </div>
-                <div className="text-xs sm:text-sm font-medium text-[#78be20]">
-                  ដំណើរការធម្មតា
+                <div className="text-xs sm:text-base font-normal text-[#78be20]">
+                  Working
                 </div>
               </div>
             </div>
@@ -153,7 +153,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
                 className="text-[11px] sm:text-sm font-normal text-[#797979] truncate max-w-full"
                 title={currentHost}
               >
-                គេហទំព័រ
+                Website
               </span>
 
               {/* Authentic Cloudflare Server Unit with Red X */}
@@ -179,11 +179,11 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               </div>
 
               <div className="pt-0.5 space-y-0.5">
-                <div className="text-xs sm:text-base font-normal text-[#444444]">
-                  ម៉ាស៊ីនមេ
+                <div className="text-xs sm:text-lg font-normal text-[#444444]">
+                  Host
                 </div>
-                <div className="text-xs sm:text-sm font-medium text-[#e74c3c]">
-                  មានបញ្ហា
+                <div className="text-xs sm:text-base font-normal text-[#e74c3c]">
+                  Error
                 </div>
               </div>
 
@@ -193,25 +193,25 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
           </div>
         </section>
 
-        {/* Real Cloudflare 2-Column Explanations in Pure Khmer */}
+        {/* Real Cloudflare 2-Column Explanations in Pure English Standard */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pt-8 sm:pt-12 pb-8 grid grid-cols-1 md:grid-cols-2 gap-7 sm:gap-12">
           {/* What happened? */}
           <div className="space-y-2.5">
-            <h2 className="text-xl sm:text-2xl font-medium text-[#222222] tracking-tight">
-              តើមានអ្វីកើតឡើង?
+            <h2 className="text-2xl sm:text-3xl font-light text-[#222222] tracking-tight">
+              What happened?
             </h2>
             <p className="text-[#555555] text-xs sm:text-sm leading-relaxed font-normal font-sans">
-              ការចូលមើលទំព័រនេះត្រូវបានដាក់កំហិតដើម្បីសុវត្ថិភាព។ ម៉ាស៊ីនមេគេហទំព័រត្រូវការការផ្ទៀងផ្ទាត់សម័យប្រជុំត្រឹមត្រូវ មុនពេលបង្ហាញទិន្នន័យគណនី និងកាបូបឌីជីថលរបស់អ្នក។
+              Access to this page is restricted for your security. The host server requires an authenticated session before displaying private account and vault data.
             </p>
           </div>
 
           {/* What can I do? */}
           <div className="space-y-2.5">
-            <h2 className="text-xl sm:text-2xl font-medium text-[#222222] tracking-tight">
-              តើខ្ញុំត្រូវធ្វើយ៉ាងណា?
+            <h2 className="text-2xl sm:text-3xl font-light text-[#222222] tracking-tight">
+              What can I do?
             </h2>
             <p className="text-[#555555] text-xs sm:text-sm leading-relaxed font-normal font-sans">
-              សូមបើកទំព័រនេះតាមរយៈតេឡេក្រាមបូតផ្លូវការ{" "}
+              Please visit our official channel for more information, then launch via our verified Telegram bot{" "}
               <a
                 href={botUrl}
                 target="_blank"
@@ -220,7 +220,7 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               >
                 @srievibot
               </a>
-              ។ ប្រព័ន្ធបូតនឹងផ្ទៀងផ្ទាត់សម័យប្រជុំរបស់អ្នកដោយស្វ័យប្រវត្តិ និងអនុញ្ញាតឱ្យចូលប្រើប្រាស់បានភ្លាមៗ។
+              . The bot will automatically verify your session and unlock instant, secure access.
             </p>
           </div>
         </section>
@@ -229,8 +229,8 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
       {/* Cloudflare Telemetry Line & Official Shiliaiwei Brand Footer */}
       <footer className="w-full pt-4 pb-8 border-t border-[#f0f0f0] mt-8 flex flex-col items-center justify-center space-y-3">
         <p className="text-[11px] text-[#999999] font-mono tracking-wide">
-          លេខសម្គាល់ Cloudflare Ray ID: <span className="select-all text-[#666666]">{rayId}</span>{" "}
-          <span className="text-[#cccccc]">•</span> រាជធានីភ្នំពេញ កម្ពុជា (ICT)
+          Cloudflare Ray ID: <span className="select-all text-[#666666]">{rayId}</span>{" "}
+          <span className="text-[#cccccc]">•</span> Phnom Penh, Cambodia (ICT)
         </p>
         <BrandFooter height={16} colorScheme="blue" />
       </footer>
