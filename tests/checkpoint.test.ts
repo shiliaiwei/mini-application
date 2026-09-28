@@ -55,3 +55,15 @@ test("Git Hooks: pre-push hook exists and is executable", () => {
   // Check executable permission bit
   assert.ok((stats.mode & 0o111) !== 0, "pre-push hook must be executable");
 });
+
+test("Repository Standards: README.md does not exist and Never Write README rule is enforced", () => {
+  const readmePath = path.resolve(__dirname, "../README.md");
+  assert.equal(fs.existsSync(readmePath), false, "README.md must not exist in repository");
+
+  const rulesPath = path.resolve(__dirname, "../.agents/rules/workspace-rules.md");
+  const content = fs.readFileSync(rulesPath, "utf-8");
+  assert.ok(
+    content.includes("Never Write README Rule"),
+    "Rules must contain Never Write README Rule"
+  );
+});

@@ -4,6 +4,10 @@
 - Do not store temporary or test scripts in the workspace.
 - If a script is created and used for a task/test/migration, it MUST be deleted immediately after execution.
 
+## Never Write README Rule - MANDATORY
+- Strictly NEVER create, write, generate, or restore `README.md` or any README documentation files in this repository.
+- Keep the repository clean of README files under all circumstances.
+
 ## Git Remote Push & Pre-Push Checkpoint Rule - MANDATORY
 - **Strict Command Gate**: Never run `git push` or execute any remote push actions under any circumstances unless explicitly commanded by the user.
 - **Mandatory Pre-Push Checkpoint Verification**: Prior to executing any `git push` to GitHub or remote repositories, the system and developers MUST execute and pass all local checkpoints first:
