@@ -22,6 +22,22 @@ test("Vercel Security Config: vercel.json restricts iframe embedding to Telegram
       cspHeader.value.includes("https://web.telegram.org"),
     "CSP must restrict frame-ancestors to Telegram domains"
   );
+  assert.ok(
+    cspHeader.value.includes("default-src 'self'"),
+    "CSP must define default-src 'self'"
+  );
+  assert.ok(
+    cspHeader.value.includes("script-src") && cspHeader.value.includes("https://telegram.org"),
+    "CSP must whitelist Telegram scripts"
+  );
+  assert.ok(
+    cspHeader.value.includes("connect-src") && cspHeader.value.includes("api.telegram.org"),
+    "CSP must whitelist Telegram API connect endpoints"
+  );
+  assert.ok(
+    cspHeader.value.includes("object-src 'none'"),
+    "CSP must disallow plugins with object-src 'none'"
+  );
 
   const robotsHeader = globalHeaders.headers.find((h: any) => h.key === "X-Robots-Tag");
   assert.ok(robotsHeader, "Must contain X-Robots-Tag");
