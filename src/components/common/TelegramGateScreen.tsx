@@ -9,11 +9,6 @@ interface TelegramGateScreenProps {
 }
 
 export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
-  const [telemetryTime, setTelemetryTime] = useState({
-    localFormatted: "2026-09-28 15:00:00",
-    utcFormatted: "2026-09-28 08:00:00 UTC",
-    zoneLabel: "ម៉ោងនៅកម្ពុជា ICT • ភ្នំពេញ",
-  });
   const [rayId, setRayId] = useState<string>("8e19c04a79b28f31");
   const [currentHost, setCurrentHost] = useState<string>("app.kesararamwithdigital.tech");
 
@@ -21,44 +16,6 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
 
   useEffect(() => {
     try {
-      const now = new Date();
-      const pad = (n: number) => String(n).padStart(2, "0");
-
-      const utcStr = `${now.getUTCFullYear()}-${pad(now.getUTCMonth() + 1)}-${pad(now.getUTCDate())} ${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())} UTC`;
-
-      let detectedZone = "Asia/Phnom_Penh";
-      try {
-        detectedZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Phnom_Penh";
-      } catch {}
-
-      const localFormatter = new Intl.DateTimeFormat("en-CA", {
-        timeZone: detectedZone,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      });
-      const localStr = localFormatter.format(now).replace(",", "");
-
-      const isCambodiaRegion =
-        detectedZone.includes("Phnom_Penh") ||
-        detectedZone.includes("Bangkok") ||
-        detectedZone.includes("Indochina") ||
-        now.getTimezoneOffset() === -420;
-
-      const zoneLabel = isCambodiaRegion
-        ? "ម៉ោងនៅកម្ពុជា ICT • ភ្នំពេញ"
-        : `${detectedZone.replace("_", " ")} (UTC${now.getTimezoneOffset() <= 0 ? "+" : "-"}${Math.abs(now.getTimezoneOffset() / 60)})`;
-
-      setTelemetryTime({
-        localFormatted: localStr,
-        utcFormatted: utcStr,
-        zoneLabel: zoneLabel,
-      });
-
       // Generate a realistic 16-hex Cloudflare Ray ID
       const randomHex = Array.from({ length: 16 }, () =>
         Math.floor(Math.random() * 16).toString(16)
@@ -105,13 +62,6 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               @srievibot
             </a>{" "}
             សម្រាប់ព័ត៌មានបន្ថែម។
-          </p>
-
-          <p className="text-[#888888] text-[11px] sm:text-xs font-sans tracking-wide pt-0.5">
-            <span className="font-medium text-[#444444] select-text">{telemetryTime.localFormatted}</span>{" "}
-            <span className="text-[#0051c3] font-medium select-text">({telemetryTime.zoneLabel})</span>{" "}
-            <span className="text-[#cccccc]">•</span>{" "}
-            <span className="font-mono text-[#888888] select-text">{telemetryTime.utcFormatted}</span>
           </p>
         </header>
 
@@ -272,19 +222,6 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               </a>
               ។ ប្រព័ន្ធបូតនឹងផ្ទៀងផ្ទាត់សម័យប្រជុំរបស់អ្នកដោយស្វ័យប្រវត្តិ និងអនុញ្ញាតឱ្យចូលប្រើប្រាស់បានភ្លាមៗ។
             </p>
-            <div className="pt-2 flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof window !== "undefined") {
-                    window.location.reload();
-                  }
-                }}
-                className="px-4 py-2 bg-[#1a73e8] hover:bg-[#1557b0] text-white text-xs sm:text-sm font-medium rounded transition select-none cursor-pointer"
-              >
-                ផ្ទុកឡើងវិញ
-              </button>
-            </div>
           </div>
         </section>
       </div>
