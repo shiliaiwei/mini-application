@@ -1,0 +1,40 @@
+name: "OSV-Scanner"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '10 2 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  osv-scan:
+    name: "OSV Vulnerability Scan"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install OSV-Scanner
+        run: |
+          wget -q https://github.com/google/osv-scanner/releases/download/v1.9.2/osv-scanner_linux_amd64 -O /usr/local/bin/osv-scanner
+          chmod +x /usr/local/bin/osv-scanner
+
+      - name: Run OSV-Scanner
+        run: |
+          /usr/local/bin/osv-scanner scan -r ./ --format sarif --output-file osv-results.sarif || true
+
+      - name: Upload OSV scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'osv-results.sarif'
+          category: 'osv-scanner'
