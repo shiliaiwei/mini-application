@@ -5,8 +5,8 @@ import { isTelegramBotRequest, isLocalhostEnvironment } from "@/lib/telegramAuth
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. Whitelist Telegram Bot Webhook endpoint (must always accept Telegram Bot updates)
-  if (pathname === "/api/bot/webhook") {
+  // 1. Whitelist Telegram Bot Webhook & Auth validation endpoints
+  if (pathname === "/api/bot/webhook" || pathname === "/api/auth/validate-telegram") {
     return NextResponse.next();
   }
 

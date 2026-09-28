@@ -169,3 +169,41 @@ test("Primary Skill Documentation: telegram-bot-exclusive-access/SKILL.md is rec
   );
 });
 
+test("Cryptographic Anti-Forging: Rejects forged browser URLs with missing or invalid HMAC signature", async () => {
+  const { verifyTelegramWebAppData } = await import("../src/lib/telegramCrypto");
+  const testBotToken = "8873981639:AAEguH_DdmL2gzcN4k9Uth4vd6-g007Kxrk";
+
+  // 1. Exact forged URL reported by user (missing hash parameter)
+  const forgedPayload =
+    "user=%7B%22id%22%3A123456789%2C%22first_name%22%3A%22Test%22%2C%22username%22%3A%22tester%22%7D&tgWebAppVersion=7.0&tgWebAppPlatform=web";
+  const forgedResult = verifyTelegramWebAppData(forgedPayload, testBotToken);
+  assert.equal(forgedResult.isValid, false);
+  assert.equal(forgedResult.error, "Missing required HMAC hash signature");
+
+  // 2. Forged URL with fake arbitrary hash
+  const fakeHashPayload = `${forgedPayload}&hash=deadbeefcafe1234`;
+  const fakeHashResult = verifyTelegramWebAppData(fakeHashPayload, testBotToken);
+  assert.equal(fakeHashResult.isValid, false);
+  assert.equal(fakeHashResult.error, "Cryptographic HMAC signature mismatch");
+
+  // 3. Legitimate Telegram payload with correct HMAC-SHA256 signature
+  const crypto = await import("crypto");
+  const authDate = Math.floor(Date.now() / 1000);
+  const userJson = JSON.stringify({ id: 6600489302, first_name: "Srievi" });
+  const dataCheckString = `auth_date=${authDate}\nuser=${userJson}`;
+  const secretKey = crypto
+    .createHmac("sha256", "WebAppData")
+    .update(testBotToken)
+    .digest();
+  const validHash = crypto
+    .createHmac("sha256", secretKey)
+    .update(dataCheckString)
+    .digest("hex");
+
+  const validPayload = `auth_date=${authDate}&user=${encodeURIComponent(userJson)}&hash=${validHash}`;
+  const validResult = verifyTelegramWebAppData(validPayload, testBotToken);
+  assert.equal(validResult.isValid, true);
+  assert.equal(validResult.user?.id, 6600489302);
+});
+
+
