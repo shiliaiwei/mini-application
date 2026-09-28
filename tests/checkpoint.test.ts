@@ -50,7 +50,11 @@ test("Package Scripts: package.json includes checkpoint command", () => {
 
 test("Git Hooks: pre-push hook exists and is executable", () => {
   const hookPath = path.resolve(__dirname, "../.git/hooks/pre-push");
-  assert.equal(fs.existsSync(hookPath), true, "pre-push hook should exist");
+  if (!fs.existsSync(hookPath) && process.env.CI) {
+    // In CI environments (e.g. GitHub Actions runner), client-side git hooks are not checked out
+    return;
+  }
+  assert.equal(fs.existsSync(hookPath), true, "pre-push hook should exist in local development");
   const stats = fs.statSync(hookPath);
   // Check executable permission bit
   assert.ok((stats.mode & 0o111) !== 0, "pre-push hook must be executable");
