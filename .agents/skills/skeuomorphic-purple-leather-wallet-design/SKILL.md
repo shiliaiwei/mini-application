@@ -67,31 +67,34 @@ This specification establishes the authoritative, permanent Design and Component
 - **Zero Banknote Background Behind App**: `cardbanknote.svg` is strictly prohibited behind the entire app canvas or settings views.
 - **Card Wallet Texture**: Strictly uses `cardbanknote.svg` (`/backgrounds/cardbanknote.svg`) for the card wallet (card face, back card edge, and 3D banknote pocket).
 
-### 6. Frosted Glassmorphism Controls & Floating Coin Quick Actions
-- **Icon-Only Plus Sign Trigger (`+`)**:
-  - Zero text label (`Add Balance` removed).
-  - Geometry: `42px x 42px` rounded circle (`rounded-full`).
-  - Background: `rgba(255, 255, 255, 0.15)` with `hover:bg-white/25`.
-  - Active State: Smoothly rotates 45° into a close `x` with cyan glow (`bg-gradient-to-br from-[#0098ea] to-[#005f99]`, `ring-2 ring-cyan-400/40`).
-  - Action: Toggles the **Floating Quick Actions Coin Pod**.
-- **Floating Coin Quick Actions Pod**:
-  - Elevated dark glass container with top specular highlight rim (`h-[1.5px]`).
-  - Displays 3 tactile 3D coin buttons with milled rims and uppercase titles:
-    1. **Scan**: Sapphire Blue coin with `ScanLine` icon (navigates to camera QR scan).
-    2. **Receive**: Emerald Green coin with `ArrowDownLeft` icon (opens skeuomorphic QR deposit modal).
-    3. **Withdraw**: Amber/Gold coin with `ArrowUpRight` icon (opens withdrawal transfer subview).
-- **Circular Utility Buttons**:
-  - Visibility Toggle: Eye / EyeOff circular frosted button placed directly adjacent to the plus trigger.
-  - Address Chip: Compact pill chip (`0x...••••••••...`) with 1-click copy feedback.
+### 6. Permanent Tactile Coin Actions & Direct Balance Privacy
+- **Permanent Quick Actions Display (No Plus Button)**:
+  - The plus button toggle (`+` / `x`) is completely removed.
+  - The 3 tactile 3D coin buttons (**SCAN**, **RECEIVE**, **WITHDRAW**) are permanently rendered directly inside the front leather pocket flap.
+- **Zero Dark Container / Background (Seamless Leather Match)**:
+  - Zero dark black/purple background box (`bg-[#180528]`, borders, and shadows removed).
+  - The 3 coins sit natively on the purple leather material with banknote guilloche watermark.
+  - Zero rectangular hover/focus highlight (`hover:bg-white/10` removed, `select-none outline-none`).
+- **Direct Tap-to-Hide Balance Privacy (No Eye Button & No Context Guide)**:
+  - The separate Eye / EyeOff button is completely removed from the pocket flap.
+  - Users toggle balance visibility (`••••••••` vs real balance) by tapping directly on the balance numbers.
+  - Zero context guides, tooltips, or clutter labels for an ultra-clean skeuomorphic design.
+- **3D Coin Buttons**:
+  1. **SCAN**: Sapphire Cyan circle with milled rim and `ScanLine` icon.
+  2. **RECEIVE**: Emerald Green circle with milled rim and `ArrowDownLeft` icon.
+  3. **WITHDRAW**: Amber Gold circle with milled rim and `ArrowUpRight` icon.
 
 ---
 
-## 2. Mandatory WEI Coin Terminology Directives
+## 2. Mandatory WEI Coin Terminology & Supported Currencies Directives
+- **Strict Supported Currencies (3 Only)**: The platform strictly supports **WEI COIN** (in-game asset), **US Dollar** (`USD` / `$`), and **Cambodian Riel** (`KHR` / `៛`).
+- **Complete Elimination of TON, PTS, and SAR**: All references to `TON`, `PTS` (generic points), and `SAR` are completely prohibited and excluded from the codebase, UI, and exchange engines.
 - **Universal Currency Terminology**: All in-game points, claim rewards, upgrade costs, and conversion listings MUST strictly use the term **WEI COIN** (or **WEI** / **$WEI**).
 - **Strict Prohibition of "PTS"**: Generic abbreviations such as "PTS" or generic "points" are strictly prohibited in user-facing UI, notification feeds, or button labels.
 - **Conversion Standards**:
   - `100 WEI COIN = $1.00 USD`
   - `100 WEI COIN = 4,100 KHR (Cambodian Riel)`
+- **Economy Terms & Logic**: Users claim, play, collect, and earn WEI Coin every day through daily check-in, tapping, interactive mini-games, and completing verified missions. Users exchange their collected WEI Coin directly into virtual currencies: Cambodian Riel (KHR ៛) and US Dollar (USD $).
 
 ---
 
