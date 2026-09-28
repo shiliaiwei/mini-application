@@ -330,13 +330,12 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Authenticated Owner Clearance Gate
-  const OWNER_TELEGRAM_IDS = ["6600489302", 6600489302, "88888888", 88888888];
-  const OWNER_USERNAMES = ["srievi", "shiliaiwei_holder"];
+  const OWNER_TELEGRAM_IDS = ["6600489302", 6600489302];
+  const OWNER_USERNAMES = ["srievi"];
   const isOwner = Boolean(
-    !user ||
-      !user.id ||
-      OWNER_TELEGRAM_IDS.includes(user.id) ||
-      OWNER_USERNAMES.includes(user?.username?.toLowerCase() || "")
+    user?.id &&
+      (OWNER_TELEGRAM_IDS.includes(user.id) ||
+        OWNER_USERNAMES.includes(user?.username?.toLowerCase() || ""))
   );
 
   const rawDisplayName =

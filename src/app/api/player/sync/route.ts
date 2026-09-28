@@ -86,7 +86,7 @@ export async function POST(req: Request) {
   } catch (err: any) {
     console.error("Player sync error:", err);
     return NextResponse.json(
-      { error: "Internal server error", details: err.message },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

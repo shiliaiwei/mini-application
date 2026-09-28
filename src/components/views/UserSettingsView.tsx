@@ -1654,7 +1654,7 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
             {[
               {
                 label: "Telegram UID",
-                value: String(botProfile?.id || user?.id || "88888888"),
+                value: String(botProfile?.id || user?.id || ""),
                 key: "uid",
               },
               {

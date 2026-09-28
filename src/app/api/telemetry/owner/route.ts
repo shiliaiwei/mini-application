@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 
 // Cloudflare Security Audit Hardened: Owner-Only Access Control List
-const OWNER_TELEGRAM_IDS = new Set(["6600489302", "88888888"]);
+const OWNER_TELEGRAM_IDS = new Set([
+  process.env.ADMIN_CHAT_ID || "",
+  process.env.ADMIN_TELEGRAM_ID || "",
+  "6600489302",
+].filter(Boolean));
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);

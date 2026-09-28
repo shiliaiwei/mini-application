@@ -39,7 +39,7 @@ export async function GET() {
       }
     );
   } catch (error: unknown) {
-    const errMsg = error instanceof Error ? error.message : "Leaderboard fetch error";
-    return NextResponse.json({ error: errMsg }, { status: 500 });
+    console.error("Leaderboard fetch error:", error);
+    return NextResponse.json({ error: "Failed to fetch leaderboard" }, { status: 500 });
   }
 }

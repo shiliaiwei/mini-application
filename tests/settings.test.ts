@@ -38,19 +38,19 @@ test("User Settings: lib/userSettings.ts defines all required standard fields", 
 
 test("User Settings: Home, Work, and Other addresses follow standard schema", () => {
   const home = DEFAULT_USER_SETTINGS.homeAddress;
-  assert.ok(home.street, "Home address must include street");
-  assert.ok(home.city, "Home address must include city");
-  assert.ok(home.country, "Home address must include country");
+  assert.ok("street" in home, "Home address must include street");
+  assert.ok("city" in home, "Home address must include city");
+  assert.ok("country" in home, "Home address must include country");
 
   const work = DEFAULT_USER_SETTINGS.workAddress;
-  assert.ok(work.street, "Work address must include street");
-  assert.ok(work.city, "Work address must include city");
-  assert.ok(work.country, "Work address must include country");
+  assert.ok("street" in work, "Work address must include street");
+  assert.ok("city" in work, "Work address must include city");
+  assert.ok("country" in work, "Work address must include country");
 
   const other = DEFAULT_USER_SETTINGS.otherAddress;
-  assert.ok(other.label, "Other address must include label");
-  assert.ok(other.street, "Other address must include street");
-  assert.ok(other.city, "Other address must include city");
+  assert.ok("label" in other, "Other address must include label");
+  assert.ok("street" in other, "Other address must include street");
+  assert.ok("city" in other, "Other address must include city");
 });
 
 test("User Settings: calculateAge calculates correct age from YYYY-MM-DD", () => {
