@@ -20,7 +20,10 @@ interface TelegramGateScreenProps {
   isDev?: boolean;
 }
 
-export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
+export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({
+  onBypass,
+  isDev = false,
+}) => {
   const statusInfo = STABLE_STATUS_403;
   const [rayId, setRayId] = useState<string>("8e19c04a79b28f31");
   const [currentHost, setCurrentHost] = useState<string>("app.kesararamwithdigital.tech");
@@ -55,6 +58,26 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = () => {
 
   return (
     <div className="min-h-screen bg-white text-[#222222] font-sans antialiased select-none flex flex-col justify-between">
+      {/* Dev Mode Banner (Localhost only) */}
+      {isDev && (
+        <aside aria-label="Dev Mode Preview Bar" className="w-full bg-slate-900 text-white px-4 py-2 flex items-center justify-between text-xs border-b border-slate-700 shadow-sm z-50">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            <span className="font-mono font-bold text-amber-300">DEV MODE PREVIEW</span>
+            <span className="text-slate-400">|</span>
+            <span className="text-slate-300">Viewing 403 Forbidden Gate (Browser Port Restricted)</span>
+          </div>
+          {onBypass && (
+            <button
+              type="button"
+              onClick={onBypass}
+              className="px-3 py-1 bg-[#0098ea] hover:bg-[#0086cf] text-white font-bold rounded-md shadow-xs transition-all active:scale-95 cursor-pointer"
+            >
+              Bypass to Mini App
+            </button>
+          )}
+        </aside>
+      )}
       <div className="w-full">
         {/* Top Header Section (Authentic Cloudflare Mobile-First Header) */}
         <header className="max-w-4xl mx-auto px-5 sm:px-8 pt-7 sm:pt-14 pb-5 space-y-2">

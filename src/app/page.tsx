@@ -9,6 +9,7 @@ import { TapGameView } from "@/components/views/TapGameView";
 import type { ProfileSubTab } from "@/components/views/GameProfileView";
 import { TopBrandNavBar } from "@/components/navigation/TopBrandNavBar";
 import { TelegramGateScreen } from "@/components/common/TelegramGateScreen";
+import { DevModeToolbar } from "@/components/common/DevModeToolbar";
 import {
   Check,
   Wallet,
@@ -41,6 +42,7 @@ export default function MiniAppPage() {
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [isTelegramVerified, setIsTelegramVerified] = useState<boolean>(false);
   const [isLocalTest, setIsLocalTest] = useState<boolean>(false);
+  const [isLocalGatePreview, setIsLocalGatePreview] = useState<boolean>(false);
   const [user, setUser] = useState<TelegramUser>(DEFAULT_USER);
   const [activeTab, setActiveTab] = useState<GameTab>("wallet");
 
@@ -73,8 +75,10 @@ export default function MiniAppPage() {
     // 3. Resolve Telegram Verification / Local Bypass
     if (isLocal) {
       if (window.location.search.includes("preview_gate=true")) {
+        setIsLocalGatePreview(true);
         setIsTelegramVerified(false);
       } else {
+        setIsLocalGatePreview(false);
         setIsTelegramVerified(true);
       }
     } else {
@@ -468,18 +472,30 @@ export default function MiniAppPage() {
     );
   }
 
-  // On public domains (e.g. app.kesararamwithdigital.tech), access is closed unless inside Telegram Mini App
+  // On public domains (e.g. Vercel), access is closed unless inside Telegram Mini App
   if (!isTelegramVerified && !isLocalTest) {
     return <TelegramGateScreen isDev={false} />;
   }
 
-  // On local test environment, if developer wants to preview the gate screen via ?preview_gate=true
-  if (!isTelegramVerified && isLocalTest) {
+  // On local test environment, if developer toggled gate preview
+  if (isLocalTest && isLocalGatePreview) {
     return (
-      <TelegramGateScreen
-        onBypass={() => setIsTelegramVerified(true)}
-        isDev={true}
-      />
+      <>
+        <TelegramGateScreen
+          onBypass={() => {
+            setIsLocalGatePreview(false);
+            setIsTelegramVerified(true);
+          }}
+          isDev={true}
+        />
+        <DevModeToolbar
+          isGateActive={true}
+          onToggleGate={() => {
+            setIsLocalGatePreview(false);
+            setIsTelegramVerified(true);
+          }}
+        />
+      </>
     );
   }
 
@@ -652,6 +668,17 @@ export default function MiniAppPage() {
         user={user}
         isVisible={isDockVisible}
       />
+
+      {/* Localhost Dev Mode Toolbar */}
+      {isLocalTest && (
+        <DevModeToolbar
+          isGateActive={false}
+          onToggleGate={() => {
+            setIsLocalGatePreview(true);
+            setIsTelegramVerified(false);
+          }}
+        />
+      )}
     </div>
   );
 }
