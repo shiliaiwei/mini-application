@@ -321,6 +321,37 @@ export default function MiniAppPage() {
     } catch {}
   }, [user]);
 
+  // Immediate full profile and wallet ledger sync when user enters
+  useEffect(() => {
+    if (!user?.id) return;
+    if (!isTelegramVerified) return;
+
+    // 1. Force sync user profile with Neon database
+    syncWithDatabase(scoreRef.current, spendRef.current, true);
+
+    // 2. Sync wallet ledger balance
+    const syncWalletBalance = async () => {
+      try {
+        const initData = typeof window !== "undefined" && window.Telegram?.WebApp?.initData
+          ? window.Telegram.WebApp.initData
+          : "";
+        const res = await fetch(`/api/wallet/balance?initData=${encodeURIComponent(initData)}&telegram_id=${user.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof data.balance === "number" && data.balance > scoreRef.current) {
+            setScore(data.balance);
+            lastSyncedScoreRef.current = data.balance;
+            try {
+              localStorage.setItem("shi_game_score", String(data.balance));
+            } catch {}
+          }
+        }
+      } catch {}
+    };
+
+    syncWalletBalance();
+  }, [user?.id, isTelegramVerified, syncWithDatabase]);
+
   // Periodic database sync every 8 seconds (skips if unverified or no score change)
   useEffect(() => {
     if (!user?.id) return;

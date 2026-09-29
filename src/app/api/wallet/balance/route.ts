@@ -42,6 +42,16 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    if (!telegramId) {
+      const paramId = searchParams.get("telegram_id") || req.headers.get("x-telegram-user-id");
+      if (paramId) {
+        const parsed = parseInt(paramId, 10);
+        if (!isNaN(parsed) && parsed > 0) {
+          telegramId = parsed;
+        }
+      }
+    }
+
     if (!telegramId && isLocal) {
       telegramId = 88888888;
     }

@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   Send,
   ArrowUpRight,
-  ArrowDownLeft,
   Check,
   Copy,
   ShieldCheck,
@@ -20,18 +19,6 @@ interface SecureTransferLedgerProductProps {
   tgApp?: TelegramWebApp | null;
   onTransferSuccess?: (amount: number, newBalance: number) => void;
   onOpenScan?: () => void;
-}
-
-interface LedgerHistoryItem {
-  id: string;
-  txHash: string;
-  type: "DEBIT" | "CREDIT";
-  entryType: "TRANSFER_OUT" | "TRANSFER_IN" | "INITIAL_GRANT" | "REWARD";
-  counterparty: string;
-  amount: number;
-  nonce: number;
-  status: "CONFIRMED";
-  timestamp: string;
 }
 
 const WC_REGEX = /^WC[a-fA-F0-9]{40}$/;
@@ -50,8 +37,6 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
   const [currentNonce, setCurrentNonce] = useState<number>(0);
   const [myAddress, setMyAddress] = useState<string>("");
   const [copiedAddress, setCopiedAddress] = useState(false);
-  const [copiedHash, setCopiedHash] = useState<string | null>(null);
-  const [filterType, setFilterType] = useState<"ALL" | "DEBIT" | "CREDIT">("ALL");
 
   // Sample quick recipients
   const QUICK_RECIPIENTS = [
@@ -60,40 +45,15 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
     { label: "Community Reserve", address: "WC1234567890abcdef1234567890abcdef12345678" },
   ];
 
-  // Live transaction ledger entries
-  const [history, setHistory] = useState<LedgerHistoryItem[]>([
-    {
-      id: "tx_init_01",
-      txHash: "7b4e9f2a01d6c8b3e5a7f920485d1e2c3b4a5f60718293a4b5c6d7e8f9a0b1c2",
-      type: "CREDIT",
-      entryType: "INITIAL_GRANT",
-      counterparty: "WC0000000000000000000000000000000000000000",
-      amount: 1000,
-      nonce: 0,
-      status: "CONFIRMED",
-      timestamp: "Just now",
-    },
-    {
-      id: "tx_init_02",
-      txHash: "9a1b2c3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5",
-      type: "CREDIT",
-      entryType: "REWARD",
-      counterparty: "WC8888000011112222333344445555666677778888",
-      amount: 250,
-      nonce: 1,
-      status: "CONFIRMED",
-      timestamp: "5m ago",
-    },
-  ]);
-
-  // Fetch live nonce and address on mount
+  // Fetch live nonce and address on mount & user change
   const fetchWalletState = useCallback(async () => {
     try {
       const initData = typeof window !== "undefined" && window.Telegram?.WebApp?.initData
         ? window.Telegram.WebApp.initData
         : "";
+      const userParam = user?.id ? `&telegram_id=${user.id}` : "";
 
-      const res = await fetch(`/api/wallet/nonce?initData=${encodeURIComponent(initData)}`);
+      const res = await fetch(`/api/wallet/nonce?initData=${encodeURIComponent(initData)}${userParam}`);
       if (res.ok) {
         const data = await res.json();
         if (typeof data.nonce === "number") {
@@ -110,7 +70,7 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
         setMyAddress(`WC${fallbackId.padStart(8, "0")}${"a".repeat(32)}`);
       }
     }
-  }, [user, myAddress]);
+  }, [user?.id]);
 
   useEffect(() => {
     fetchWalletState();
@@ -129,15 +89,6 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
       setCopiedAddress(true);
       tgApp?.HapticFeedback?.notificationOccurred?.("success");
       setTimeout(() => setCopiedAddress(false), 2000);
-    } catch {}
-  };
-
-  const handleCopyHash = (hash: string) => {
-    try {
-      navigator.clipboard.writeText(hash);
-      setCopiedHash(hash);
-      tgApp?.HapticFeedback?.impactOccurred?.("light");
-      setTimeout(() => setCopiedHash(null), 1500);
     } catch {}
   };
 
@@ -185,6 +136,7 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           initData,
+          telegram_id: user?.id,
           to_address: cleanRecipient,
           amount: parsedAmount,
           nonce: currentNonce,
@@ -202,6 +154,7 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           initData,
+          telegram_id: user?.id,
           to_address: cleanRecipient,
           amount: parsedAmount,
           nonce: currentNonce,
@@ -214,21 +167,8 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
         throw new Error(transferData.error || "Transfer failed");
       }
 
-      // 3. Update local history and state
+      // 3. Update local state
       const tx = transferData.transaction;
-      const newHistoryItem: LedgerHistoryItem = {
-        id: tx.id || `tx_${Date.now()}`,
-        txHash: tx.txHash,
-        type: "DEBIT",
-        entryType: "TRANSFER_OUT",
-        counterparty: cleanRecipient,
-        amount: parsedAmount,
-        nonce: currentNonce,
-        status: "CONFIRMED",
-        timestamp: "Just now",
-      };
-
-      setHistory((prev) => [newHistoryItem, ...prev]);
       setCurrentNonce((prev) => prev + 1);
       setTransferSuccess(`Transferred ${parsedAmount} WEI COIN successfully. TX: ${tx.txHash.slice(0, 16)}...`);
       setAmount("");
@@ -247,15 +187,10 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
     }
   };
 
-  const filteredHistory = history.filter((item) => {
-    if (filterType === "ALL") return true;
-    return item.type === filterType;
-  });
-
   return (
     <div className="w-full space-y-4 select-none my-2 font-sans">
       {/* ============================================================== */}
-      {/* 1. SKEUOMORPHIC PURPLE LEATHER SECURE TRANSFER CARD             */}
+      {/* SKEUOMORPHIC PURPLE LEATHER SECURE TRANSFER CARD               */}
       {/* ============================================================== */}
       <div
         className="relative w-full rounded-[26px] p-5 sm:p-6 overflow-hidden bg-gradient-to-b from-[#6420a7] via-[#4e1688] to-[#340b5c] text-white"
@@ -489,149 +424,6 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
             )}
           </button>
         </form>
-      </div>
-
-      {/* ============================================================== */}
-      {/* 2. SKEUOMORPHIC PURPLE LEATHER DOUBLE-ENTRY LEDGER CARD        */}
-      {/* ============================================================== */}
-      <div
-        className="relative w-full rounded-[26px] p-5 sm:p-6 overflow-hidden bg-gradient-to-b from-[#6420a7] via-[#4e1688] to-[#340b5c] text-white"
-        style={{
-          boxShadow:
-            "0 20px 42px -10px rgba(45, 10, 80, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.35), inset 0 -3px 8px rgba(0, 0, 0, 0.5)",
-        }}
-      >
-        {/* Guilloche Banknote Security Background */}
-        <div
-          className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-25"
-          style={{
-            backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center center",
-            backgroundSize: "cover",
-            filter: "contrast(1.35) brightness(1.1)",
-          }}
-        />
-
-        {/* Simulated Thread Perimeter Stitching */}
-        <svg
-          className="absolute inset-0 w-full h-full pointer-events-none z-10"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <rect
-            x="6"
-            y="6"
-            width="calc(100% - 12px)"
-            height="calc(100% - 12px)"
-            rx="20"
-            ry="20"
-            fill="none"
-            stroke="#e9d5ff"
-            strokeWidth="1.2"
-            strokeDasharray="4 4"
-            strokeLinecap="round"
-            opacity="0.45"
-            style={{ filter: "drop-shadow(0px 1px 1px rgba(0,0,0,0.6))" }}
-          />
-        </svg>
-
-        {/* Top Specular Rim */}
-        <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none" />
-
-        {/* Header & Filter Tabs */}
-        <div className="relative z-10 flex items-center justify-between pb-3.5 mb-3.5 border-b border-white/15">
-          <div className="flex items-center gap-2">
-            <Coins size={18} className="text-cyan-300" />
-            <h3 className="text-sm font-bold text-white uppercase tracking-wide drop-shadow-sm">
-              Double-Entry Ledger (កំណត់ត្រាប្រតិបត្តិការ)
-            </h3>
-          </div>
-          <div className="flex items-center gap-1 bg-black/30 p-1 rounded-xl border border-purple-300/20">
-            {(["ALL", "DEBIT", "CREDIT"] as const).map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => setFilterType(mode)}
-                className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                  filterType === mode
-                    ? "bg-white text-purple-950 shadow-xs"
-                    : "text-purple-200/80 hover:text-white"
-                }`}
-              >
-                {mode === "ALL" ? "All" : mode === "DEBIT" ? "Debits" : "Credits"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Ledger Entries List */}
-        <div className="relative z-10 space-y-2.5">
-          {filteredHistory.length === 0 ? (
-            <div className="text-center py-6 text-xs text-purple-200/70 font-medium">
-              No ledger transactions recorded in this view.
-            </div>
-          ) : (
-            filteredHistory.map((item) => (
-              <div
-                key={item.id}
-                className="p-3.5 rounded-2xl bg-black/25 border border-purple-300/20 hover:bg-black/35 transition-all flex items-center justify-between gap-3 backdrop-blur-xs"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
-                      item.type === "DEBIT"
-                        ? "bg-rose-500/20 border-rose-400/30 text-rose-300"
-                        : "bg-emerald-500/20 border-emerald-400/30 text-emerald-300"
-                    }`}
-                  >
-                    {item.type === "DEBIT" ? (
-                      <ArrowUpRight size={18} />
-                    ) : (
-                      <ArrowDownLeft size={18} />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-white">
-                        {item.entryType}
-                      </span>
-                      <span className="text-[10px] font-mono text-purple-200/70">
-                        Nonce #{item.nonce}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-purple-200/70 font-mono truncate">
-                      <span>Counterparty:</span>
-                      <span className="truncate">{item.counterparty.slice(0, 10)}...{item.counterparty.slice(-6)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-right shrink-0">
-                  <div
-                    className={`text-sm font-black font-mono ${
-                      item.type === "DEBIT" ? "text-rose-400" : "text-emerald-400"
-                    }`}
-                  >
-                    {item.type === "DEBIT" ? "-" : "+"}
-                    {item.amount.toLocaleString()} WEI
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyHash(item.txHash)}
-                    className="text-[10px] text-purple-200/70 hover:text-white font-mono transition-colors cursor-pointer"
-                    title="Copy full transaction hash"
-                  >
-                    {copiedHash === item.txHash ? (
-                      <span className="text-emerald-300 font-bold">Copied TX</span>
-                    ) : (
-                      <span>TX: {item.txHash.slice(0, 8)}...</span>
-                    )}
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
       </div>
     </div>
   );
