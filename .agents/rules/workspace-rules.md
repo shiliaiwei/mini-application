@@ -1,8 +1,10 @@
 # Workspace Rules
 
-## Temporary Scripts Cleanup Rule - MANDATORY
-- Do not store temporary or test scripts in the workspace.
-- If a script is created and used for a task/test/migration, it MUST be deleted immediately after execution.
+## Temporary Scripts Cleanup & Zero Exposure Rule - MANDATORY
+- **Skill Reference**: Governed by [`.agents/skills/ephemeral-script-cleanup/SKILL.md`](file:///Users/Apple16/Desktop/mini-app/.agents/skills/ephemeral-script-cleanup/SKILL.md).
+- **Immediate Post-Execution Deletion**: If any script is written or executed for testing, debugging, inspection, or migration, it MUST be deleted immediately after execution.
+- **Never Expose**: Temporary test scripts, scratch files, or debug harnesses must NEVER be committed to Git, never exposed in production bundles, and never left in the workspace.
+- **Permanent Tests Only in `tests/`**: All official permanent tests belong strictly in `tests/*.test.ts`. Any temporary test script must be deleted and never exposed.
 
 ## Never Write README Rule - MANDATORY
 - Strictly NEVER create, write, generate, or restore `README.md` or any README documentation files in this repository.

@@ -254,7 +254,7 @@ export function saveUserSettings(
   // 2. Full profile with verified addresses is securely stored in Telegram CloudStorage
   if (tgApp?.CloudStorage?.setItem && settings.telegramCloudSync) {
     try {
-      tgApp.CloudStorage.setItem(STORAGE_KEY, str, (err, ok) => {
+      tgApp.CloudStorage.setItem(STORAGE_KEY, str, (err) => {
         if (err) {
           console.warn("Telegram CloudStorage sync error:", err);
         }

@@ -16,7 +16,7 @@ const CARDS: GemCardConfig[] = [
   {
     id: "mining",
     title: "Boost Mining Power",
-    description: "Claim daily crystalline points to accelerate passive yield and tier rank.",
+    description: "Claim daily crystalline boosts to accelerate passive yield and tier progress.",
     badgeText: "+ BOOST YIELD",
     accentColor: "#34d399",
     accentGlow: "rgba(52, 211, 153, 0.35)",
@@ -25,8 +25,8 @@ const CARDS: GemCardConfig[] = [
   },
   {
     id: "compounding",
-    title: "2.5x Points Compounding",
-    description: "Multiply your hourly score compounding across all simulated balances.",
+    title: "2.5x WEI Coin Compounding",
+    description: "Multiply your hourly WEI Coin compounding across all simulated balances.",
     badgeText: "+ ACTIVATE 2.5X",
     accentColor: "#c084fc",
     accentGlow: "rgba(192, 132, 252, 0.35)",

@@ -47,7 +47,7 @@ export async function GET(req: Request) {
       settings: rows[0].settings,
       updated_at: rows[0].updated_at,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("GET /api/player/settings error:", err);
     return NextResponse.json(
       { error: "Internal server error" },
@@ -105,7 +105,7 @@ export async function POST(req: Request) {
       telegram_id: cleanId,
       updated_at: rows[0]?.updated_at,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("POST /api/player/settings error:", err);
     return NextResponse.json(
       { error: "Internal server error" },

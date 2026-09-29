@@ -47,15 +47,22 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
   useEffect(() => {
     if (tgApp?.MainButton) {
       try {
-        if (typeof (tgApp.MainButton as unknown as { setText?: (t: string) => void }).setText === "function") {
-          (tgApp.MainButton as unknown as { setText: (t: string) => void }).setText("START MINI APP");
-        } else {
-          tgApp.MainButton.text = "START MINI APP";
+        const mb = tgApp.MainButton as unknown as {
+          setText?: (t: string) => void;
+          color?: string;
+          textColor?: string;
+          show: () => void;
+          onClick: (fn: () => void) => void;
+          offClick: (fn: () => void) => void;
+          hide: () => void;
+        };
+        if (typeof mb.setText === "function") {
+          mb.setText("START MINI APP");
         }
-        tgApp.MainButton.color = "#0098ea";
-        tgApp.MainButton.textColor = "#ffffff";
-        tgApp.MainButton.show();
-        tgApp.MainButton.onClick(handleStart);
+        mb.color = "#0098ea";
+        mb.textColor = "#ffffff";
+        mb.show();
+        mb.onClick(handleStart);
       } catch {}
 
       return () => {
@@ -132,7 +139,7 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
                 Play & Earn WEI Coin
               </div>
               <div className="text-[11px] text-slate-500">
-                Tap, complete tasks, and climb the leaderboard
+                Tap to mint and accumulate WEI Coin
               </div>
             </div>
           </div>
@@ -147,7 +154,7 @@ export const GameWelcomeScreen: React.FC<GameWelcomeScreenProps> = ({
                 Instant Cloud Sync
               </div>
               <div className="text-[11px] text-slate-500">
-                Scores and rewards update directly in Telegram
+                Balances update directly in Telegram
               </div>
             </div>
           </div>

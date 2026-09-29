@@ -152,14 +152,14 @@ export async function GET(req: Request) {
     };
 
     return NextResponse.json(payload);
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
       {
         success: false,
         source: "fallback",
         coordinates: { lat: 11.5564, lng: 104.9282 },
         address: FALLBACK_ADDRESS,
-        error: err?.message || "Geocoding service unavailable",
+        error: err instanceof Error ? err.message : "Geocoding service unavailable",
       },
       { status: 500 }
     );

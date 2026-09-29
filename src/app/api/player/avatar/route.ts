@@ -9,7 +9,7 @@ interface CacheEntry {
 // In-memory cache for user avatars (15 minutes TTL) to prevent Telegram API rate limits
 const avatarCache = new Map<string, CacheEntry>();
 
-function createDefaultAvatarSvg(initial = "U"): string {
+function createDefaultAvatarSvg(): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
   <defs>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -35,7 +35,7 @@ export async function GET(req: Request) {
     if (checkOnly) {
       return NextResponse.json({ success: false, error: "Valid numeric telegram_id required" }, { status: 400 });
     }
-    const svg = createDefaultAvatarSvg("?");
+    const svg = createDefaultAvatarSvg();
     return new Response(svg, {
       status: 200,
       headers: {
@@ -71,7 +71,7 @@ export async function GET(req: Request) {
     if (checkOnly) {
       return NextResponse.json({ success: false, error: "Bot token not configured" }, { status: 500 });
     }
-    const svg = createDefaultAvatarSvg("U");
+    const svg = createDefaultAvatarSvg();
     return new Response(svg, {
       status: 200,
       headers: {
@@ -97,7 +97,7 @@ export async function GET(req: Request) {
       if (checkOnly) {
         return NextResponse.json({ success: true, hasPhoto: false });
       }
-      const svg = createDefaultAvatarSvg("U");
+      const svg = createDefaultAvatarSvg();
       return new Response(svg, {
         status: 200,
         headers: {
@@ -136,7 +136,7 @@ export async function GET(req: Request) {
       if (checkOnly) {
         return NextResponse.json({ success: true, hasPhoto: false });
       }
-      const svg = createDefaultAvatarSvg("U");
+      const svg = createDefaultAvatarSvg();
       return new Response(svg, {
         status: 200,
         headers: {
@@ -154,7 +154,7 @@ export async function GET(req: Request) {
       if (checkOnly) {
         return NextResponse.json({ success: false, error: "Failed to download avatar" }, { status: 502 });
       }
-      const svg = createDefaultAvatarSvg("U");
+      const svg = createDefaultAvatarSvg();
       return new Response(svg, {
         status: 200,
         headers: {
@@ -198,7 +198,7 @@ export async function GET(req: Request) {
     if (checkOnly) {
       return NextResponse.json({ success: false, error: "Internal avatar fetch error" }, { status: 500 });
     }
-    const svg = createDefaultAvatarSvg("U");
+    const svg = createDefaultAvatarSvg();
     return new Response(svg, {
       status: 200,
       headers: {

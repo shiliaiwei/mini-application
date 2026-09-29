@@ -527,7 +527,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         },
         web3_vault: {
           wallet_address: walletAddress,
-          score_points: score,
+          wei_coin_balance: score,
           usd_valuation: usdValue,
           spend_seconds: spendSeconds,
         },
@@ -714,9 +714,8 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-2">
           {[
             { t: "Cloudflare Security Audit", s: "Zero Trust PII redaction and edge telemetry enforced.", time: "Just now" },
-            { t: "Vault Sync Complete", s: "Your points have been saved to the cloud.", time: "10m ago" },
+            { t: "Vault Sync Complete", s: "Your WEI Coin balance has been saved to the cloud.", time: "10m ago" },
             { t: "Daily Bonus Available", s: "Spin the lucky wheel for bonus WEI Coin!", time: "2h ago" },
-            { t: "Leaderboard Update", s: "Your rank has been refreshed with anti-cheat checks.", time: "5h ago" },
           ].map((n, i) => (
             <div key={i} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
               <div className="flex items-center justify-between mb-0.5">
@@ -866,9 +865,9 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
             className="relative rounded-2xl p-3 overflow-hidden bg-gradient-to-b from-[#0284c7] to-[#0369a1] text-white border border-sky-400/30 flex flex-col justify-between shadow-xs"
           >
             <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-200">Total Points</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-200">WEI COIN</span>
             <span className="text-base font-black text-white mt-0.5 truncate">{score.toLocaleString()}</span>
-            <span className="text-[9px] font-semibold text-sky-100 mt-0.5">WEI Coin</span>
+            <span className="text-[9px] font-semibold text-sky-100 mt-0.5">Asset Balance</span>
           </div>
 
           <div

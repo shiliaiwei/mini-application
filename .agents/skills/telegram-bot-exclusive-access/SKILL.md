@@ -1,17 +1,17 @@
 ---
 name: telegram-bot-exclusive-access
-description: Authoritative specification for ensuring the SHILIAIWEI application is exclusively accessible within the Telegram Mini App Bot environment on Vercel, completely restricting external web browsers, scrapers, and outside applications. Covers Vercel Edge Middleware, Content-Security-Policy frame-ancestors, centralized request validation (isTelegramBotRequest), client-side WebApp verification, and Deploy Checkpoint verification gates. Trigger on: "restrict browser", "telegram bot only", "exclusive telegram access", "close port on browser", "telegram gate", "deploy checkpoint".
+description: Authoritative specification for ensuring the SHILIAIWEI application is accessible across both external web browsers and the Telegram Mini App Bot environment without restrictions, with mandatory Telegram account sync authentication. Covers Vercel Edge Middleware, Content-Security-Policy frame-ancestors, centralized request validation (isTelegramBotRequest), client-side Telegram account sync, and Deploy Checkpoint verification gates. Trigger on: "web and mini app", "telegram sync", "account sync", "unrestricted access", "telegram gate", "deploy checkpoint".
 ---
 
-# TELEGRAM MINI APP BOT EXCLUSIVE ACCESS SPECIFICATION
+# TELEGRAM MINI APP & WEB UNRESTRICTED ACCESS WITH MANDATORY ACCOUNT SYNC SPECIFICATION
 
-This specification defines the multi-layer security architecture and verification mechanisms used to restrict access to the SHILIAIWEI application strictly and exclusively to the official Telegram Mini App Bot (`@srievibot` / `https://t.me/srievibot/app`), terminating and rejecting any direct web browser access.
+This specification defines the multi-layer architecture and verification mechanisms used to allow unrestricted access to the SHILIAIWEI application across both external web browsers and the official Telegram Mini App Bot (`@srievibot` / `https://t.me/srievibot/app`), while requiring that all user sessions have their account synced and authenticated via Telegram.
 
 ---
 
-## 1. Multi-Layer Access Control Architecture
+## 1. Multi-Layer Dual-Platform Architecture
 
-The application enforces security across four cascading layers:
+The application enforces security and account sync across four cascading layers:
 
 ```
 [ Incoming Request / Client Connection ]
@@ -32,9 +32,9 @@ The application enforces security across four cascading layers:
 │ • Exempts: /api/bot/webhook (Telegram Bot event updates)    │
 │ • Bypasses: Localhost (127.0.0.1, *.local) for dev testing │
 │ • Inspects: User-Agent, tgWebApp* searchParams, Referer     │
-│ • Browser Action: Sets Connection: close and returns        │
-│   HTTP 403 Forbidden on API routes; injects restriction     │
-│   headers on page requests.                                 │
+│ • Unrestricted Access: Passes all Web and Mini App requests │
+│   through; injects X-Telegram-Client and X-Platform-Access  │
+│   headers without blocking or port closing.                 │
 └─────────────────────────────────────────────────────────────┘
                    │
                    ▼
@@ -49,12 +49,14 @@ The application enforces security across four cascading layers:
                    │
                    ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 4. CLIENT-SIDE GATE & 403 SCREEN (page.tsx & GateScreen)   │
-│ • Evaluates window.Telegram.WebApp.initData & platform     │
-│ • If not verified: Displays authentic Cloudflare 403        │
-│   Forbidden Gate Screen with launch CTA to @srievibot/app   │
+│ 4. CLIENT-SIDE GATE & SYNC SCREEN (page.tsx & GateScreen)   │
+│ • Mini App: Ingests window.Telegram.WebApp user & initData  │
+│ • Web Browser: Hydrates synced Telegram user from cache or  │
+│   prompts user to sync their Telegram account on Web.       │
+│ • Both platforms require valid Telegram account sync        │
+│   before unlocking balances and gameplay.                   │
 │ • Localhost Dev Mode: Floating DevModeToolbar with 1-click │
-│   toggle between unlocked app and 403 gate preview.         │
+│   toggle between unlocked app and sync gate preview.        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -67,7 +69,7 @@ All incoming requests are validated through [`src/lib/telegramAuth.ts`](file:///
 * **`isTelegramUserAgent(ua)`**: Matches official Telegram client signatures (`Telegram`, `TelegramMessenger`, `Telegram-Android`, `tdesktop`).
 * **`hasTelegramLaunchParams(params)`**: Validates presence of Telegram WebApp query tokens (`tgWebAppVersion`, `tgWebAppData`, `tgWebAppStartParam`).
 * **`isTelegramReferer(referer)`**: Validates origins from `telegram.org`.
-* **`isTelegramBotRequest(headers, searchParams)`**: Consolidated master validator returning `true` only when the request originates within the Telegram client.
+* **`isTelegramBotRequest(headers, searchParams)`**: Master validator identifying whether a request originates within Telegram or external Web.
 * **`isLocalhostEnvironment(host)`**: Identifies `localhost`, `127.0.0.1`, `0.0.0.0`, and `.local` to enable local developer testing.
 * **`verifyTelegramWebAppData(initData, botToken)`** ([`src/lib/telegramCrypto.ts`](file:///Users/Apple16/Desktop/mini-app/src/lib/telegramCrypto.ts)): **Cryptographic Anti-Forging Engine**:
   * Recalculates secret key `HMAC_SHA256("WebAppData", botToken)`.
@@ -96,23 +98,23 @@ To guarantee that broken code or unauthorized access configurations never deploy
 
 ## 4. Verification & Testing Procedures
 
-### A. Testing External Web Browser Access (Must Be Denied)
+### A. Testing External Web Browser Access (Must Pass With Telegram Sync)
 ```bash
 curl -i -H "Host: mini-application.vercel.app" \
      -H "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Safari/537.36" \
-     http://localhost:3000/api/audit/list
+     http://localhost:3000/
 ```
-**Expected**: `HTTP/1.1 403 Forbidden`, `x-port-access: Restricted-To-Telegram-Bot`, JSON error.
+**Expected**: `HTTP/1.1 200 OK`, `x-telegram-client: false`, `x-platform-access: Unrestricted-Telegram-Sync`.
 
 ### B. Testing Inside Telegram Client (Must Pass)
 ```bash
 curl -i -H "Host: mini-application.vercel.app" \
      -H "User-Agent: TelegramMessenger" \
-     http://localhost:3000/api/audit/list
+     http://localhost:3000/
 ```
-**Expected**: `x-telegram-client: true`, passed through to API logic.
+**Expected**: `x-telegram-client: true`, passed through with native WebApp capabilities.
 
 ### C. Testing on Localhost
 * Open `http://localhost:3000` -> Dev Mode active with [`DevModeToolbar`](file:///Users/Apple16/Desktop/mini-app/src/components/common/DevModeToolbar.tsx).
-* Click `Preview 403 Gate` -> Displays Cloudflare 403 Gate Screen.
+* Click `Preview Sync Gate` -> Displays Telegram Account Sync Screen.
 * Click `Bypass to Mini App` -> Returns to unlocked mini app.

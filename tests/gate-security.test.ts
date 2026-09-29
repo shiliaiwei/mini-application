@@ -10,11 +10,22 @@ test("Vercel Security Config: vercel.json restricts iframe embedding to Telegram
   const config = JSON.parse(fs.readFileSync(vercelPath, "utf-8"));
   assert.ok(Array.isArray(config.headers), "vercel.json must define headers array");
 
-  const globalHeaders = config.headers.find((h: any) => h.source === "/(.*)");
+  interface HeaderRule {
+    key: string;
+    value: string;
+  }
+  interface HeaderGroup {
+    source: string;
+    headers: HeaderRule[];
+  }
+
+  const globalHeaders = (config.headers as HeaderGroup[]).find(
+    (h: HeaderGroup) => h.source === "/(.*)"
+  );
   assert.ok(globalHeaders, "Must have global header rules for /(.*)");
 
   const cspHeader = globalHeaders.headers.find(
-    (h: any) => h.key === "Content-Security-Policy"
+    (h: HeaderRule) => h.key === "Content-Security-Policy"
   );
   assert.ok(cspHeader, "Must contain Content-Security-Policy header");
 
@@ -38,12 +49,12 @@ test("Vercel Security Config: vercel.json restricts iframe embedding to Telegram
   const objectTokens = directiveMap.get("object-src") || [];
   assert.equal(objectTokens.some((t) => t === "'none'"), true, "CSP must disallow plugins with object-src 'none'");
 
-  const robotsHeader = globalHeaders.headers.find((h: any) => h.key === "X-Robots-Tag");
+  const robotsHeader = globalHeaders.headers.find((h: HeaderRule) => h.key === "X-Robots-Tag");
   assert.ok(robotsHeader, "Must contain X-Robots-Tag");
   assert.equal(robotsHeader.value, "noindex, nofollow");
 });
 
-test("Edge Middleware: src/middleware.ts restricts web browser access and whitelists Telegram bot", () => {
+test("Edge Middleware: src/middleware.ts enables web and mini app access with Telegram detection", () => {
   const middlewarePath = path.resolve(__dirname, "../src/middleware.ts");
   assert.equal(fs.existsSync(middlewarePath), true, "src/middleware.ts must exist");
 
@@ -61,32 +72,30 @@ test("Edge Middleware: src/middleware.ts restricts web browser access and whitel
     "Middleware must reuse isTelegramBotRequest from telegramAuth"
   );
 
-  // 403 Port Access Restriction
+  // Unrestricted access with platform headers
   assert.ok(
-    content.includes("status: 403") || content.includes("403"),
-    "Middleware must return 403 for unauthorized browser access"
+    content.includes("X-Telegram-Client"),
+    "Middleware must set X-Telegram-Client header"
   );
   assert.ok(
-    content.includes("Connection") && content.includes("close"),
-    "Middleware must set Connection: close to terminate web browser port access"
+    content.includes("X-Platform-Access"),
+    "Middleware must set X-Platform-Access header for unrestricted access"
   );
 });
 
-test("Dev Mode Controls: DevModeToolbar and Gate Screen bypass are wired", () => {
-  const toolbarPath = path.resolve(
-    __dirname,
-    "../src/components/common/DevModeToolbar.tsx"
-  );
-  assert.equal(fs.existsSync(toolbarPath), true, "DevModeToolbar.tsx must exist");
+test("Zero Dev Mode: Dev mode toolbar and artificial bypasses are eliminated for unified user access", () => {
+  const pagePath = path.resolve(__dirname, "../src/app/page.tsx");
+  const pageContent = fs.readFileSync(pagePath, "utf-8");
 
-  const toolbarContent = fs.readFileSync(toolbarPath, "utf-8");
-  assert.ok(
-    toolbarContent.includes("DEV MODE"),
-    "DevModeToolbar must display DEV MODE indicator"
+  assert.equal(
+    pageContent.includes("DevModeToolbar"),
+    false,
+    "DevModeToolbar must be removed from page.tsx"
   );
-  assert.ok(
-    toolbarContent.includes("onToggleGate"),
-    "DevModeToolbar must expose onToggleGate action"
+  assert.equal(
+    pageContent.includes("isLocalTest"),
+    false,
+    "isLocalTest must be removed from page.tsx"
   );
 
   const gateScreenPath = path.resolve(
@@ -94,9 +103,10 @@ test("Dev Mode Controls: DevModeToolbar and Gate Screen bypass are wired", () =>
     "../src/components/common/TelegramGateScreen.tsx"
   );
   const gateContent = fs.readFileSync(gateScreenPath, "utf-8");
-  assert.ok(
-    gateContent.includes("isDev") && gateContent.includes("onBypass"),
-    "TelegramGateScreen must handle isDev and onBypass props"
+  assert.equal(
+    gateContent.includes("DEV MODE PREVIEW"),
+    false,
+    "TelegramGateScreen must not contain dev mode preview banner"
   );
 });
 
@@ -228,16 +238,15 @@ test("Cryptographic Anti-Forging: Rejects forged browser URLs with missing or in
   assert.equal(expiredResult.error, "Telegram session expired (auth_date > 24 hours)");
 });
 
-test("Production User Isolation: Zero demo or mock user in production; external browsers receive blank page", () => {
+test("Production User Isolation: Demo user strictly restricted to local test; in real product auth is always needed", () => {
   const pagePath = path.resolve(__dirname, "../src/app/page.tsx");
   const pageContent = fs.readFileSync(pagePath, "utf-8");
 
-  // Verify DEFAULT_USER is renamed to DEFAULT_DEV_USER and isolated strictly to localhost
-  assert.equal(pageContent.includes("const DEFAULT_USER:"), false, "DEFAULT_USER must not exist; use DEFAULT_DEV_USER");
-  assert.ok(pageContent.includes("DEFAULT_DEV_USER"), "DEFAULT_DEV_USER must be defined for local dev only");
+  // Verify LOCAL_DEMO_USER is defined for local development only and strictly gated by isLocal
+  assert.ok(pageContent.includes("LOCAL_DEMO_USER"), "LOCAL_DEMO_USER must be defined for local test only");
   assert.ok(
-    pageContent.includes("if (isLocal) {") && pageContent.includes("setUser(DEFAULT_DEV_USER)"),
-    "DEFAULT_DEV_USER must only be set when isLocal is true"
+    pageContent.includes("else if (isLocal) {") && pageContent.includes("setUser(LOCAL_DEMO_USER)"),
+    "LOCAL_DEMO_USER must strictly be assigned when isLocal is true"
   );
 
   // Initial user state must be null (zero fallback user in production)
@@ -257,14 +266,14 @@ test("Production User Isolation: Zero demo or mock user in production; external 
     "document.referrer must not be used to bypass Telegram verification"
   );
 
-  // Blank page enforcement for external browsers and unverified users
+  // In real product: unverified sessions without Telegram auth are always gated
   assert.ok(
-    pageContent.includes("(!isTelegramClient || !isTelegramVerified || !user) && !isLocalTest"),
-    "External browser or unverified session must render blank page"
+    pageContent.includes("(!isTelegramVerified || !user)"),
+    "Unsynced session must be gated until Telegram account is linked"
   );
   assert.ok(
-    pageContent.includes("localStorage.removeItem(\"shi_tg_user_cache\")"),
-    "Stale cache must be purged on unverified sessions"
+    pageContent.includes("onSyncSuccess"),
+    "Gate screen must provide onSyncSuccess handler for web Telegram sync"
   );
 });
 

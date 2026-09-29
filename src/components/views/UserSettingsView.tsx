@@ -237,10 +237,26 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
 
   const [draftHome, setDraftHome] = useState<AddressDetails>(settings.homeAddress);
   const [draftWork, setDraftWork] = useState<AddressDetails>(settings.workAddress);
+
+  const PRESET_SECURITY_QUESTIONS = [
+    "What is your secret recovery codeword?",
+    "What was the name of your first school?",
+    "What city were you born in?",
+    "What was your favorite childhood pet's name?",
+  ];
+
+  const initialIsCustom =
+    Boolean(settings.securityQuestion) &&
+    !PRESET_SECURITY_QUESTIONS.includes(settings.securityQuestion || "");
+
   const [draftSecurityQuestion, setDraftSecurityQuestion] = useState(
-    settings.securityQuestion || "What is your secret recovery codeword?"
+    initialIsCustom
+      ? "Custom Question"
+      : settings.securityQuestion || PRESET_SECURITY_QUESTIONS[0]
   );
-  const [draftCustomQuestion, setDraftCustomQuestion] = useState("");
+  const [draftCustomQuestion, setDraftCustomQuestion] = useState(
+    initialIsCustom ? settings.securityQuestion || "" : ""
+  );
   const [draftSecurityAnswer, setDraftSecurityAnswer] = useState(
     settings.securityAnswer || ""
   );
@@ -356,8 +372,9 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
     });
   }, [user]);
 
-  // Sync draft states whenever settings change
+  // Sync draft states whenever settings change (only if user is not actively editing inside a modal)
   useEffect(() => {
+    if (activeModal || isWorkMapOpen) return;
     setDraftFirstName(settings.firstName);
     setDraftLastName(settings.lastName);
     setDraftDisplayName(settings.displayName);
@@ -370,16 +387,25 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
     setDraftPhone(settings.phone);
     setDraftHome(settings.homeAddress);
     setDraftWork(settings.workAddress);
+    const isCustomQ =
+      Boolean(settings.securityQuestion) &&
+      !PRESET_SECURITY_QUESTIONS.includes(settings.securityQuestion || "");
     setDraftSecurityQuestion(
-      settings.securityQuestion || "What is your secret recovery codeword?"
+      isCustomQ ? "Custom Question" : settings.securityQuestion || PRESET_SECURITY_QUESTIONS[0]
     );
+    setDraftCustomQuestion(isCustomQ ? settings.securityQuestion || "" : "");
     setDraftSecurityAnswer(settings.securityAnswer || "");
-  }, [settings]);
+  }, [settings, activeModal, isWorkMapOpen]);
 
   // Telegram native BackButton integration (Telegram WebApp v6.1+)
   useEffect(() => {
     const handleTgBack = () => {
-      if (activeModal) {
+      if (isWorkMapOpen) {
+        setIsWorkMapOpen(false);
+        try {
+          tgApp?.HapticFeedback?.selectionChanged();
+        } catch {}
+      } else if (activeModal) {
         setActiveModal(null);
         try {
           tgApp?.HapticFeedback?.selectionChanged();
@@ -402,31 +428,36 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
       if (supportsBackButton && tgApp?.BackButton) {
         try {
           tgApp.BackButton.offClick(handleTgBack);
-          if (!activeModal && !onBack) {
+          if (!isWorkMapOpen && !activeModal && !onBack) {
             tgApp.BackButton.hide();
           }
         } catch {}
       }
     };
-  }, [tgApp, activeModal, onBack]);
+  }, [tgApp, isWorkMapOpen, activeModal, onBack]);
 
-  const triggerHaptic = (type: "light" | "medium" | "heavy" | "success" | "warning" | "error" | "selection" = "selection") => {
-    if (!hapticsEnabled) return;
-    try {
-      if (type === "selection") {
-        tgApp?.HapticFeedback?.selectionChanged();
-      } else if (type === "success" || type === "warning" || type === "error") {
-        tgApp?.HapticFeedback?.notificationOccurred(type);
-      } else {
-        tgApp?.HapticFeedback?.impactOccurred(type);
-      }
-    } catch {}
-  };
+  const triggerHaptic = useCallback(
+    (type: "light" | "medium" | "heavy" | "success" | "warning" | "error" | "selection" = "selection") => {
+      if (!hapticsEnabled) return;
+      try {
+        if (type === "selection") {
+          tgApp?.HapticFeedback?.selectionChanged();
+        } else if (type === "success" || type === "warning" || type === "error") {
+          tgApp?.HapticFeedback?.notificationOccurred(type);
+        } else {
+          tgApp?.HapticFeedback?.impactOccurred(type);
+        }
+      } catch {}
+    },
+    [hapticsEnabled, tgApp]
+  );
 
   const playSynthesizedTone = () => {
     if (!soundEnabled) return;
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
       const osc = ctx.createOscillator();
@@ -453,7 +484,7 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
       if (onSavedNotification) onSavedNotification();
       setTimeout(() => setSaveBanner(null), 3200);
     },
-    [tgApp, onSavedNotification, refreshCacheCount]
+    [tgApp, onSavedNotification, refreshCacheCount, triggerHaptic]
   );
 
   const handleCopyText = (val: string, key: string) => {
@@ -1319,7 +1350,7 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
                 <div>
                   <span className="text-sm font-bold text-white block">Game SFX Sound</span>
                   <span className="text-xs text-white/70">
-                    Audio sound effects during points claim and reward spin
+                    Audio sound effects during WEI Coin claim and reward spin
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -2375,7 +2406,7 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
                   value="What was your favorite childhood pet's name?"
                   className="bg-slate-900 text-white"
                 >
-                  What was your favorite childhood pet's name?
+                  What was your favorite childhood pet&apos;s name?
                 </option>
                 <option value="Custom Question" className="bg-slate-900 text-white">
                   Custom Question...

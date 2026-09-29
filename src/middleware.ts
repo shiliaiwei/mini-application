@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { isTelegramBotRequest, isLocalhostEnvironment } from "@/lib/telegramAuth";
+import { isTelegramBotRequest } from "@/lib/telegramAuth";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -10,53 +10,18 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. Resolve hostname for local development bypass
-  const host = request.headers.get("host") || "";
-  const isLocal = isLocalhostEnvironment(host);
-
-  if (isLocal) {
-    const response = NextResponse.next();
-    response.headers.set("X-Dev-Environment", "localhost");
-    return response;
-  }
-
-  // 3. Detect Telegram Mini App Bot client signatures via centralized utility
-  // On API routes, strictly evaluate headers to prevent query parameter spoofing
+  // 2. Detect Telegram Mini App Bot client signatures via centralized utility
   const isApiRoute = pathname.startsWith("/api/");
   const isTelegramClient = isTelegramBotRequest(
     request.headers,
     isApiRoute ? undefined : request.nextUrl.searchParams
   );
 
-  // 4. Handle API routes - Immediately terminate port access for external web browsers
-  if (pathname.startsWith("/api/")) {
-    if (!isTelegramClient) {
-      return NextResponse.json(
-        {
-          error: "Forbidden: Port access restricted to Telegram Bot client only.",
-          code: 403,
-          channel: "https://t.me/shiliaiwei",
-          bot: "https://t.me/srievibot/app",
-        },
-        {
-          status: 403,
-          headers: {
-            "Connection": "close",
-            "X-Port-Access": "Restricted-To-Telegram-Bot",
-            "X-Robots-Tag": "noindex, nofollow",
-          },
-        }
-      );
-    }
-  }
-
-  // 5. Pass through page requests with verification metadata
+  // 3. Pass through all requests: Unrestricted access for both Web and Telegram Mini App
+  // Both platforms are allowed full access; sessions must have a synced Telegram account
   const response = NextResponse.next();
   response.headers.set("X-Telegram-Client", isTelegramClient ? "true" : "false");
-  if (!isTelegramClient) {
-    response.headers.set("Connection", "close");
-    response.headers.set("X-Port-Access", "Restricted-To-Telegram-Bot");
-  }
+  response.headers.set("X-Platform-Access", "Unrestricted-Telegram-Sync");
 
   return response;
 }

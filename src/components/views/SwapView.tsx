@@ -116,7 +116,7 @@ export const SwapView: React.FC<SwapViewProps> = ({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             telegram_id: user.id,
-            action: "POINTS_EXCHANGE",
+            action: "WEI_COIN_EXCHANGE",
             details: `Exchanged ${parsedInput} ${fromCurrency} for ${outputText}`,
             platform: tgApp?.platform || "TELEGRAM_WEB",
           }),

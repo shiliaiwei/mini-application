@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { RECENT_USER_CLAIMS, UserClaimEvent } from "@/data/userClaimsData";
-import { Sparkles } from "@/components/icons/KeylineIcons";
 
 export const LiveClaimsTicker: React.FC = () => {
   const [index, setIndex] = useState(0);

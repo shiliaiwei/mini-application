@@ -99,7 +99,7 @@ export function verifyTelegramWebAppData(
     }
 
     return { isValid: true, user, authDate };
-  } catch (err: any) {
-    return { isValid: false, error: err?.message || "Validation error" };
+  } catch (err: unknown) {
+    return { isValid: false, error: err instanceof Error ? err.message : "Validation error" };
   }
 }

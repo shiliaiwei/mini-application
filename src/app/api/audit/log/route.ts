@@ -120,9 +120,9 @@ export async function GET(req: Request) {
       LIMIT ${safeLimit};
     `;
 
-    const logs = rawLogs.map((log: any) => ({
+    const logs = rawLogs.map((log: Record<string, unknown>) => ({
       ...log,
-      ip_address: maskIp(log.ip_address),
+      ip_address: maskIp(typeof log.ip_address === "string" ? log.ip_address : ""),
     }));
 
     return NextResponse.json({

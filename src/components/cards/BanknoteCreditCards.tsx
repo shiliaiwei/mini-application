@@ -7,8 +7,6 @@ import {
   Check,
   Copy,
   X,
-  QrCode,
-  Sparkles,
 } from "@/components/icons/KeylineIcons";
 
 interface BanknoteCreditCardsProps {
@@ -46,15 +44,12 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
   tgApp,
   onOpenDeposit,
   onOpenSend,
-  onOpenSwap,
-  onOpenAddress,
   onOpenScan,
   onOpenReceive,
 }) => {
   const [currency, setCurrency] = useState<CurrencyMode>("USD");
   const [switchDirection, setSwitchDirection] = useState<"left" | "right">("right");
   const [isHangingSwitch, setIsHangingSwitch] = useState(false);
-  const [copiedAddress, setCopiedAddress] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
   const [copiedReceiveAddress, setCopiedReceiveAddress] = useState(false);
 
@@ -71,17 +66,6 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
     }
   }, []);
 
-  const handleCopyAddress = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      if (typeof navigator !== "undefined" && navigator.clipboard) {
-        navigator.clipboard.writeText(walletAddress);
-      }
-      setCopiedAddress(true);
-      setTimeout(() => setCopiedAddress(false), 1800);
-    } catch {}
-  };
-
   const telegramUsername = user?.username
     ? `@${user.username}`
     : user?.first_name
@@ -96,12 +80,12 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
     ? `0x${Number(user.id).toString(16).padStart(4, "0")}••••••••${String(user.id).slice(-4)}`
     : "0x78a1••••••••82f1";
 
-  const usdFormatted = (score > 0 ? score / 100 : 268.48).toLocaleString("en-US", {
+  const usdFormatted = (score / 100).toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 
-  const khrFormatted = Math.floor(score > 0 ? score * 41 : 1100768).toLocaleString("en-US");
+  const khrFormatted = Math.floor(score * 41).toLocaleString("en-US");
 
   const handleCycleCurrency = () => {
     setSwitchDirection((prev) => (prev === "right" ? "left" : "right"));

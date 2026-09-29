@@ -9,7 +9,6 @@ import { TapGameView } from "@/components/views/TapGameView";
 import type { ProfileSubTab } from "@/components/views/GameProfileView";
 import { TopBrandNavBar } from "@/components/navigation/TopBrandNavBar";
 import { TelegramGateScreen } from "@/components/common/TelegramGateScreen";
-import { DevModeToolbar } from "@/components/common/DevModeToolbar";
 import { isLocalhostEnvironment } from "@/lib/telegramAuth";
 import {
   Check,
@@ -32,10 +31,12 @@ const GameProfileView = dynamic(
   { ssr: false }
 );
 
-const DEFAULT_DEV_USER: TelegramUser = {
+// Local demo test user: strictly enabled on localhost only; NEVER exposed in production
+const LOCAL_DEMO_USER: TelegramUser = {
   id: 88888888,
-  first_name: "SHILIAIWEI Dev",
-  username: "shiliaiwei_dev",
+  first_name: "SHILIAIWEI Demo",
+  username: "demo_tester",
+  photo_url: "/api/player/avatar?telegram_id=88888888",
 };
 
 function detectIsTelegramClient(): boolean {
@@ -82,56 +83,86 @@ export default function MiniAppPage() {
   const [isTelegramClient, setIsTelegramClient] = useState<boolean>(false);
   const [isTelegramVerified, setIsTelegramVerified] = useState<boolean>(false);
   const isVerifiedRef = useRef<boolean>(false);
-  const [isLocalTest, setIsLocalTest] = useState<boolean>(false);
-  const [isLocalGatePreview, setIsLocalGatePreview] = useState<boolean>(false);
   const [user, setUser] = useState<TelegramUser | null>(null);
   const [activeTab, setActiveTab] = useState<GameTab>("wallet");
+  const [activeCategory, setActiveCategory] = useState<NavCategory>("lobby");
+  const [profileSubTab, setProfileSubTab] = useState<ProfileSubTab>("profile");
+  const [showBalances, setShowBalances] = useState(true);
+  const [activeTopUpScreen, setActiveTopUpScreen] = useState(false);
+
+  // Top Up State (Reset to 0)
+  const [topUpAmount, setTopUpAmount] = useState(0);
+  const [topUpSuccess, setTopUpSuccess] = useState(false);
+
+  // Game Mechanics State (Reset to 0)
+  const [score, setScore] = useState(0);
+  const [spendSeconds, setSpendSeconds] = useState(0);
+
+  // Crypto Upgrades & Mining Power
+  const [tapPower, setTapPower] = useState(1);
+  const [passiveRate, setPassiveRate] = useState(0);
+
+  const scoreRef = useRef(score);
+  const spendRef = useRef(spendSeconds);
+  const lastSyncedScoreRef = useRef(-1);
+  const lastSyncedSpendRef = useRef(-1);
+
+  // Update refs on state changes rather than render phase
+  useEffect(() => {
+    scoreRef.current = score;
+    spendRef.current = spendSeconds;
+  }, [score, spendSeconds]);
+
+  // Dynamic Dock Visibility on Scroll
+  const [isDockVisible, setIsDockVisible] = useState(true);
+  const lastScrollYRef = useRef(0);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
 
-    // 1. Resolve host environment
     const isLocal = isLocalhostEnvironment(window.location.hostname);
-    setIsLocalTest(isLocal);
 
-    // 2. Resolve Telegram environment
+    // 1. Resolve Telegram environment
     const isTg = detectIsTelegramClient();
     setIsTelegramClient(isTg);
 
-    // 3. Resolve user: Strictly authentic Telegram users in production, zero demo fallbacks
-    if (isLocal) {
-      setUser(DEFAULT_DEV_USER);
-      if (window.location.search.includes("preview_gate=true")) {
-        setIsLocalGatePreview(true);
-        setIsTelegramVerified(false);
-        isVerifiedRef.current = false;
-      } else {
-        setIsLocalGatePreview(false);
-        setIsTelegramVerified(true);
-        isVerifiedRef.current = true;
-      }
+    // 2. Resolve user:
+    // In local development: automatically initialize demo user for testing
+    // In real product: authentic Telegram authentication / sync is ALWAYS required
+    const directUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    if (directUser?.id) {
+      const enrichedUser: TelegramUser = {
+        ...directUser,
+        photo_url:
+          directUser.photo_url ||
+          `/api/player/avatar?telegram_id=${directUser.id}`,
+      };
+      setUser(enrichedUser);
+      setIsTelegramVerified(true);
+      isVerifiedRef.current = true;
+      setIsTelegramClient(true);
+      try {
+        localStorage.setItem("shi_tg_user_cache", JSON.stringify(enrichedUser));
+      } catch {}
+    } else if (isLocal) {
+      // Local development test only: initialize demo user
+      setUser(LOCAL_DEMO_USER);
+      setIsTelegramVerified(true);
+      isVerifiedRef.current = true;
     } else {
-      // In Production: strictly verify Telegram client and clear unverified caches
-      const directUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-      if (directUser?.id) {
-        const enrichedUser: TelegramUser = {
-          ...directUser,
-          photo_url:
-            directUser.photo_url ||
-            `/api/player/avatar?telegram_id=${directUser.id}`,
-        };
-        setUser(enrichedUser);
-        setIsTelegramVerified(true);
-        isVerifiedRef.current = true;
-        setIsTelegramClient(true);
-      } else if (!isTg) {
-        setUser(null);
-        setIsTelegramVerified(false);
-        isVerifiedRef.current = false;
-        try {
-          localStorage.removeItem("shi_tg_user_cache");
-        } catch {}
-      }
+      // Real product: strictly check for authentic synced Telegram account
+      try {
+        const cachedUserStr = localStorage.getItem("shi_tg_user_cache");
+        if (cachedUserStr) {
+          const cachedUser = JSON.parse(cachedUserStr);
+          if (cachedUser?.id && typeof cachedUser.id === "number" && cachedUser.id > 0) {
+            setUser(cachedUser);
+            setIsTelegramVerified(true);
+            isVerifiedRef.current = true;
+          }
+        }
+      } catch {}
     }
 
     // 4. Resolve tab parameter from search params or Telegram Settings hash
@@ -142,42 +173,13 @@ export default function MiniAppPage() {
     }
     if (
       params.get("subtab") === "settings" ||
-      tabParam === ("settings" as any) ||
+      (tabParam as string) === "settings" ||
       window.location.hash.includes("tgWebAppShowSettings=1")
     ) {
       setProfileSubTab("settings");
       setActiveTab("profile");
     }
   }, []);
-  const [activeCategory, setActiveCategory] = useState<NavCategory>("lobby");
-  const [profileSubTab, setProfileSubTab] = useState<ProfileSubTab>("profile");
-  const [showBalances, setShowBalances] = useState(true);
-  const [activeTopUpScreen, setActiveTopUpScreen] = useState(false);
-
-  // Top Up State
-  const [topUpAmount, setTopUpAmount] = useState(100);
-  const [topUpSuccess, setTopUpSuccess] = useState(false);
-
-  // Game Mechanics State
-  const [score, setScore] = useState(0);
-  const [spendSeconds, setSpendSeconds] = useState(0);
-  const [userRank, setUserRank] = useState(1);
-
-  // Crypto Upgrades & Mining Power
-  const [tapPower, setTapPower] = useState(1);
-  const [passiveRate, setPassiveRate] = useState(0);
-
-  const scoreRef = useRef(score);
-  const spendRef = useRef(spendSeconds);
-  const lastSyncedScoreRef = useRef(-1);
-  const lastSyncedSpendRef = useRef(-1);
-  scoreRef.current = score;
-  spendRef.current = spendSeconds;
-
-  // Dynamic Dock Visibility on Scroll
-  const [isDockVisible, setIsDockVisible] = useState(true);
-  const lastScrollYRef = useRef(0);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Track scroll direction for dock hide/show
   useEffect(() => {
@@ -238,7 +240,7 @@ export default function MiniAppPage() {
 
 
   // Passive Auto-Miner Yield: Auto-increase is disabled to prevent dollar and Khmer currency from auto-ticking in Telegram.
-  // Points must be explicitly claimed through playing games or tapping.
+  // WEI Coin must be explicitly claimed through playing games or tapping.
 
   // Load initial score, upgrades, and cached Telegram user from localStorage for instant start
   useEffect(() => {
@@ -259,25 +261,25 @@ export default function MiniAppPage() {
       if (savedPassive) {
         setPassiveRate(parseInt(savedPassive, 10) || 0);
       }
-      // Instant User Hydration from cache (local development only)
-      if (isLocalTest) {
-        try {
-          const cachedUserStr = localStorage.getItem("shi_tg_user_cache");
-          if (cachedUserStr) {
-            const cachedUser = JSON.parse(cachedUserStr);
-            if (cachedUser?.id) {
-              setUser(cachedUser);
-            }
+      // Instant User Hydration from synced Telegram cache (Web & Mini App)
+      try {
+        const cachedUserStr = localStorage.getItem("shi_tg_user_cache");
+        if (cachedUserStr) {
+          const cachedUser = JSON.parse(cachedUserStr);
+          if (cachedUser?.id && typeof cachedUser.id === "number" && cachedUser.id > 0) {
+            setUser(cachedUser);
+            setIsTelegramVerified(true);
+            isVerifiedRef.current = true;
           }
-        } catch {}
-      }
+        }
+      } catch {}
     }
-  }, [isLocalTest]);
+  }, []);
 
   // Sync to Neon Database with smart change detection
   const syncWithDatabase = useCallback(async (currentScore: number, currentTime: number, force = false) => {
     if (!user?.id) return;
-    if (!isVerifiedRef.current && !isLocalTest) return;
+    if (!isVerifiedRef.current) return;
     // Skip redundant network requests if score hasn't changed and time delta < 30s
     if (!force && currentScore === lastSyncedScoreRef.current && Math.abs(currentTime - lastSyncedSpendRef.current) < 30) {
       return;
@@ -300,9 +302,6 @@ export default function MiniAppPage() {
         }),
       });
       const data = await res.json();
-      if (data && data.rank) {
-        setUserRank(data.rank);
-      }
       if (data?.player?.score && data.player.score > currentScore) {
         setScore(data.player.score);
         lastSyncedScoreRef.current = data.player.score;
@@ -319,22 +318,22 @@ export default function MiniAppPage() {
         });
       }
     } catch {}
-  }, [user, isLocalTest]);
+  }, [user]);
 
   // Periodic database sync every 8 seconds (skips if unverified or no score change)
   useEffect(() => {
     if (!user?.id) return;
-    if (!isTelegramVerified && !isLocalTest) return;
+    if (!isTelegramVerified) return;
     const interval = setInterval(() => {
       syncWithDatabase(scoreRef.current, spendRef.current, false);
     }, 8000);
     return () => clearInterval(interval);
-  }, [user, syncWithDatabase, isTelegramVerified, isLocalTest]);
+  }, [user, syncWithDatabase, isTelegramVerified]);
 
   // Audit Log: Record login event into Neon PostgreSQL (strictly verified sessions only)
   useEffect(() => {
     if (!user?.id) return;
-    if (!isTelegramVerified && !isLocalTest) return;
+    if (!isTelegramVerified) return;
     const recordedKey = `audit_login_${user.id}_${new Date().toDateString()}`;
     if (typeof window !== "undefined" && sessionStorage.getItem(recordedKey)) return;
 
@@ -417,9 +416,8 @@ export default function MiniAppPage() {
         syncWithDatabase(scoreRef.current, spendRef.current, true);
       }
 
-      if (isLocalTest) {
-        setIsTelegramVerified(!isLocalGatePreview);
-        isVerifiedRef.current = !isLocalGatePreview;
+      if (isLocalhostEnvironment(window.location.hostname)) {
+        // Local test: preserve demo user
         return;
       }
 
@@ -455,27 +453,35 @@ export default function MiniAppPage() {
                 localStorage.setItem("shi_tg_user_cache", JSON.stringify(enrichedValidatedUser));
               } catch {}
               syncWithDatabase(scoreRef.current, spendRef.current, true);
-            } else if (!isLocalTest && !tgUser?.id) {
+            } else if (!tgUser?.id) {
               // Only reject if there is NO legitimate Telegram user
               setUser(null);
               setIsTelegramVerified(false);
               isVerifiedRef.current = false;
               setIsTelegramClient(false);
-              try {
-                localStorage.removeItem("shi_tg_user_cache");
-              } catch {}
             }
           })
           .catch(() => {});
-      } else if (!isLocalTest && !tgUser?.id && !isTgClient) {
-        // External browser with no valid Telegram credentials
+      } else if (!tgUser?.id) {
+        // External browser: check if valid Telegram account was previously synced
+        try {
+          const cachedUserStr = localStorage.getItem("shi_tg_user_cache");
+          if (cachedUserStr) {
+            const cachedUser = JSON.parse(cachedUserStr);
+            if (cachedUser?.id && typeof cachedUser.id === "number" && cachedUser.id > 0) {
+              setUser(cachedUser);
+              setIsTelegramVerified(true);
+              isVerifiedRef.current = true;
+              return;
+            }
+          }
+        } catch {}
+
+        // Not synced yet: gate session until Telegram account is linked
         setUser(null);
         setIsTelegramVerified(false);
         isVerifiedRef.current = false;
         setIsTelegramClient(false);
-        try {
-          localStorage.removeItem("shi_tg_user_cache");
-        } catch {}
       }
     };
 
@@ -504,39 +510,7 @@ export default function MiniAppPage() {
 
 
 
-  const handleUpgradeTapPower = useCallback(() => {
-    const cost = tapPower * 150;
-    if (score >= cost) {
-      setScore((prev) => prev - cost);
-      setTapPower((prev) => {
-        const next = prev + 1;
-        if (typeof window !== "undefined") {
-          localStorage.setItem("shi_tap_power", String(next));
-        }
-        return next;
-      });
-      try {
-        tgApp?.HapticFeedback?.notificationOccurred("success");
-      } catch {}
-    }
-  }, [score, tapPower, tgApp]);
 
-  const handleUpgradePassiveRate = useCallback(() => {
-    const cost = (passiveRate + 1) * 300;
-    if (score >= cost) {
-      setScore((prev) => prev - cost);
-      setPassiveRate((prev) => {
-        const next = prev + 1;
-        if (typeof window !== "undefined") {
-          localStorage.setItem("shi_passive_rate", String(next));
-        }
-        return next;
-      });
-      try {
-        tgApp?.HapticFeedback?.notificationOccurred("success");
-      } catch {}
-    }
-  }, [score, passiveRate, tgApp]);
 
   const handleAddScore = useCallback((amount: number) => {
     setScore((prev) => prev + amount);
@@ -548,12 +522,6 @@ export default function MiniAppPage() {
     } catch {}
     syncWithDatabase(scoreRef.current, spendRef.current, true);
     setActiveTab(tab);
-
-    // Sync category bar state
-    if (tab === "wallet") setActiveCategory("lobby");
-    else if (tab === "earn") setActiveCategory("earn");
-    else if (tab === "leaderboard") setActiveCategory("tournaments");
-    else if (tab === "profile") setActiveCategory("settings");
   };
 
   const handleCategorySelect = (cat: NavCategory) => {
@@ -561,17 +529,6 @@ export default function MiniAppPage() {
       tgApp?.HapticFeedback?.selectionChanged();
     } catch {}
     setActiveCategory(cat);
-
-    if (cat === "lobby" || cat === "vault" || cat === "popular" || cat === "favorites") {
-      setActiveTab("wallet");
-    } else if (cat === "earn") {
-      setActiveTab("earn");
-    } else if (cat === "tournaments") {
-      setActiveTab("leaderboard");
-    } else if (cat === "settings") {
-      setProfileSubTab("settings");
-      setActiveTab("profile");
-    }
   };
 
   const handleExecuteTopUp = () => {
@@ -591,32 +548,20 @@ export default function MiniAppPage() {
     return <main className="min-h-screen bg-white" />;
   }
 
-  // In external web browsers outside Telegram or unverified accounts: block access with TelegramGateScreen
-  if ((!isTelegramClient || !isTelegramVerified || !user) && !isLocalTest) {
-    return <TelegramGateScreen isDev={false} />;
-  }
-
-  // On local test environment, if developer toggled gate preview
-  if (isLocalTest && isLocalGatePreview) {
+  // If session does not have an authentic Telegram account synced: gate until synced
+  if (!isTelegramVerified || !user) {
     return (
-      <>
-        <TelegramGateScreen
-          onBypass={() => {
-            setIsLocalGatePreview(false);
-            setIsTelegramVerified(true);
-            isVerifiedRef.current = true;
-          }}
-          isDev={true}
-        />
-        <DevModeToolbar
-          isGateActive={true}
-          onToggleGate={() => {
-            setIsLocalGatePreview(false);
-            setIsTelegramVerified(true);
-            isVerifiedRef.current = true;
-          }}
-        />
-      </>
+      <TelegramGateScreen
+        onSyncSuccess={(syncedUser) => {
+          setUser(syncedUser);
+          setIsTelegramVerified(true);
+          isVerifiedRef.current = true;
+          try {
+            localStorage.setItem("shi_tg_user_cache", JSON.stringify(syncedUser));
+          } catch {}
+          syncWithDatabase(scoreRef.current, spendRef.current, true);
+        }}
+      />
     );
   }
 
@@ -674,7 +619,7 @@ export default function MiniAppPage() {
                   Instant Vault Top-Up
                 </h2>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  Select a simulated USD credit package to instantly boost your vault balance and claim points.
+                  Select a simulated USD credit package to instantly boost your vault balance and mint WEI Coin.
                 </p>
               </div>
 
@@ -744,25 +689,11 @@ export default function MiniAppPage() {
             )}
 
             {activeTab === "earn" && (
-              <EarnTasksView
-                score={score}
-                onAddScore={handleAddScore}
-                tapPower={tapPower}
-                onUpgradeTapPower={handleUpgradeTapPower}
-                passiveRate={passiveRate}
-                onUpgradePassiveRate={handleUpgradePassiveRate}
-                user={user}
-                tgApp={tgApp}
-              />
+              <EarnTasksView />
             )}
 
             {activeTab === "leaderboard" && (
-              <LeaderboardView
-                userScore={score}
-                userSpendSeconds={spendSeconds}
-                user={user}
-                userRank={userRank}
-              />
+              <LeaderboardView />
             )}
 
             {activeTab === "profile" && (
@@ -789,17 +720,6 @@ export default function MiniAppPage() {
         user={user}
         isVisible={isDockVisible}
       />
-
-      {/* Localhost Dev Mode Toolbar */}
-      {isLocalTest && (
-        <DevModeToolbar
-          isGateActive={false}
-          onToggleGate={() => {
-            setIsLocalGatePreview(true);
-            setIsTelegramVerified(false);
-          }}
-        />
-      )}
     </div>
   );
 }

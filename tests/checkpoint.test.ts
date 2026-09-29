@@ -71,3 +71,33 @@ test("Repository Standards: README.md does not exist and Never Write README rule
     "Rules must contain Never Write README Rule"
   );
 });
+
+test("Ephemeral Scripts Protocol: workspace-rules.md and ephemeral-script-cleanup skill mandate zero script exposure", () => {
+  const skillPath = path.resolve(
+    __dirname,
+    "../.agents/skills/ephemeral-script-cleanup/SKILL.md"
+  );
+  assert.equal(fs.existsSync(skillPath), true, "ephemeral-script-cleanup SKILL.md must exist");
+
+  const skillContent = fs.readFileSync(skillPath, "utf-8");
+  assert.ok(
+    skillContent.includes("name: ephemeral-script-cleanup"),
+    "Skill must define name: ephemeral-script-cleanup"
+  );
+  assert.ok(
+    skillContent.includes("Immediate Post-Execution Deletion"),
+    "Skill must mandate Immediate Post-Execution Deletion"
+  );
+  assert.ok(
+    skillContent.includes("Zero Code Exposure"),
+    "Skill must mandate Zero Code Exposure"
+  );
+
+  const rulesPath = path.resolve(__dirname, "../.agents/rules/workspace-rules.md");
+  const rulesContent = fs.readFileSync(rulesPath, "utf-8");
+  assert.ok(
+    rulesContent.includes("Temporary Scripts Cleanup & Zero Exposure Rule"),
+    "Rules must include Temporary Scripts Cleanup & Zero Exposure Rule"
+  );
+});
+

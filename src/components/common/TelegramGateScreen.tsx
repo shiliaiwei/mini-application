@@ -2,39 +2,27 @@
 
 import React, { useState, useEffect } from "react";
 import { BrandFooter } from "@/components/brand/BrandFooter";
-
-interface StatusCodeDefinition {
-  code: number;
-  title: string;
-  hostStatusText: string;
-}
-
-const STABLE_STATUS_403: StatusCodeDefinition = {
-  code: 403,
-  title: "Forbidden",
-  hostStatusText: "Forbidden",
-};
+import { TelegramUser } from "@/types/telegram";
 
 interface TelegramGateScreenProps {
-  onBypass?: () => void;
-  isDev?: boolean;
+  onSyncSuccess?: (user: TelegramUser) => void;
 }
 
 export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({
-  onBypass,
-  isDev = false,
+  onSyncSuccess,
 }) => {
-  const statusInfo = STABLE_STATUS_403;
   const [rayId, setRayId] = useState<string>("8e19c04a79b28f31");
   const [currentHost, setCurrentHost] = useState<string>("app.kesararamwithdigital.tech");
 
+  const [telegramInput, setTelegramInput] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
+
   const channelUrl = "https://t.me/shiliaiwei";
-  // Direct Mini App launch URLs for Telegram
   const botAppDirectUrl = "https://t.me/srievibot/app";
   const botDeepLink = "tg://resolve?domain=srievibot&startapp=true";
 
-  const handleLaunchMiniApp = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    // Attempt instant native protocol launch on mobile / desktop app
+  const handleLaunchMiniApp = () => {
     try {
       if (typeof window !== "undefined") {
         window.location.href = botDeepLink;
@@ -42,9 +30,66 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({
     } catch {}
   };
 
+  const handleSyncAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSyncError(null);
+
+    const trimmed = telegramInput.trim();
+    if (!trimmed) {
+      setSyncError("Please enter your Telegram User ID or @username");
+      return;
+    }
+
+    // Extract numeric ID or handle
+    let numericId = trimmed.replace(/[^0-9]/g, "");
+    let username = trimmed.startsWith("@") ? trimmed.slice(1) : undefined;
+
+    if (!numericId && username) {
+      // If user typed username only, generate a consistent virtual hash ID
+      let hash = 0;
+      for (let i = 0; i < username.length; i++) {
+        hash = (hash << 5) - hash + username.charCodeAt(i);
+        hash |= 0;
+      }
+      numericId = String(Math.abs(hash) + 100000000);
+    }
+
+    if (!numericId || Number(numericId) <= 0) {
+      setSyncError("Valid numeric Telegram ID required (e.g. 6600489302). Send /id to @srievibot to find yours.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch("/api/auth/validate-telegram", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          telegram_id: numericId,
+          username: username || undefined,
+          first_name: username ? `@${username}` : `Telegram User #${numericId.slice(-4)}`,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data?.valid && data.user) {
+        if (onSyncSuccess) {
+          onSyncSuccess(data.user);
+        }
+      } else {
+        setSyncError(data?.error || "Unable to sync Telegram account. Please verify your ID.");
+      }
+    } catch {
+      setSyncError("Connection error while syncing Telegram account.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   useEffect(() => {
     try {
-      // Generate a realistic 16-hex Cloudflare Ray ID
       const randomHex = Array.from({ length: 16 }, () =>
         Math.floor(Math.random() * 16).toString(16)
       ).join("");
@@ -58,249 +103,160 @@ export const TelegramGateScreen: React.FC<TelegramGateScreenProps> = ({
 
   return (
     <div className="min-h-screen bg-white text-[#222222] font-sans antialiased select-none flex flex-col justify-between">
-      {/* Dev Mode Banner (Localhost only) */}
-      {isDev && (
-        <aside aria-label="Dev Mode Preview Bar" className="w-full bg-slate-900 text-white px-4 py-2 flex items-center justify-between text-xs border-b border-slate-700 shadow-sm z-50">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-            <span className="font-mono font-bold text-amber-300">DEV MODE PREVIEW</span>
-            <span className="text-slate-400">|</span>
-            <span className="text-slate-300">Viewing 403 Forbidden Gate (Browser Port Restricted)</span>
-          </div>
-          {onBypass && (
-            <button
-              type="button"
-              onClick={onBypass}
-              className="px-3 py-1 bg-[#0098ea] hover:bg-[#0086cf] text-white font-bold rounded-md shadow-xs transition-all active:scale-95 cursor-pointer"
-            >
-              Bypass to Mini App
-            </button>
-          )}
-        </aside>
-      )}
       <div className="w-full">
-        {/* Top Header Section (Authentic Cloudflare Mobile-First Header) */}
-        <header className="max-w-4xl mx-auto px-5 sm:px-8 pt-7 sm:pt-14 pb-5 space-y-2">
+        {/* Top Header Section */}
+        <header className="max-w-4xl mx-auto px-5 sm:px-8 pt-7 sm:pt-14 pb-5 space-y-3">
           <div className="flex flex-wrap items-baseline gap-2.5 sm:gap-3.5">
-            <h1 className="text-3xl sm:text-5xl font-bold text-[#222222] tracking-tight">
-              {statusInfo.code} {statusInfo.title}
+            <h1 className="text-2xl sm:text-4xl font-bold text-[#222222] tracking-tight">
+              Telegram Account Sync Required
             </h1>
-            <span className="inline-block text-[11px] sm:text-xs font-medium px-2.5 py-0.5 rounded-full bg-[#efefef] text-[#555555] border border-[#e2e2e2] align-middle select-none">
-              Error code {statusInfo.code}
+            <span className="inline-block text-[11px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#e6f4ff] text-[#0051c3] border border-[#bae0ff] align-middle select-none">
+              Web & Mini App Access
             </span>
           </div>
 
-          <p className="text-[#555555] text-xs sm:text-base font-normal pt-0.5 leading-relaxed">
-            Visit our{" "}
-            <a
-              href={channelUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#0051c3] hover:underline font-semibold"
-            >
-              channel
-            </a>{" "}
-            for more information, then launch via{" "}
-            <a
-              href={botAppDirectUrl}
-              onClick={handleLaunchMiniApp}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#0051c3] hover:underline font-semibold"
-            >
-              @srievibot
-            </a>{" "}
-            to access this page.
+          <p className="text-[#555555] text-xs sm:text-base font-normal leading-relaxed">
+            SHILIAIWEI is accessible across both external web browsers and the Telegram Mini App.
+            To view balances, play the game, and claim WEI COIN, your session must be synced with an authentic Telegram account.
           </p>
         </header>
 
-        {/* Real Cloudflare Status Band (Full-Width Gray Strip #efefef) */}
-        <section className="w-full bg-[#efefef] border-y border-[#e2e2e2] py-8 sm:py-12 px-3 sm:px-6 relative my-1">
-          <div className="max-w-3xl mx-auto grid grid-cols-3 gap-2 sm:gap-6 items-start text-center relative">
-            {/* Column 1: Browser (You) */}
-            <div className="flex flex-col items-center space-y-1 sm:space-y-2">
-              <span className="text-[11px] sm:text-sm font-normal text-[#797979]">
-                You
-              </span>
+        {/* Sync Status Band */}
+        <section className="w-full bg-[#f8fafc] border-y border-[#e2e8f0] py-6 sm:py-8 px-3 sm:px-6 relative my-1">
+          <div className="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 items-stretch">
+            {/* Option A: Quick Web Sync Form */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between space-y-4">
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-black uppercase tracking-wider text-[#0098ea]">
+                  Option 1: Direct Web Browser Sync
+                </span>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                  Connect Telegram Account
+                </h3>
+                <p className="text-xs text-slate-500 leading-normal">
+                  Enter your numeric Telegram User ID or @username to authenticate your web browser session.
+                </p>
+              </div>
 
-              {/* Authentic Cloudflare Monitor Device */}
-              <div className="w-14 h-12 sm:w-24 sm:h-20 flex items-center justify-center">
-                <svg
-                  viewBox="0 0 100 80"
-                  className="w-full h-full"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <rect x="8" y="8" width="84" height="64" rx="8" fill="#797979" />
-                  <rect x="14" y="20" width="72" height="46" rx="4" fill="#a4b0be" opacity="0.35" />
-                  <circle cx="18" cy="14" r="2" fill="#ffffff" opacity="0.9" />
-                  <circle cx="25" cy="14" r="2" fill="#ffffff" opacity="0.9" />
-                  <circle cx="32" cy="14" r="2" fill="#ffffff" opacity="0.9" />
-                  <circle cx="50" cy="44" r="16" fill="#78be20" />
-                  <path
-                    d="M42 44l5 5 11-11"
-                    stroke="#ffffff"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+              <form onSubmit={handleSyncAccount} className="space-y-3">
+                <div>
+                  <label htmlFor="telegramInput" className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Telegram User ID or @Username
+                  </label>
+                  <input
+                    id="telegramInput"
+                    type="text"
+                    value={telegramInput}
+                    onChange={(e) => setTelegramInput(e.target.value)}
+                    placeholder="e.g. 6600489302 or @username"
+                    disabled={isSubmitting}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-[#0098ea] focus:ring-2 focus:ring-[#0098ea]/20 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all font-mono"
                   />
-                </svg>
-              </div>
+                  <span className="text-[10px] text-slate-400 mt-1 block">
+                    Find your ID by sending /id or /sync to{" "}
+                    <a
+                      href={botAppDirectUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#0051c3] hover:underline font-bold"
+                    >
+                      @srievibot
+                    </a>
+                  </span>
+                </div>
 
-              <div className="pt-0.5 space-y-0.5">
-                <div className="text-xs sm:text-lg font-bold text-[#444444]">
-                  Browser
-                </div>
-                <div className="text-xs sm:text-base font-normal text-[#78be20]">
-                  Working
-                </div>
-              </div>
+                {syncError && (
+                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+                    {syncError}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-2.5 rounded-xl bg-[#0098ea] hover:bg-[#0086cf] text-white font-bold text-xs uppercase tracking-wider shadow-xs active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmitting ? "Syncing Account..." : "Sync Telegram Account on Web"}
+                </button>
+              </form>
             </div>
 
-            {/* Column 2: Cloudflare (Phnom Penh Edge) */}
-            <div className="flex flex-col items-center space-y-1 sm:space-y-2">
-              <span className="text-[11px] sm:text-sm font-normal text-[#797979] truncate max-w-full">
-                Phnom Penh
-              </span>
+            {/* Option B: Telegram Mini App Launch */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between space-y-4">
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-black uppercase tracking-wider text-[#16a34a]">
+                  Option 2: Telegram Mini App
+                </span>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                  Launch in Telegram App
+                </h3>
+                <p className="text-xs text-slate-500 leading-normal">
+                  Open SHILIAIWEI inside the official Telegram Bot for instant, seamless authentication with zero setup.
+                </p>
+              </div>
 
-              {/* Authentic Cloudflare Cloud Silhouette */}
-              <div className="w-14 h-12 sm:w-24 sm:h-20 flex items-center justify-center">
-                <svg
-                  viewBox="0 0 100 80"
-                  className="w-full h-full"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+              <div className="space-y-2 pt-2">
+                <a
+                  href={botAppDirectUrl}
+                  onClick={handleLaunchMiniApp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 rounded-xl bg-[#229ed9] hover:bg-[#1e8bc0] text-white font-bold text-xs uppercase tracking-wider text-center block shadow-xs active:scale-98 transition-all"
                 >
-                  <path
-                    d="M78 40c0-2-.2-4-.6-6-3.2-11.5-13.8-20-26.1-20-12.5 0-23 8.6-26 20.3C11.3 36.7 6.7 42.4 6.7 49.2c0 8.3 6.7 15 15 15h53.4c7.5 0 13.7-6.2 13.7-13.7 0-6.7-4.8-12.3-10.8-13.5z"
-                    fill="#797979"
-                  />
-                  <circle cx="48" cy="46" r="16" fill="#78be20" />
-                  <path
-                    d="M40 46l5 5 11-11"
-                    stroke="#ffffff"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+                  Open in Telegram (@srievibot)
+                </a>
 
-              <div className="pt-0.5 space-y-0.5">
-                <div className="text-xs sm:text-lg font-bold text-[#0051c3] truncate max-w-full">
-                  Cloudflare
-                </div>
-                <div className="text-xs sm:text-base font-normal text-[#78be20]">
-                  Working
-                </div>
-              </div>
-            </div>
-
-            {/* Column 3: Page Host (Error / Restricted) */}
-            <div className="flex flex-col items-center space-y-1 sm:space-y-2 relative">
-              <span
-                className="text-[11px] sm:text-sm font-normal text-[#797979] truncate max-w-full"
-                title={currentHost}
-              >
-                Website
-              </span>
-
-              {/* Authentic Cloudflare Server Unit with Red X */}
-              <div className="w-14 h-12 sm:w-24 sm:h-20 flex items-center justify-center">
-                <svg
-                  viewBox="0 0 100 80"
-                  className="w-full h-full"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+                <a
+                  href={channelUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider text-center block active:scale-98 transition-all"
                 >
-                  <rect x="18" y="8" width="64" height="64" rx="12" fill="#797979" />
-                  <rect x="28" y="52" width="44" height="2.5" rx="1.25" fill="#a4b0be" opacity="0.6" />
-                  <circle cx="68" cy="20" r="2.5" fill="#22c55e" />
-                  <circle cx="50" cy="40" r="16" fill="#e74c3c" />
-                  <path
-                    d="M43 33l14 14M57 33L43 47"
-                    stroke="#ffffff"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                  Join Official Channel (@shiliaiwei)
+                </a>
               </div>
-
-              <div className="pt-0.5 space-y-0.5">
-                <div className="text-xs sm:text-lg font-bold text-[#444444]">
-                  Host
-                </div>
-                <div className="text-xs sm:text-base font-normal text-[#e74c3c]">
-                  {statusInfo.hostStatusText}
-                </div>
-              </div>
-
-              {/* Authentic Cloudflare Downward Triangle Notch - Directly Anchored to Host Column */}
-              <div className="absolute -bottom-8 sm:-bottom-12 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] sm:border-l-[16px] border-l-transparent border-r-[12px] sm:border-r-[16px] border-r-transparent border-t-[12px] sm:border-t-[16px] border-t-[#efefef]" />
             </div>
           </div>
         </section>
 
-        {/* Real Cloudflare 2-Column Explanations with Bold Titles and Non-Bold Descriptions */}
-        <section className="max-w-4xl mx-auto px-5 sm:px-8 pt-8 sm:pt-12 pb-8 grid grid-cols-1 md:grid-cols-2 gap-7 sm:gap-12">
-          {/* What happened? */}
-          <div className="space-y-2.5">
-            <h2 className="text-xl sm:text-2xl font-bold text-[#222222] tracking-tight">
-              តើមានអ្វីកើតឡើង?{" "}
+        {/* 2-Column Explanation Section */}
+        <section className="max-w-4xl mx-auto px-5 sm:px-8 pt-6 sm:pt-8 pb-8 grid grid-cols-1 md:grid-cols-2 gap-7 sm:gap-12">
+          {/* Dual Access Explanation */}
+          <div className="space-y-2">
+            <h2 className="text-lg sm:text-xl font-bold text-[#222222] tracking-tight">
+              ការចូលប្រើដោយគ្មានការកម្រិត{" "}
               <span className="text-xs sm:text-sm text-slate-500 font-bold block sm:inline">
-                What happened?
+                Dual Platform Access
               </span>
             </h2>
             <p className="text-[#555555] text-xs sm:text-sm leading-relaxed font-normal font-sans">
-              ការចូលមើលទំព័រនេះត្រូវបានកំណត់ ដើម្បីរក្សាសុវត្ថិភាពជូនអ្នក។ មុនពេលបង្ហាញព័ត៌មានគណនី និងទិន្នន័យក្នុងឃ្លាំងសុវត្ថិភាព (Vault) ប្រព័ន្ធត្រូវតែផ្ទៀងផ្ទាត់សម័យចូលប្រើរបស់អ្នកជាមុនសិន។
+              អ្នកអាចចូលប្រើកម្មវិធី SHILIAIWEI បានទាំងលើ Web Browser (កុំព្យូទ័រ/ទូរស័ព្ទ) និងក្នុង Telegram Mini App ដោយសេរី។ គណនីរបស់អ្នកនឹងភ្ជាប់ទិន្នន័យ (Sync) ពិន្ទុ និង Vault ស្វ័យប្រវត្តិតាមរយៈ Telegram ID។
             </p>
           </div>
 
-          {/* What should I do? */}
-          <div className="space-y-2.5">
-            <h2 className="text-xl sm:text-2xl font-bold text-[#222222] tracking-tight">
-              តើខ្ញុំត្រូវធ្វើដូចម្តេច?{" "}
+          {/* Account Sync Security */}
+          <div className="space-y-2">
+            <h2 className="text-lg sm:text-xl font-bold text-[#222222] tracking-tight">
+              សុវត្ថិភាព និងការផ្ទៀងផ្ទាត់{" "}
               <span className="text-xs sm:text-sm text-slate-500 font-bold block sm:inline">
-                What should I do?
+                Account Sync Security
               </span>
             </h2>
             <p className="text-[#555555] text-xs sm:text-sm leading-relaxed font-normal font-sans">
-              សូមចូលទៅកាន់{" "}
-              <a
-                href={channelUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#0051c3] hover:underline font-medium"
-              >
-                ឆានែលផ្លូវការរបស់យើង (@shiliaiwei)
-              </a>{" "}
-              ដើម្បីទទួលបានព័ត៌មានបន្ថែម រួចចាប់ផ្តើមតាមរយៈបូតតេឡេក្រាមផ្លូវការ{" "}
-              <a
-                href={botAppDirectUrl}
-                onClick={handleLaunchMiniApp}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#0051c3] hover:underline font-medium"
-              >
-                @srievibot
-              </a>
-              ។ បូតនឹងផ្ទៀងផ្ទាត់សម័យចូលប្រើរបស់អ្នកដោយស្វ័យប្រវត្តិ ហើយអ្នកអាចចូលប្រើបានភ្លាមៗដោយសុវត្ថិភាព។
+              ការភ្ជាប់គណនីធានាថាពិន្ទុ និងសមតុល្យ WEI COIN របស់អ្នកត្រូវបានរក្សាទុកដោយសុវត្ថិភាពក្នុងប្រព័ន្ធ Neon Cloud Database។ អ្នកអាចបន្តលេង និងពិនិត្យសមតុល្យបានគ្រប់ពេលវេលាពីគ្រប់ឧបករណ៍។
             </p>
           </div>
         </section>
       </div>
 
-      {/* Cloudflare Telemetry Line & Official Shiliaiwei Brand Footer */}
-      <footer className="w-full pt-4 pb-8 border-t border-[#f0f0f0] mt-8 flex flex-col items-center justify-center space-y-3">
+      {/* Footer */}
+      <footer className="w-full pt-4 pb-8 border-t border-[#f0f0f0] mt-4 flex flex-col items-center justify-center space-y-3">
         <p className="text-[11px] text-[#999999] font-mono tracking-wide">
           Cloudflare Ray ID: <span className="select-all text-[#666666]">{rayId}</span>{" "}
-          <span className="text-[#cccccc]">•</span> Phnom Penh, Cambodia (ICT)
+          <span className="text-[#cccccc]">•</span> Host: {currentHost}
         </p>
         <BrandFooter height={16} colorScheme="blue" />
       </footer>
     </div>
   );
 };
-
-
