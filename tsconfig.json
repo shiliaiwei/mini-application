@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@web3-utils/crypto-qr-code": ["./node_modules/@web3-utils/crypto-qr-code/src/index.ts"]
     }
   },
   "include": [
