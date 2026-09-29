@@ -159,11 +159,34 @@ const SpecularRim: React.FC = () => (
   <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none" />
 );
 
-const ProfileAvatar: React.FC<{ user: TelegramUser | null; size?: number }> = ({ user, size = 64 }) => {
-  if (user?.photo_url) {
+const ProfileAvatar: React.FC<{
+  user: TelegramUser | null;
+  size?: number;
+  photoUrl?: string;
+}> = ({ user, size = 64, photoUrl }) => {
+  const [imageError, setImageError] = useState(false);
+
+  const effectivePhoto =
+    !imageError &&
+    (photoUrl ||
+      user?.photo_url ||
+      (user?.id && user.id > 0 ? `/api/player/avatar?telegram_id=${user.id}` : null));
+
+  if (effectivePhoto) {
     return (
-      <div className="rounded-2xl overflow-hidden border-2 border-white shadow-md flex-shrink-0" style={{ width: size, height: size }}>
-        <Image src={user.photo_url} alt="avatar" width={size} height={size} className="w-full h-full object-cover" unoptimized />
+      <div
+        className="rounded-2xl overflow-hidden border-2 border-white shadow-md flex-shrink-0"
+        style={{ width: size, height: size }}
+      >
+        <Image
+          src={effectivePhoto}
+          alt="avatar"
+          width={size}
+          height={size}
+          className="w-full h-full object-cover"
+          unoptimized
+          onError={() => setImageError(true)}
+        />
       </div>
     );
   }

@@ -48,13 +48,16 @@ export interface UserSettings {
   birthday: string; // YYYY-MM-DD
   showBirthdayYear: boolean;
 
-  // 7. Language
+  // 7. Security Question & Answer (Manual Input)
+  securityQuestion?: string;
+  securityAnswer?: string;
+
+  // 8. Language
   language: string; // "en" | "km" | "zh" | "ru"
 
-  // 8. Addresses
+  // 9. Addresses: Home (manual) & Work (auto map pin)
   homeAddress: AddressDetails;
   workAddress: AddressDetails;
-  otherAddress: OtherAddressDetails;
 
   // Preferences & Meta
   telegramCloudSync: boolean;
@@ -81,6 +84,8 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   phoneSource: "manual",
   birthday: "",
   showBirthdayYear: true,
+  securityQuestion: "What is your secret recovery codeword?",
+  securityAnswer: "",
   language: "en",
   homeAddress: {
     street: "",
@@ -91,15 +96,6 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
     country: "Cambodia",
   },
   workAddress: {
-    street: "",
-    unit: "",
-    city: "",
-    stateProvince: "",
-    postalCode: "",
-    country: "Cambodia",
-  },
-  otherAddress: {
-    label: "Other Address",
     street: "",
     unit: "",
     city: "",
@@ -123,14 +119,20 @@ export function createInitialSettings(user: TelegramUser | null): UserSettings {
   const fName = user.first_name || "";
   const lName = user.last_name || "";
   const dName = [fName, lName].filter(Boolean).join(" ") || user.username || "";
+  const nName = user.username ? (user.username.startsWith("@") ? user.username : `@${user.username}`) : "";
+
+  const resolvedPhoto =
+    user.photo_url ||
+    (user.id && user.id > 0 ? `/api/player/avatar?telegram_id=${user.id}` : "");
 
   return {
     ...base,
-    photoUrl: user.photo_url || "",
-    photoSource: user.photo_url ? "telegram" : "preset",
+    photoUrl: resolvedPhoto,
+    photoSource: resolvedPhoto ? "telegram" : "preset",
     firstName: fName,
     lastName: lName,
     displayName: dName,
+    nickname: nName,
     language: user.language_code ? (["en", "km", "zh", "ru"].includes(user.language_code) ? user.language_code : "en") : "en",
     updatedAt: new Date().toISOString(),
   };
@@ -150,24 +152,33 @@ export function loadCachedUserSettings(user: TelegramUser | null): UserSettings 
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === "object") {
+        const effectiveFirstName = user?.first_name || parsed.firstName || initial.firstName;
+        const effectiveLastName = user?.last_name || parsed.lastName || initial.lastName;
+        const effectiveDisplayName =
+          parsed.displayName ||
+          [effectiveFirstName, effectiveLastName].filter(Boolean).join(" ") ||
+          user?.username ||
+          initial.displayName;
+        const effectiveNickname = user?.username
+          ? (user.username.startsWith("@") ? user.username : `@${user.username}`)
+          : (parsed.nickname || initial.nickname);
+        const effectivePhoto =
+          user?.photo_url ||
+          (user?.id && user.id > 0 ? `/api/player/avatar?telegram_id=${user.id}` : (parsed.photoUrl || initial.photoUrl));
+
         return {
           ...initial,
-          photoUrl: parsed.photoUrl || initial.photoUrl,
-          photoSource: parsed.photoSource || initial.photoSource,
-          displayName: parsed.displayName || initial.displayName,
-          language: parsed.language || initial.language,
-          telegramCloudSync:
-            typeof parsed.telegramCloudSync === "boolean"
-              ? parsed.telegramCloudSync
-              : initial.telegramCloudSync,
-          hapticFeedback:
-            typeof parsed.hapticFeedback === "boolean"
-              ? parsed.hapticFeedback
-              : initial.hapticFeedback,
-          soundEffects:
-            typeof parsed.soundEffects === "boolean"
-              ? parsed.soundEffects
-              : initial.soundEffects,
+          ...parsed,
+          firstName: effectiveFirstName,
+          lastName: effectiveLastName,
+          displayName: effectiveDisplayName,
+          nickname: effectiveNickname,
+          photoUrl: effectivePhoto,
+          photoSource: effectivePhoto ? "telegram" : (parsed.photoSource || initial.photoSource),
+          homeAddress: { ...DEFAULT_USER_SETTINGS.homeAddress, ...(parsed.homeAddress || {}) },
+          workAddress: { ...DEFAULT_USER_SETTINGS.workAddress, ...(parsed.workAddress || {}) },
+          securityQuestion: parsed.securityQuestion || initial.securityQuestion,
+          securityAnswer: parsed.securityAnswer || initial.securityAnswer,
           updatedAt: parsed.updatedAt || initial.updatedAt,
         };
       }
@@ -199,7 +210,6 @@ export function loadTelegramCloudSettings(
               ...parsed,
               homeAddress: { ...DEFAULT_USER_SETTINGS.homeAddress, ...(parsed.homeAddress || {}) },
               workAddress: { ...DEFAULT_USER_SETTINGS.workAddress, ...(parsed.workAddress || {}) },
-              otherAddress: { ...DEFAULT_USER_SETTINGS.otherAddress, ...(parsed.otherAddress || {}) },
             };
             callback(merged);
           }
@@ -367,12 +377,21 @@ export function getProfileCompletion(settings: UserSettings): {
     });
   }
 
+  if (!settings.securityAnswer?.trim()) {
+    incompleteFields.push({
+      key: "security_answer",
+      label: "Security Answer",
+      section: "personal",
+      actionText: "Set secret recovery codeword",
+    });
+  }
+
   if (isAddressEmpty(settings.homeAddress)) {
     incompleteFields.push({
       key: "home_address",
       label: "Home Address",
       section: "addresses",
-      actionText: "Pin home delivery location",
+      actionText: "Enter home address manually",
     });
   }
 
@@ -381,16 +400,7 @@ export function getProfileCompletion(settings: UserSettings): {
       key: "work_address",
       label: "Work Address",
       section: "addresses",
-      actionText: "Pin office address",
-    });
-  }
-
-  if (isAddressEmpty(settings.otherAddress)) {
-    incompleteFields.push({
-      key: "other_address",
-      label: "Other Address",
-      section: "addresses",
-      actionText: "Pin secondary warehouse",
+      actionText: "Pin work office on map",
     });
   }
 

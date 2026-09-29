@@ -114,7 +114,13 @@ export default function MiniAppPage() {
       // In Production: strictly verify Telegram client and clear unverified caches
       const directUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
       if (directUser?.id) {
-        setUser(directUser);
+        const enrichedUser: TelegramUser = {
+          ...directUser,
+          photo_url:
+            directUser.photo_url ||
+            `/api/player/avatar?telegram_id=${directUser.id}`,
+        };
+        setUser(enrichedUser);
         setIsTelegramVerified(true);
         isVerifiedRef.current = true;
         setIsTelegramClient(true);
@@ -301,6 +307,17 @@ export default function MiniAppPage() {
         setScore(data.player.score);
         lastSyncedScoreRef.current = data.player.score;
       }
+      if (data?.player?.photo_url) {
+        setUser((prev) => {
+          if (!prev) return prev;
+          if (prev.photo_url === data.player.photo_url) return prev;
+          const updated = { ...prev, photo_url: data.player.photo_url };
+          try {
+            localStorage.setItem("shi_tg_user_cache", JSON.stringify(updated));
+          } catch {}
+          return updated;
+        });
+      }
     } catch {}
   }, [user, isLocalTest]);
 
@@ -384,12 +401,18 @@ export default function MiniAppPage() {
       const isTgClient = detectIsTelegramClient();
 
       if (tgUser && tgUser.id) {
-        setUser(tgUser);
+        const enrichedTgUser: TelegramUser = {
+          ...tgUser,
+          photo_url:
+            tgUser.photo_url ||
+            `/api/player/avatar?telegram_id=${tgUser.id}`,
+        };
+        setUser(enrichedTgUser);
         setIsTelegramVerified(true);
         isVerifiedRef.current = true;
         setIsTelegramClient(true);
         try {
-          localStorage.setItem("shi_tg_user_cache", JSON.stringify(tgUser));
+          localStorage.setItem("shi_tg_user_cache", JSON.stringify(enrichedTgUser));
         } catch {}
         syncWithDatabase(scoreRef.current, spendRef.current, true);
       }
@@ -418,12 +441,18 @@ export default function MiniAppPage() {
           .then((res) => res.json())
           .then((data) => {
             if (data?.valid && data.user) {
-              setUser(data.user);
+              const enrichedValidatedUser: TelegramUser = {
+                ...data.user,
+                photo_url:
+                  data.user.photo_url ||
+                  `/api/player/avatar?telegram_id=${data.user.id}`,
+              };
+              setUser(enrichedValidatedUser);
               setIsTelegramVerified(true);
               isVerifiedRef.current = true;
               setIsTelegramClient(true);
               try {
-                localStorage.setItem("shi_tg_user_cache", JSON.stringify(data.user));
+                localStorage.setItem("shi_tg_user_cache", JSON.stringify(enrichedValidatedUser));
               } catch {}
               syncWithDatabase(scoreRef.current, spendRef.current, true);
             } else if (!isLocalTest && !tgUser?.id) {
@@ -562,9 +591,9 @@ export default function MiniAppPage() {
     return <main className="min-h-screen bg-white" />;
   }
 
-  // In ordinary web browsers outside Telegram or unverified accounts: render completely blank page
+  // In external web browsers outside Telegram or unverified accounts: block access with TelegramGateScreen
   if ((!isTelegramClient || !isTelegramVerified || !user) && !isLocalTest) {
-    return <main className="min-h-screen bg-white" />;
+    return <TelegramGateScreen isDev={false} />;
   }
 
   // On local test environment, if developer toggled gate preview

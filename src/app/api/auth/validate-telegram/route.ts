@@ -25,9 +25,18 @@ export async function POST(req: Request) {
       );
     }
 
+    const userWithAvatar = validation.user
+      ? {
+          ...validation.user,
+          photo_url:
+            validation.user.photo_url ||
+            `/api/player/avatar?telegram_id=${validation.user.id}`,
+        }
+      : undefined;
+
     return NextResponse.json({
       valid: true,
-      user: validation.user,
+      user: userWithAvatar,
       authDate: validation.authDate,
     });
   } catch (err: any) {

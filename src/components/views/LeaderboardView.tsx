@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import { TelegramUser } from "@/types/telegram";
 import { Trophy, RefreshCw, Crown } from "@/components/icons/KeylineIcons";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
@@ -219,6 +220,18 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                     }`}
                   >
                     {isTop1 ? <Crown size={16} className="text-slate-950" /> : `#${p.rank}`}
+                  </div>
+
+                  {/* Player Avatar */}
+                  <div className="w-7 h-7 rounded-full overflow-hidden border border-slate-200 shrink-0 bg-slate-100 flex items-center justify-center">
+                    <Image
+                      src={p.photo_url || (p.telegram_id ? `/api/player/avatar?telegram_id=${p.telegram_id}&size=small` : "")}
+                      alt={p.first_name}
+                      width={28}
+                      height={28}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                    />
                   </div>
 
                   <div className="min-w-0">

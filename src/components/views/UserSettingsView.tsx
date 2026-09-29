@@ -6,7 +6,6 @@ import { TelegramUser, TelegramWebApp } from "@/types/telegram";
 import {
   UserSettings,
   AddressDetails,
-  OtherAddressDetails,
   GenderOption,
   loadCachedUserSettings,
   loadTelegramCloudSettings,
@@ -56,7 +55,7 @@ import {
   Monitor,
   Zap,
 } from "@/components/icons/KeylineIcons";
-import { DeliveryMapPickerModal } from "@/components/modals/DeliveryMapPickerModal";
+import { WorkingAddressMapModal } from "@/components/modals/WorkingAddressMapModal";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 
@@ -88,7 +87,7 @@ type EditModal =
   | "phone"
   | "home_address"
   | "work_address"
-  | "other_address";
+  | "security_question";
 
 /* ──────────────────────────────────────────────────────────── */
 /* 3D Skeuomorphic Primitives                                   */
@@ -218,6 +217,7 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
   const [settings, setSettings] = useState<UserSettings>(() =>
     loadCachedUserSettings(user)
   );
+  const [avatarError, setAvatarError] = useState(false);
   const [activeSection, setActiveSection] = useState<SettingsSection>("all");
   const [activeModal, setActiveModal] = useState<EditModal>(null);
   const [saveBanner, setSaveBanner] = useState<string | null>(null);
@@ -237,8 +237,14 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
 
   const [draftHome, setDraftHome] = useState<AddressDetails>(settings.homeAddress);
   const [draftWork, setDraftWork] = useState<AddressDetails>(settings.workAddress);
-  const [draftOther, setDraftOther] = useState<OtherAddressDetails>(settings.otherAddress);
-  const [deliveryMapTarget, setDeliveryMapTarget] = useState<"home" | "work" | "other" | null>(null);
+  const [draftSecurityQuestion, setDraftSecurityQuestion] = useState(
+    settings.securityQuestion || "What is your secret recovery codeword?"
+  );
+  const [draftCustomQuestion, setDraftCustomQuestion] = useState("");
+  const [draftSecurityAnswer, setDraftSecurityAnswer] = useState(
+    settings.securityAnswer || ""
+  );
+  const [isWorkMapOpen, setIsWorkMapOpen] = useState(false);
 
   // System, Haptics & Display local preferences
   const [hapticsEnabled, setHapticsEnabled] = useState<boolean>(() => {
@@ -304,6 +310,52 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
     });
   }, [tgApp]);
 
+  // Automatically sync Telegram user fields into settings whenever user is loaded or updated
+  useEffect(() => {
+    if (!user) return;
+    const fName = user.first_name || "";
+    const lName = user.last_name || "";
+    const dName = [fName, lName].filter(Boolean).join(" ") || user.username || "";
+    const nName = user.username ? (user.username.startsWith("@") ? user.username : `@${user.username}`) : "";
+    const resolvedPhoto =
+      user.photo_url ||
+      (user.id && user.id > 0 ? `/api/player/avatar?telegram_id=${user.id}` : "");
+
+    setSettings((prev) => {
+      const nextPhoto =
+        prev.photoSource === "custom" && prev.photoUrl
+          ? prev.photoUrl
+          : resolvedPhoto || prev.photoUrl;
+      const nextSource =
+        prev.photoSource === "custom" ? "custom" : resolvedPhoto ? "telegram" : prev.photoSource;
+      const nextFirst = prev.firstName || fName;
+      const nextLast = prev.lastName || lName;
+      const nextDisplay = prev.displayName || dName;
+      const nextNick = prev.nickname || nName;
+
+      if (
+        prev.photoUrl === nextPhoto &&
+        prev.photoSource === nextSource &&
+        prev.firstName === nextFirst &&
+        prev.lastName === nextLast &&
+        prev.displayName === nextDisplay &&
+        prev.nickname === nextNick
+      ) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        photoUrl: nextPhoto,
+        photoSource: nextSource,
+        firstName: nextFirst,
+        lastName: nextLast,
+        displayName: nextDisplay,
+        nickname: nextNick,
+      };
+    });
+  }, [user]);
+
   // Sync draft states whenever settings change
   useEffect(() => {
     setDraftFirstName(settings.firstName);
@@ -318,7 +370,10 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
     setDraftPhone(settings.phone);
     setDraftHome(settings.homeAddress);
     setDraftWork(settings.workAddress);
-    setDraftOther(settings.otherAddress);
+    setDraftSecurityQuestion(
+      settings.securityQuestion || "What is your secret recovery codeword?"
+    );
+    setDraftSecurityAnswer(settings.securityAnswer || "");
   }, [settings]);
 
   // Telegram native BackButton integration (Telegram WebApp v6.1+)
@@ -432,30 +487,11 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
   const calculatedAge = calculateAge(settings.birthday);
   const profileCompletion = getProfileCompletion(settings);
 
-  const handleDeliveryMapConfirm = (addr: AddressDetails) => {
-    if (deliveryMapTarget === "home") {
-      const updated: UserSettings = { ...settings, homeAddress: addr };
-      persistSettings(updated, "Home delivery address pinned & saved");
-      setDraftHome(addr);
-    } else if (deliveryMapTarget === "work") {
-      const updated: UserSettings = { ...settings, workAddress: addr };
-      persistSettings(updated, "Work office address pinned & saved");
-      setDraftWork(addr);
-    } else if (deliveryMapTarget === "other") {
-      const updated: UserSettings = {
-        ...settings,
-        otherAddress: {
-          ...addr,
-          label: settings.otherAddress.label || "Warehouse",
-        },
-      };
-      persistSettings(updated, "Other address pinned & saved");
-      setDraftOther({
-        ...addr,
-        label: settings.otherAddress.label || "Warehouse",
-      });
-    }
-    setDeliveryMapTarget(null);
+  const handleWorkMapConfirm = (addr: AddressDetails) => {
+    const updated: UserSettings = { ...settings, workAddress: addr };
+    persistSettings(updated, "Work office address pinned & saved");
+    setDraftWork(addr);
+    setIsWorkMapOpen(false);
   };
 
   return (
@@ -517,7 +553,7 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
           {/* Avatar with Camera Overlay Trigger */}
           <div className="relative shrink-0">
             <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full overflow-hidden border-2 border-purple-200/50 shadow-md bg-purple-950 flex items-center justify-center">
-              {settings.photoUrl ? (
+              {settings.photoUrl && !avatarError ? (
                 <Image
                   src={settings.photoUrl}
                   alt={settings.displayName}
@@ -525,6 +561,7 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
                   height={88}
                   className="w-full h-full object-cover"
                   unoptimized
+                  onError={() => setAvatarError(true)}
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-[#0098ea] to-[#0066fe] flex items-center justify-center text-2xl font-black text-white">
@@ -635,11 +672,11 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
                 onClick={() => {
                   triggerHaptic("selection");
                   if (field.key === "home_address") {
-                    setDeliveryMapTarget("home");
+                    setActiveModal("home_address");
                   } else if (field.key === "work_address") {
-                    setDeliveryMapTarget("work");
-                  } else if (field.key === "other_address") {
-                    setDeliveryMapTarget("other");
+                    setIsWorkMapOpen(true);
+                  } else if (field.key === "security_answer") {
+                    setActiveModal("security_question");
                   } else {
                     setActiveModal(field.key as EditModal);
                   }
@@ -933,6 +970,41 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
               </div>
               <ChevronRight size={16} className="text-white/60 shrink-0" />
             </div>
+            {/* Field: Security Recovery Question */}
+            <div
+              onClick={() => {
+                triggerHaptic("selection");
+                setActiveModal("security_question");
+              }}
+              className="bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur-md rounded-2xl p-3 flex items-center justify-between cursor-pointer transition-all active:scale-[0.99]"
+            >
+              <div className="min-w-0 pr-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-teal-200">
+                    Security Recovery Question
+                  </span>
+                  {settings.securityAnswer?.trim() ? (
+                    <span className="px-1.5 py-0.2 bg-teal-400/20 text-teal-200 border border-teal-300/40 text-[9px] font-black rounded-md uppercase">
+                      Configured
+                    </span>
+                  ) : (
+                    <span className="px-1.5 py-0.2 bg-amber-400/25 text-amber-200 border border-amber-300/40 text-[9px] font-black rounded-md uppercase flex items-center gap-0.5">
+                      <CircleAlert size={9} />
+                      Action Required
+                    </span>
+                  )}
+                </div>
+                <span className="text-sm font-bold text-white block truncate">
+                  {settings.securityQuestion || "What is your secret recovery codeword?"}
+                </span>
+                <span className="text-[10px] text-white/60">
+                  {settings.securityAnswer?.trim()
+                    ? "•••••••• (Answer Protected)"
+                    : "Manual entry required for account recovery"}
+                </span>
+              </div>
+              <ChevronRight size={16} className="text-white/60 shrink-0" />
+            </div>
           </div>
         </div>
       )}
@@ -957,48 +1029,38 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
               <h3 className="text-base font-bold text-white drop-shadow-sm">Addresses</h3>
             </div>
             <span className="text-[10px] text-indigo-200 font-bold uppercase tracking-wider">
-              Google Places Standard
+              Physical & Work Pin
             </span>
           </div>
 
           <div className="relative z-10 space-y-3">
-            {/* Field: Home Address */}
+            {/* Field: Home Address (Manual Entry Only) */}
             {isAddressEmpty(settings.homeAddress) ? (
               <div className="bg-amber-500/10 border-2 border-dashed border-amber-400/50 rounded-2xl p-3.5 space-y-2.5 transition-all">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-amber-300">
                     <Home size={15} />
-                    <span className="text-xs font-black uppercase tracking-wider">Home Address</span>
+                    <span className="text-xs font-black uppercase tracking-wider">Home Address (Manual Entry)</span>
                   </div>
                   <span className="px-2 py-0.5 rounded-md bg-amber-500/25 text-amber-200 border border-amber-400/50 text-[9px] font-black uppercase flex items-center gap-1">
                     <CircleAlert size={10} />
-                    Action Required: Incomplete
+                    Action Required
                   </span>
                 </div>
                 <p className="text-xs text-amber-100/80 leading-relaxed">
-                  No physical home delivery address pinned yet. Access real-time delivery map to pinpoint your location via device GPS or local network IP.
+                  No residential address entered yet. Home address requires manual text input (not tracked on map).
                 </p>
-                <div className="flex items-center gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic("selection");
-                      setDeliveryMapTarget("home");
-                    }}
-                    className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer"
-                  >
-                    <Navigation size={14} />
-                    <span>Pin on Delivery Map (GPS & IP)</span>
-                  </button>
+                <div className="pt-1">
                   <button
                     type="button"
                     onClick={() => {
                       triggerHaptic("selection");
                       setActiveModal("home_address");
                     }}
-                    className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 active:scale-95 transition-all cursor-pointer"
+                    className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer"
                   >
-                    Manual
+                    <Home size={14} />
+                    <span>Enter Home Address (Manual)</span>
                   </button>
                 </div>
               </div>
@@ -1007,11 +1069,11 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-indigo-200">
                     <Home size={13} />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Home Address</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Home Address (Manual)</span>
                   </div>
                   <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 text-[9px] font-black uppercase flex items-center gap-1">
                     <CircleCheck size={10} />
-                    Verified Physical Address
+                    Saved Physical Address
                   </span>
                 </div>
                 <div>
@@ -1023,59 +1085,48 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
                     {settings.homeAddress.country}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 pt-1 border-t border-white/10">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic("selection");
-                      setDeliveryMapTarget("home");
-                    }}
-                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-indigo-500/30 hover:bg-indigo-500/40 text-indigo-200 border border-indigo-400/30 font-bold text-[11px] flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
-                  >
-                    <Navigation size={12} />
-                    <span>Re-Pin on Map</span>
-                  </button>
+                <div className="pt-1 border-t border-white/10">
                   <button
                     type="button"
                     onClick={() => {
                       triggerHaptic("selection");
                       setActiveModal("home_address");
                     }}
-                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white/90 border border-white/15 font-bold text-[11px] flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
+                    className="w-full py-1.5 px-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white/90 border border-white/15 font-bold text-[11px] flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
                   >
-                    <span>Edit Details</span>
+                    <span>Edit Home Address (Manual)</span>
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Field: Work Address */}
+            {/* Field: Work Address (Map Pin) */}
             {isAddressEmpty(settings.workAddress) ? (
               <div className="bg-amber-500/10 border-2 border-dashed border-amber-400/50 rounded-2xl p-3.5 space-y-2.5 transition-all">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-amber-300">
                     <Briefcase size={15} />
-                    <span className="text-xs font-black uppercase tracking-wider">Work Address</span>
+                    <span className="text-xs font-black uppercase tracking-wider">Work Address (Map Pin)</span>
                   </div>
                   <span className="px-2 py-0.5 rounded-md bg-amber-500/25 text-amber-200 border border-amber-400/50 text-[9px] font-black uppercase flex items-center gap-1">
                     <CircleAlert size={10} />
-                    Action Required: Incomplete
+                    Action Required
                   </span>
                 </div>
                 <p className="text-xs text-amber-100/80 leading-relaxed">
-                  No office delivery location pinned yet. Access real-time delivery map to pinpoint your workplace via device GPS or local network IP.
+                  No workplace location pinned yet. Drop and drag a pin on OpenStreetMap to auto-detect and populate your working address.
                 </p>
                 <div className="flex items-center gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => {
                       triggerHaptic("selection");
-                      setDeliveryMapTarget("work");
+                      setIsWorkMapOpen(true);
                     }}
                     className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer"
                   >
                     <Navigation size={14} />
-                    <span>Pin on Delivery Map (GPS & IP)</span>
+                    <span>Pin on Working Map (Drag & Drop)</span>
                   </button>
                   <button
                     type="button"
@@ -1098,7 +1149,7 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
                   </div>
                   <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 text-[9px] font-black uppercase flex items-center gap-1">
                     <CircleCheck size={10} />
-                    Verified Physical Address
+                    Verified Map Location
                   </span>
                 </div>
                 <div>
@@ -1115,7 +1166,7 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
                     type="button"
                     onClick={() => {
                       triggerHaptic("selection");
-                      setDeliveryMapTarget("work");
+                      setIsWorkMapOpen(true);
                     }}
                     className="flex-1 py-1.5 px-2.5 rounded-xl bg-indigo-500/30 hover:bg-indigo-500/40 text-indigo-200 border border-indigo-400/30 font-bold text-[11px] flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
                   >
@@ -1127,97 +1178,6 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
                     onClick={() => {
                       triggerHaptic("selection");
                       setActiveModal("work_address");
-                    }}
-                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white/90 border border-white/15 font-bold text-[11px] flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
-                  >
-                    <span>Edit Details</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Field: Other Address */}
-            {isAddressEmpty(settings.otherAddress) ? (
-              <div className="bg-amber-500/10 border-2 border-dashed border-amber-400/50 rounded-2xl p-3.5 space-y-2.5 transition-all">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-amber-300">
-                    <Building size={15} />
-                    <span className="text-xs font-black uppercase tracking-wider">
-                      Other Address ({settings.otherAddress.label || "Warehouse"})
-                    </span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-md bg-amber-500/25 text-amber-200 border border-amber-400/50 text-[9px] font-black uppercase flex items-center gap-1">
-                    <CircleAlert size={10} />
-                    Action Required: Incomplete
-                  </span>
-                </div>
-                <p className="text-xs text-amber-100/80 leading-relaxed">
-                  No secondary delivery location pinned yet. Access real-time delivery map to pinpoint secondary warehouse or studio location.
-                </p>
-                <div className="flex items-center gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic("selection");
-                      setDeliveryMapTarget("other");
-                    }}
-                    className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer"
-                  >
-                    <Navigation size={14} />
-                    <span>Pin on Delivery Map (GPS & IP)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic("selection");
-                      setActiveModal("other_address");
-                    }}
-                    className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 active:scale-95 transition-all cursor-pointer"
-                  >
-                    Manual
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur-md rounded-2xl p-3 space-y-2 transition-all">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-indigo-200">
-                    <Building size={13} />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">
-                      Other Address ({settings.otherAddress.label || "Warehouse"})
-                    </span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 text-[9px] font-black uppercase flex items-center gap-1">
-                    <CircleCheck size={10} />
-                    Verified Physical Address
-                  </span>
-                </div>
-                <div>
-                  <span className="text-sm font-bold text-white block truncate">
-                    {formatAddressLine(settings.otherAddress)}
-                  </span>
-                  <span className="text-[10px] text-white/60 block">
-                    Label: {settings.otherAddress.label || "Warehouse"} - {settings.otherAddress.city},{" "}
-                    {settings.otherAddress.country}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 pt-1 border-t border-white/10">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic("selection");
-                      setDeliveryMapTarget("other");
-                    }}
-                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-indigo-500/30 hover:bg-indigo-500/40 text-indigo-200 border border-indigo-400/30 font-bold text-[11px] flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
-                  >
-                    <Navigation size={12} />
-                    <span>Re-Pin on Map</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic("selection");
-                      setActiveModal("other_address");
                     }}
                     className="flex-1 py-1.5 px-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white/90 border border-white/15 font-bold text-[11px] flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
                   >
@@ -1747,7 +1707,7 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
           {/* Current Photo Preview */}
           <div className="flex justify-center">
             <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-purple-200/50 shadow-xl bg-purple-950">
-              {settings.photoUrl ? (
+              {settings.photoUrl && !avatarError ? (
                 <Image
                   src={settings.photoUrl}
                   alt="Preview"
@@ -1755,6 +1715,7 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
                   height={96}
                   className="w-full h-full object-cover"
                   unoptimized
+                  onError={() => setAvatarError(true)}
                 />
               ) : (
                 <div className="w-full h-full bg-[#0098ea] text-white flex items-center justify-center text-3xl font-black">
@@ -1766,13 +1727,15 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
 
           {/* Photo Action Options */}
           <div className="space-y-2.5">
-            {user?.photo_url && (
+            {user?.id && (
               <button
                 type="button"
                 onClick={() => {
+                  setAvatarError(false);
+                  const tgAvatar = `/api/player/avatar?telegram_id=${user.id}&refresh=1`;
                   const updated: UserSettings = {
                     ...settings,
-                    photoUrl: user.photo_url || "",
+                    photoUrl: tgAvatar,
                     photoSource: "telegram",
                   };
                   persistSettings(updated, "Synced Telegram official photo");
@@ -1781,7 +1744,7 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
                 className="w-full py-3 rounded-2xl bg-white/10 hover:bg-white/15 text-white border border-white/20 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-colors active:scale-98"
               >
                 <ShieldCheck size={16} className="text-emerald-300" />
-                <span>Restore Telegram Avatar</span>
+                <span>Sync Official Telegram Avatar</span>
               </button>
             )}
 
@@ -2169,29 +2132,13 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
         </SkeuomorphicModalContainer>
       )}
 
-      {/* 6H. HOME ADDRESS EDIT MODAL */}
+      {/* 6H. HOME ADDRESS EDIT MODAL (MANUAL INPUT ONLY) */}
       {activeModal === "home_address" && (
-        <SkeuomorphicModalContainer title="Edit Home Address" onClose={() => setActiveModal(null)}>
+        <SkeuomorphicModalContainer title="Edit Home Address (Manual)" onClose={() => setActiveModal(null)}>
           <div className="space-y-3">
-            {/* Delivery Map Quick Pin Action */}
-            <button
-              type="button"
-              onClick={() => {
-                setActiveModal(null);
-                setDeliveryMapTarget("home");
-                triggerHaptic("selection");
-              }}
-              className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 hover:from-indigo-500 hover:to-purple-600 text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md border border-indigo-400/40 active:scale-98 transition-all"
-            >
-              <Navigation size={15} className="text-cyan-300" />
-              <span>Auto-Pin on Delivery Map (GPS & IP)</span>
-            </button>
-
-            <div className="flex items-center gap-2 my-1">
-              <div className="flex-1 h-px bg-white/15" />
-              <span className="text-[10px] uppercase font-bold text-white/40">Or Edit Details Manually</span>
-              <div className="flex-1 h-px bg-white/15" />
-            </div>
+            <p className="text-xs text-purple-200/80 leading-relaxed">
+              Residential home address requires manual text input (not tracked on map).
+            </p>
 
             <div>
               <label className="text-xs font-bold text-purple-200 uppercase tracking-wider block mb-1">
@@ -2291,22 +2238,22 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
         </SkeuomorphicModalContainer>
       )}
 
-      {/* 6I. WORK ADDRESS EDIT MODAL */}
+      {/* 6I. WORK ADDRESS EDIT MODAL (AUTO-PINNED VIA MAP OR MANUAL TWEAK) */}
       {activeModal === "work_address" && (
         <SkeuomorphicModalContainer title="Edit Work Address" onClose={() => setActiveModal(null)}>
           <div className="space-y-3">
-            {/* Delivery Map Quick Pin Action */}
+            {/* Working Map Quick Pin Action */}
             <button
               type="button"
               onClick={() => {
                 setActiveModal(null);
-                setDeliveryMapTarget("work");
+                setIsWorkMapOpen(true);
                 triggerHaptic("selection");
               }}
               className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 hover:from-indigo-500 hover:to-purple-600 text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md border border-indigo-400/40 active:scale-98 transition-all"
             >
               <Navigation size={15} className="text-cyan-300" />
-              <span>Auto-Pin on Delivery Map (GPS & IP)</span>
+              <span>Pin on Working Map (Drag & Drop Pin)</span>
             </button>
 
             <div className="flex items-center gap-2 my-1">
@@ -2386,135 +2333,111 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
         </SkeuomorphicModalContainer>
       )}
 
-      {/* 6J. OTHER ADDRESS EDIT MODAL */}
-      {activeModal === "other_address" && (
-        <SkeuomorphicModalContainer title="Edit Other Address" onClose={() => setActiveModal(null)}>
-          <div className="space-y-3">
-            {/* Delivery Map Quick Pin Action */}
-            <button
-              type="button"
-              onClick={() => {
-                setActiveModal(null);
-                setDeliveryMapTarget("other");
-                triggerHaptic("selection");
-              }}
-              className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 hover:from-indigo-500 hover:to-purple-600 text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md border border-indigo-400/40 active:scale-98 transition-all"
-            >
-              <Navigation size={15} className="text-cyan-300" />
-              <span>Auto-Pin on Delivery Map (GPS & IP)</span>
-            </button>
+      {/* 6J. SECURITY QUESTION EDIT MODAL (MANUAL INPUT ONLY) */}
+      {activeModal === "security_question" && (
+        <SkeuomorphicModalContainer
+          title="Security & Recovery Question"
+          onClose={() => setActiveModal(null)}
+        >
+          <div className="space-y-4">
+            <p className="text-xs text-purple-200/80 leading-relaxed">
+              Configure your secret security recovery question and answer. Required for manual identity recovery.
+            </p>
 
-            <div className="flex items-center gap-2 my-1">
-              <div className="flex-1 h-px bg-white/15" />
-              <span className="text-[10px] uppercase font-bold text-white/40">Or Edit Details Manually</span>
-              <div className="flex-1 h-px bg-white/15" />
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="text-xs font-bold text-purple-200 uppercase tracking-wider block mb-1">
-                  Address Label
-                </label>
+            <div>
+              <label className="text-xs font-bold text-purple-200 uppercase tracking-wider block mb-1">
+                Security Question
+              </label>
+              <select
+                value={draftSecurityQuestion}
+                onChange={(e) => setDraftSecurityQuestion(e.target.value)}
+                className="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white text-sm font-semibold focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 transition-all cursor-pointer mb-2"
+              >
+                <option
+                  value="What is your secret recovery codeword?"
+                  className="bg-slate-900 text-white"
+                >
+                  What is your secret recovery codeword?
+                </option>
+                <option
+                  value="What was the name of your first school?"
+                  className="bg-slate-900 text-white"
+                >
+                  What was the name of your first school?
+                </option>
+                <option
+                  value="What city were you born in?"
+                  className="bg-slate-900 text-white"
+                >
+                  What city were you born in?
+                </option>
+                <option
+                  value="What was your favorite childhood pet's name?"
+                  className="bg-slate-900 text-white"
+                >
+                  What was your favorite childhood pet's name?
+                </option>
+                <option value="Custom Question" className="bg-slate-900 text-white">
+                  Custom Question...
+                </option>
+              </select>
+              {draftSecurityQuestion === "Custom Question" && (
                 <input
                   type="text"
-                  value={draftOther.label}
-                  onChange={(e) => setDraftOther({ ...draftOther, label: e.target.value })}
+                  placeholder="Enter your custom question"
+                  value={draftCustomQuestion}
+                  onChange={(e) => setDraftCustomQuestion(e.target.value)}
                   className="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/40 text-sm font-semibold focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 transition-all"
-                  placeholder="e.g. Warehouse, Studio"
                 />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-purple-200 uppercase tracking-wider block mb-1">
-                  Unit / Suite
-                </label>
-                <input
-                  type="text"
-                  value={draftOther.unit || ""}
-                  onChange={(e) => setDraftOther({ ...draftOther, unit: e.target.value })}
-                  className="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/40 text-sm font-semibold focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 transition-all"
-                  placeholder="Suite / Floor"
-                />
-              </div>
+              )}
             </div>
 
             <div>
               <label className="text-xs font-bold text-purple-200 uppercase tracking-wider block mb-1">
-                Street Address
+                Secret Answer (Manual Entry)
               </label>
               <input
                 type="text"
-                value={draftOther.street}
-                onChange={(e) => setDraftOther({ ...draftOther, street: e.target.value })}
+                value={draftSecurityAnswer}
+                onChange={(e) => setDraftSecurityAnswer(e.target.value)}
+                placeholder="Enter secret answer"
                 className="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/40 text-sm font-semibold focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 transition-all"
-                placeholder="Street address"
               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="text-xs font-bold text-purple-200 uppercase tracking-wider block mb-1">
-                  City
-                </label>
-                <input
-                  type="text"
-                  value={draftOther.city}
-                  onChange={(e) => setDraftOther({ ...draftOther, city: e.target.value })}
-                  className="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/40 text-sm font-semibold focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 transition-all"
-                  placeholder="City"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-purple-200 uppercase tracking-wider block mb-1">
-                  Country
-                </label>
-                <input
-                  type="text"
-                  value={draftOther.country}
-                  onChange={(e) => setDraftOther({ ...draftOther, country: e.target.value })}
-                  className="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/40 text-sm font-semibold focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 transition-all"
-                  placeholder="Country"
-                />
-              </div>
+              <span className="text-[10px] text-white/50 block mt-1">
+                Your answer is stored securely and used to authenticate recovery requests.
+              </span>
             </div>
           </div>
 
           <button
             type="button"
             onClick={() => {
+              const finalQuestion =
+                draftSecurityQuestion === "Custom Question"
+                  ? draftCustomQuestion.trim() || "What is your secret recovery codeword?"
+                  : draftSecurityQuestion;
               const updated: UserSettings = {
                 ...settings,
-                otherAddress: draftOther,
+                securityQuestion: finalQuestion,
+                securityAnswer: draftSecurityAnswer.trim(),
               };
-              persistSettings(updated, "Other address saved");
+              persistSettings(updated, "Security question & answer saved");
               setActiveModal(null);
             }}
             className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#0098ea] to-[#0081c7] hover:from-[#00a8ff] hover:to-[#0098ea] text-white font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-[0_4px_16px_rgba(0,152,234,0.4)] border border-cyan-300/40 active:scale-98"
           >
-            Save Other Address
+            Save Security Question
           </button>
         </SkeuomorphicModalContainer>
       )}
 
-      {/* 7. INTERACTIVE DELIVERY MAP PINNING MODAL (GPS & LOCAL NETWORK IP) */}
-      {deliveryMapTarget !== null && (
-        <DeliveryMapPickerModal
-          isOpen={deliveryMapTarget !== null}
-          onClose={() => setDeliveryMapTarget(null)}
-          title={
-            deliveryMapTarget === "home"
-              ? "Pin Home Delivery Location"
-              : deliveryMapTarget === "work"
-              ? "Pin Office / Work Location"
-              : `Pin ${settings.otherAddress.label || "Other"} Location`
-          }
-          initialAddress={
-            deliveryMapTarget === "home"
-              ? settings.homeAddress
-              : deliveryMapTarget === "work"
-              ? settings.workAddress
-              : settings.otherAddress
-          }
-          onConfirm={handleDeliveryMapConfirm}
+      {/* 7. INTERACTIVE WORKING ADDRESS MAP PINNING MODAL (OPENSTREETMAP) */}
+      {isWorkMapOpen && (
+        <WorkingAddressMapModal
+          isOpen={isWorkMapOpen}
+          onClose={() => setIsWorkMapOpen(false)}
+          initialAddress={settings.workAddress}
+          onConfirm={handleWorkMapConfirm}
           triggerHaptic={triggerHaptic}
         />
       )}

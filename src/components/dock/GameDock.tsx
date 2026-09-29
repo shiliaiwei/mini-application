@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { TelegramUser } from "@/types/telegram";
 import {
@@ -15,6 +15,7 @@ export interface GameDockProps {
   activeTab: GameTab;
   onChangeTab: (tab: GameTab) => void;
   user: TelegramUser | null;
+  photoUrl?: string;
   isVisible?: boolean;
 }
 
@@ -22,8 +23,16 @@ export const GameDock: React.FC<GameDockProps> = React.memo(({
   activeTab,
   onChangeTab,
   user,
+  photoUrl,
   isVisible = true,
 }) => {
+  const [photoError, setPhotoError] = useState(false);
+  const effectivePhoto =
+    !photoError &&
+    (photoUrl ||
+      user?.photo_url ||
+      (user?.id && user.id > 0 ? `/api/player/avatar?telegram_id=${user.id}&size=small` : null));
+
   return (
     <nav
       aria-label="Bottom Navigation Dock"
@@ -229,7 +238,7 @@ export const GameDock: React.FC<GameDockProps> = React.memo(({
 
           {/* Icon */}
           <div className="flex items-center justify-center my-auto transition-transform duration-200 group-hover:scale-105">
-            {user?.photo_url ? (
+            {effectivePhoto ? (
               <div
                 className={`w-[22px] h-[22px] rounded-full overflow-hidden border transition-all ${
                   activeTab === "profile"
@@ -238,12 +247,13 @@ export const GameDock: React.FC<GameDockProps> = React.memo(({
                 }`}
               >
                 <Image
-                  src={user.photo_url}
+                  src={effectivePhoto}
                   alt="Profile"
                   width={22}
                   height={22}
                   className="w-full h-full object-cover"
                   unoptimized
+                  onError={() => setPhotoError(true)}
                 />
               </div>
             ) : (

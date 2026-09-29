@@ -24,7 +24,8 @@ test("User Settings: lib/userSettings.ts defines all required standard fields", 
     "language",
     "homeAddress",
     "workAddress",
-    "otherAddress",
+    "securityQuestion",
+    "securityAnswer",
     "telegramCloudSync",
   ];
 
@@ -36,7 +37,7 @@ test("User Settings: lib/userSettings.ts defines all required standard fields", 
   }
 });
 
-test("User Settings: Home, Work, and Other addresses follow standard schema", () => {
+test("User Settings: Home and Work addresses follow standard schema, with security questions", () => {
   const home = DEFAULT_USER_SETTINGS.homeAddress;
   assert.ok("street" in home, "Home address must include street");
   assert.ok("city" in home, "Home address must include city");
@@ -47,10 +48,8 @@ test("User Settings: Home, Work, and Other addresses follow standard schema", ()
   assert.ok("city" in work, "Work address must include city");
   assert.ok("country" in work, "Work address must include country");
 
-  const other = DEFAULT_USER_SETTINGS.otherAddress;
-  assert.ok("label" in other, "Other address must include label");
-  assert.ok("street" in other, "Other address must include street");
-  assert.ok("city" in other, "Other address must include city");
+  assert.ok("securityQuestion" in DEFAULT_USER_SETTINGS, "Must include securityQuestion");
+  assert.ok("securityAnswer" in DEFAULT_USER_SETTINGS, "Must include securityAnswer");
 });
 
 test("User Settings: calculateAge calculates correct age from YYYY-MM-DD", () => {
@@ -100,7 +99,7 @@ test("User Settings View: UserSettingsView.tsx exists and implements Telegram We
   assert.ok(code.includes("requestContact"), "Must integrate requestContact for phone");
   assert.ok(code.includes("home_address"), "Must include home address editor");
   assert.ok(code.includes("work_address"), "Must include work address editor");
-  assert.ok(code.includes("other_address"), "Must include other address editor");
+  assert.ok(code.includes("security_question"), "Must include security question editor");
   assert.ok(code.includes("ThreadStitching"), "Must include 3D perimeter thread stitching");
   assert.ok(code.includes("GuillocheBackground"), "Must include Guilloche banknote styling");
   assert.ok(code.includes("LeatherGrain"), "Must include purple leather texture overlay");
@@ -217,7 +216,7 @@ test("Profile Completion: getProfileCompletion lists unfilled fields and calcula
     phone: "",
     homeAddress: { street: "", city: "", country: "" },
     workAddress: { street: "", city: "", country: "" },
-    otherAddress: { label: "Warehouse", street: "", city: "", country: "" },
+    securityAnswer: "",
   };
 
   const completion = getProfileCompletion(emptySettings);
@@ -234,15 +233,15 @@ test("Profile Completion: getProfileCompletion lists unfilled fields and calcula
   );
 });
 
-test("Delivery Map Picker: DeliveryMapPickerModal.tsx exists and implements interactive pinpointing", () => {
+test("Working Address Map Picker: WorkingAddressMapModal.tsx exists and implements interactive pinpointing", () => {
   const modalPath = path.resolve(
     __dirname,
-    "../src/components/modals/DeliveryMapPickerModal.tsx"
+    "../src/components/modals/WorkingAddressMapModal.tsx"
   );
-  assert.ok(fs.existsSync(modalPath), "DeliveryMapPickerModal.tsx must exist");
+  assert.ok(fs.existsSync(modalPath), "WorkingAddressMapModal.tsx must exist");
 
   const modalCode = fs.readFileSync(modalPath, "utf-8");
-  assert.ok(modalCode.includes("Confirm Pin & Set Physical Address"), "Must have delivery map confirmation action");
+  assert.ok(modalCode.includes("Confirm & Set Working Address"), "Must have working map confirmation action");
   assert.ok(modalCode.includes("fetchGeocode"), "Must have reverse geocode fetcher");
   assert.ok(modalCode.includes("/api/geocode/locate"), "Must call locate API endpoint");
   assert.ok(modalCode.includes("navigator.geolocation"), "Must support device GPS pinpointing");
@@ -250,7 +249,7 @@ test("Delivery Map Picker: DeliveryMapPickerModal.tsx exists and implements inte
   assert.ok(modalCode.includes("KeylineIcons"), "Must strictly use official Keyline icons");
 
   const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u;
-  assert.equal(emojiRegex.test(modalCode), false, "DeliveryMapPickerModal must contain NO emojis");
+  assert.equal(emojiRegex.test(modalCode), false, "WorkingAddressMapModal must contain NO emojis");
 });
 
 test("Physical Geocoding Endpoint: api/geocode/locate/route.ts exists and handles GPS & IP resolution", () => {
@@ -273,10 +272,40 @@ test("UserSettingsView: Renders interactive map actions and incomplete placehold
   const viewPath = path.resolve(__dirname, "../src/components/views/UserSettingsView.tsx");
   const code = fs.readFileSync(viewPath, "utf-8");
 
-  assert.ok(code.includes("DeliveryMapPickerModal"), "UserSettingsView must mount DeliveryMapPickerModal");
-  assert.ok(code.includes("Pin on Delivery Map (GPS & IP)"), "Must render delivery map pin CTA buttons");
-  assert.ok(code.includes("Action Required: Incomplete"), "Must render Action Required alert badges");
+  assert.ok(code.includes("WorkingAddressMapModal"), "UserSettingsView must mount WorkingAddressMapModal");
+  assert.ok(code.includes("Pin on Working Map"), "Must render working map pin CTA buttons");
+  assert.ok(code.includes("Action Required"), "Must render Action Required alert badges");
   assert.ok(code.includes("Profile Readiness:"), "Must render Profile Readiness Banner");
-  assert.ok(code.includes("Verified Physical Address"), "Must render verified physical address badge when filled");
+  assert.ok(code.includes("Saved Physical Address"), "Must render saved physical address badge when filled");
 });
+
+test("Telegram Profile Photo Sync: createInitialSettings auto-assigns avatar proxy when photo_url is missing", () => {
+  const userWithoutPhoto = {
+    id: 6600489302,
+    first_name: "Kesararam",
+    username: "kesararam",
+  };
+  const settings = createInitialSettings(userWithoutPhoto);
+  assert.equal(
+    settings.photoUrl,
+    "/api/player/avatar?telegram_id=6600489302",
+    "Must auto-assign /api/player/avatar?telegram_id=6600489302 when photo_url is omitted"
+  );
+  assert.equal(settings.photoSource, "telegram", "photoSource should be telegram");
+});
+
+test("Telegram Profile Photo Proxy: api/player/avatar/route.ts exists and implements caching and Bot API fetch", () => {
+  const avatarRoutePath = path.resolve(
+    __dirname,
+    "../src/app/api/player/avatar/route.ts"
+  );
+  assert.ok(fs.existsSync(avatarRoutePath), "api/player/avatar/route.ts must exist");
+
+  const code = fs.readFileSync(avatarRoutePath, "utf-8");
+  assert.ok(code.includes("getUserProfilePhotos"), "Must call getUserProfilePhotos");
+  assert.ok(code.includes("getFile"), "Must call getFile");
+  assert.ok(code.includes("Cache-Control"), "Must include HTTP caching headers");
+  assert.ok(code.includes("createDefaultAvatarSvg"), "Must provide SVG fallback when no photo");
+});
+
 

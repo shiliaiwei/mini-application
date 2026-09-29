@@ -31,9 +31,10 @@ export async function POST(req: Request) {
     const cleanFirstName = String(first_name || "Player").slice(0, 64).trim();
     const cleanLastName = last_name ? String(last_name).slice(0, 64).trim() : null;
     const cleanUsername = username ? String(username).replace(/[^a-zA-Z0-9_]/g, "").slice(0, 64) : null;
-    const cleanPhotoUrl = photo_url && typeof photo_url === "string" && photo_url.startsWith("https://")
-      ? photo_url.slice(0, 255)
-      : null;
+    const cleanPhotoUrl =
+      photo_url && typeof photo_url === "string" && (photo_url.startsWith("https://") || photo_url.startsWith("/api/player/avatar"))
+        ? photo_url.slice(0, 2048)
+        : (cleanId ? `/api/player/avatar?telegram_id=${cleanId}` : null);
 
     const safeScore = Math.max(0, Math.min(100_000_000, Math.floor(Number(score) || 0)));
     const safeSpendSeconds = Math.max(0, Math.min(100_000_000, Math.floor(Number(spend_seconds) || 0)));
