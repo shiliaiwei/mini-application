@@ -14,6 +14,7 @@ import {
   formatAddressLine,
   isAddressEmpty,
   getProfileCompletion,
+  isCloudStorageSupported,
 } from "@/lib/userSettings";
 import {
   User,
@@ -319,12 +320,31 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
     refreshCacheCount();
   }, [refreshCacheCount]);
 
-  // Telegram CloudStorage background sync
+  // Telegram CloudStorage background sync (guarded by version 6.9+ check)
   useEffect(() => {
+    if (!isCloudStorageSupported(tgApp)) return;
     loadTelegramCloudSettings(tgApp, (cloudData) => {
       setSettings(cloudData);
     });
   }, [tgApp]);
+
+  // Server-side database settings background sync (reliable across all Telegram versions)
+  useEffect(() => {
+    if (!user?.id) return;
+    fetch(`/api/player/settings?telegram_id=${user.id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.found && data?.settings) {
+          setSettings((prev) => ({
+            ...prev,
+            ...data.settings,
+            homeAddress: { ...prev.homeAddress, ...(data.settings.homeAddress || {}) },
+            workAddress: { ...prev.workAddress, ...(data.settings.workAddress || {}) },
+          }));
+        }
+      })
+      .catch(() => {});
+  }, [user?.id]);
 
   // Automatically sync Telegram user fields into settings whenever user is loaded or updated
   useEffect(() => {
@@ -478,13 +498,20 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
     (newSettings: UserSettings, message = "Settings saved successfully") => {
       setSettings(newSettings);
       saveUserSettings(newSettings, tgApp);
+      if (user?.id) {
+        fetch("/api/player/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ telegram_id: user.id, settings: newSettings }),
+        }).catch(() => {});
+      }
       triggerHaptic("success");
       refreshCacheCount();
       setSaveBanner(message);
       if (onSavedNotification) onSavedNotification();
       setTimeout(() => setSaveBanner(null), 3200);
     },
-    [tgApp, onSavedNotification, refreshCacheCount, triggerHaptic]
+    [tgApp, user?.id, onSavedNotification, refreshCacheCount, triggerHaptic]
   );
 
   const handleCopyText = (val: string, key: string) => {
@@ -1515,40 +1542,51 @@ export const UserSettingsView: React.FC<UserSettingsViewProps> = ({
               </span>
 
               {/* Telegram Cloud Storage Sync Toggle */}
-              <div className="bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur-md rounded-2xl p-3.5 flex items-center justify-between transition-all">
-                <div>
-                  <span className="text-sm font-bold text-white block">
-                    Telegram Cloud Storage Sync
-                  </span>
-                  <span className="text-xs text-white/70">
-                    Sync user settings across all Telegram devices via CloudStorage API
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const updated: UserSettings = {
-                      ...settings,
-                      telegramCloudSync: !settings.telegramCloudSync,
-                    };
-                    persistSettings(
-                      updated,
-                      `CloudStorage sync ${!settings.telegramCloudSync ? "enabled" : "disabled"}`
-                    );
-                  }}
-                  className={`relative w-12 h-6 rounded-full border transition-all duration-300 cursor-pointer shrink-0 ${
-                    settings.telegramCloudSync
-                      ? "bg-[#0098ea] border-cyan-300 ring-2 ring-cyan-400/30 shadow-[0_0_12px_rgba(0,152,234,0.5)]"
-                      : "bg-slate-800/90 border-white/20"
-                  }`}
-                >
-                  <span
-                    className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-all duration-300 ${
-                      settings.telegramCloudSync ? "left-6" : "left-0.5"
-                    }`}
-                  />
-                </button>
-              </div>
+              {(() => {
+                const isCloudSupported = isCloudStorageSupported(tgApp);
+                return (
+                  <div className="bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur-md rounded-2xl p-3.5 flex items-center justify-between transition-all">
+                    <div>
+                      <span className="text-sm font-bold text-white block">
+                        Telegram Cloud Storage Sync
+                      </span>
+                      <span className="text-xs text-white/70">
+                        {isCloudSupported
+                          ? "Sync user settings across all Telegram devices via CloudStorage API"
+                          : `Requires Telegram Bot API 6.9+ (Client: v${tgApp?.version || "6.0"} - Server DB sync active)`}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={!isCloudSupported}
+                      onClick={() => {
+                        if (!isCloudSupported) return;
+                        const updated: UserSettings = {
+                          ...settings,
+                          telegramCloudSync: !settings.telegramCloudSync,
+                        };
+                        persistSettings(
+                          updated,
+                          `CloudStorage sync ${!settings.telegramCloudSync ? "enabled" : "disabled"}`
+                        );
+                      }}
+                      className={`relative w-12 h-6 rounded-full border transition-all duration-300 shrink-0 ${
+                        !isCloudSupported
+                          ? "opacity-50 cursor-not-allowed bg-slate-800 border-white/10"
+                          : settings.telegramCloudSync
+                          ? "bg-[#0098ea] border-cyan-300 ring-2 ring-cyan-400/30 shadow-[0_0_12px_rgba(0,152,234,0.5)] cursor-pointer"
+                          : "bg-slate-800/90 border-white/20 cursor-pointer"
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-all duration-300 ${
+                          isCloudSupported && settings.telegramCloudSync ? "left-6" : "left-0.5"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                );
+              })()}
 
               {/* Cache Management & Purge */}
               <div className="bg-white/10 border border-white/15 rounded-2xl p-3.5 flex items-center justify-between">

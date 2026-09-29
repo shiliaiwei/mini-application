@@ -9,6 +9,9 @@ import {
   formatAddressLine,
   isAddressEmpty,
   getProfileCompletion,
+  isCloudStorageSupported,
+  loadTelegramCloudSettings,
+  saveUserSettings,
 } from "../src/lib/userSettings";
 
 test("User Settings: lib/userSettings.ts defines all required standard fields", () => {
@@ -307,5 +310,74 @@ test("Telegram Profile Photo Proxy: api/player/avatar/route.ts exists and implem
   assert.ok(code.includes("Cache-Control"), "Must include HTTP caching headers");
   assert.ok(code.includes("createDefaultAvatarSvg"), "Must provide SVG fallback when no photo");
 });
+
+test("Telegram CloudStorage: Version 6.0 safety prevents console error", () => {
+  // 1. null / undefined tgApp
+  assert.equal(isCloudStorageSupported(null), false, "null tgApp must return false");
+  assert.equal(isCloudStorageSupported(undefined), false, "undefined tgApp must return false");
+
+  // 2. Telegram WebApp v6.0 where isVersionAtLeast('6.9') returns false
+  let getItemCalled = false;
+  let setItemCalled = false;
+
+  const mockTgAppV6 = {
+    version: "6.0",
+    isVersionAtLeast: (v: string) => v === "6.0",
+    CloudStorage: {
+      getItem: (_key: string, _cb: (err: Error | null, val: string) => void) => {
+        getItemCalled = true;
+      },
+      setItem: (_key: string, _val: string, _cb?: (err: Error | null, ok: boolean) => void) => {
+        setItemCalled = true;
+      },
+    },
+  } as unknown as any;
+
+  assert.equal(
+    isCloudStorageSupported(mockTgAppV6),
+    false,
+    "Telegram v6.0 must NOT report CloudStorage as supported"
+  );
+
+  // Calling loadTelegramCloudSettings on v6.0 must NOT call getItem
+  loadTelegramCloudSettings(mockTgAppV6, () => {});
+  assert.equal(getItemCalled, false, "loadTelegramCloudSettings must not invoke getItem on v6.0");
+
+  // Calling saveUserSettings on v6.0 must NOT call setItem
+  saveUserSettings({ ...DEFAULT_USER_SETTINGS, telegramCloudSync: true }, mockTgAppV6);
+  assert.equal(setItemCalled, false, "saveUserSettings must not invoke setItem on v6.0");
+
+  // 3. Telegram WebApp v6.9+ where isVersionAtLeast('6.9') returns true
+  const mockTgAppV7 = {
+    version: "7.0",
+    isVersionAtLeast: (v: string) => ["6.0", "6.1", "6.2", "6.9", "7.0"].includes(v),
+    CloudStorage: {
+      getItem: (key: string, cb: (err: Error | null, val: string) => void) => {
+        getItemCalled = true;
+        cb(null, JSON.stringify({ displayName: "Synced User" }));
+      },
+      setItem: (_key: string, _val: string, _cb?: (err: Error | null, ok: boolean) => void) => {
+        setItemCalled = true;
+      },
+    },
+  } as unknown as any;
+
+  assert.equal(
+    isCloudStorageSupported(mockTgAppV7),
+    true,
+    "Telegram v7.0 must report CloudStorage as supported"
+  );
+
+  let loadedSettings: any = null;
+  loadTelegramCloudSettings(mockTgAppV7, (s) => {
+    loadedSettings = s;
+  });
+  assert.equal(getItemCalled, true, "loadTelegramCloudSettings must invoke getItem on v7.0");
+  assert.equal(loadedSettings?.displayName, "Synced User", "Loaded settings should match cloud payload");
+
+  saveUserSettings({ ...DEFAULT_USER_SETTINGS, telegramCloudSync: true }, mockTgAppV7);
+  assert.equal(setItemCalled, true, "saveUserSettings must invoke setItem on v7.0");
+});
+
 
 

@@ -189,18 +189,54 @@ export function loadCachedUserSettings(user: TelegramUser | null): UserSettings 
 }
 
 /**
+ * Safely checks whether Telegram WebApp supports the CloudStorage API (requires Bot API 6.9+).
+ * Prevents "[Telegram.WebApp] CloudStorage is not supported in version 6.0" runtime console error.
+ */
+export function isCloudStorageSupported(tgApp: TelegramWebApp | null | undefined): boolean {
+  if (!tgApp) return false;
+  if (!tgApp.CloudStorage || typeof tgApp.CloudStorage.getItem !== "function") {
+    return false;
+  }
+
+  // Official Telegram WebApp method
+  if (typeof tgApp.isVersionAtLeast === "function") {
+    try {
+      return tgApp.isVersionAtLeast("6.9");
+    } catch {
+      return false;
+    }
+  }
+
+  // Fallback version string parsing (e.g., "6.0", "6.9", "7.0")
+  if (tgApp.version && typeof tgApp.version === "string") {
+    try {
+      const parts = tgApp.version.split(".").map(Number);
+      const major = parts[0] || 0;
+      const minor = parts[1] || 0;
+      if (major > 6) return true;
+      if (major === 6 && minor >= 9) return true;
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
+  return false;
+}
+
+/**
  * Asynchronously checks and syncs settings from Telegram CloudStorage
  */
 export function loadTelegramCloudSettings(
-  tgApp: TelegramWebApp | null,
+  tgApp: TelegramWebApp | null | undefined,
   callback: (settings: UserSettings) => void
 ): void {
-  if (!tgApp?.CloudStorage?.getItem) {
+  if (!isCloudStorageSupported(tgApp)) {
     return;
   }
 
   try {
-    tgApp.CloudStorage.getItem(STORAGE_KEY, (err, val) => {
+    tgApp?.CloudStorage?.getItem(STORAGE_KEY, (err, val) => {
       if (!err && val && typeof val === "string") {
         try {
           const parsed = JSON.parse(val);
@@ -225,7 +261,7 @@ export function loadTelegramCloudSettings(
  */
 export function saveUserSettings(
   settings: UserSettings,
-  tgApp: TelegramWebApp | null
+  tgApp: TelegramWebApp | null | undefined
 ): void {
   const updated: UserSettings = {
     ...settings,
@@ -251,10 +287,10 @@ export function saveUserSettings(
     } catch {}
   }
 
-  // 2. Full profile with verified addresses is securely stored in Telegram CloudStorage
-  if (tgApp?.CloudStorage?.setItem && settings.telegramCloudSync) {
+  // 2. Full profile with verified addresses is securely stored in Telegram CloudStorage if supported
+  if (isCloudStorageSupported(tgApp) && settings.telegramCloudSync) {
     try {
-      tgApp.CloudStorage.setItem(STORAGE_KEY, str, (err) => {
+      tgApp?.CloudStorage?.setItem(STORAGE_KEY, str, (err) => {
         if (err) {
           console.warn("Telegram CloudStorage sync error:", err);
         }
