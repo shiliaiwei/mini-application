@@ -319,7 +319,7 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
                 disabled={isProcessing}
               />
             </div>
-            {/* Quick Demo Recipient Buttons */}
+            {/* Quick Preset Recipient Buttons */}
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
               <span className="text-[10px] text-purple-200/70 font-bold uppercase">Quick Fill:</span>
               {QUICK_RECIPIENTS.map((rec) => (

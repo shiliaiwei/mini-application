@@ -65,7 +65,9 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
     ? `@${user.username}`
     : user?.first_name
     ? `@${user.first_name.toLowerCase().replace(/[^a-z0-9_]/g, "")}`
-    : "@shiliaiwei_holder";
+    : user?.id
+    ? `@vault_${user.id}`
+    : "@vault_holder";
 
   const walletAddress = user?.id
     ? `wei_0x${Number(user.id).toString(16).padStart(8, "0")}...${String(user.id).slice(-4)}`

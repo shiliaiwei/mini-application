@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { BrandFooter } from "@/components/brand/BrandFooter";
 import {
@@ -51,22 +51,58 @@ export const AccountAuthView: React.FC<AccountAuthViewProps> = ({
     } catch {}
   };
 
-  // 1. Direct Demo Account Login
-  const handleQuickDemoLogin = () => {
-    triggerHaptic("success");
-    const demoUser: TelegramUser = {
-      id: 70220432,
-      first_name: "Sri Evi",
-      username: "shiliaiwei_holder",
-      photo_url: "/api/player/avatar?telegram_id=70220432",
-    };
+  // 1. Automatic Telegram Session Sync on mount
+  useEffect(() => {
     try {
-      localStorage.setItem("shi_tg_user_cache", JSON.stringify(demoUser));
+      const tgUser =
+        window.Telegram?.WebApp?.initDataUnsafe?.user ||
+        tgApp?.initDataUnsafe?.user;
+
+      if (tgUser?.id) {
+        const enrichedUser: TelegramUser = {
+          ...tgUser,
+          photo_url:
+            tgUser.photo_url ||
+            `/api/player/avatar?telegram_id=${tgUser.id}`,
+        };
+        try {
+          localStorage.setItem("shi_tg_user_cache", JSON.stringify(enrichedUser));
+        } catch {}
+        onLogin(enrichedUser);
+      }
     } catch {}
-    onLogin(demoUser);
+  }, [onLogin, tgApp]);
+
+  // 2. Manual One-Tap Auto Sync Telegram Action
+  const handleAutoSyncTelegram = () => {
+    triggerHaptic("light");
+    try {
+      const tgUser =
+        window.Telegram?.WebApp?.initDataUnsafe?.user ||
+        tgApp?.initDataUnsafe?.user;
+
+      if (tgUser?.id) {
+        triggerHaptic("success");
+        const enrichedUser: TelegramUser = {
+          ...tgUser,
+          photo_url:
+            tgUser.photo_url ||
+            `/api/player/avatar?telegram_id=${tgUser.id}`,
+        };
+        try {
+          localStorage.setItem("shi_tg_user_cache", JSON.stringify(enrichedUser));
+        } catch {}
+        onLogin(enrichedUser);
+      } else {
+        // When running in external web browser, launch via Telegram bot to authenticate
+        window.location.href = "https://t.me/srievibot/app";
+      }
+    } catch {
+      window.location.href = "https://t.me/srievibot/app";
+    }
   };
 
-  // 2. Handle Login Submission
+  // 3. Handle Login Submission
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -123,14 +159,14 @@ export const AccountAuthView: React.FC<AccountAuthViewProps> = ({
         triggerHaptic("error");
       }
     } catch {
-      setErrorMessage("Connection error. Please try again or use Demo Login.");
+      setErrorMessage("Connection error. Please verify your credentials or create an account.");
       triggerHaptic("error");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 3. Handle Registration Submission
+  // 4. Handle Registration Submission
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -291,7 +327,7 @@ export const AccountAuthView: React.FC<AccountAuthViewProps> = ({
                     type="text"
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
-                    placeholder="e.g. shiliaiwei_holder or 70220432"
+                    placeholder="e.g. your_handle or telegram_id"
                     className="w-full px-4 py-3 rounded-2xl bg-black/50 border border-white/15 text-white placeholder:text-slate-500 text-sm focus:border-[#0098ea] focus:ring-2 focus:ring-[#0098ea]/20 outline-none transition-all font-mono"
                   />
                   <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
@@ -303,7 +339,7 @@ export const AccountAuthView: React.FC<AccountAuthViewProps> = ({
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">
-                    Vault PIN (Optional for Demo)
+                    Vault Security PIN
                   </label>
                   <button
                     type="button"
@@ -420,24 +456,24 @@ export const AccountAuthView: React.FC<AccountAuthViewProps> = ({
             </form>
           )}
 
-          {/* Quick Demo Login Option */}
+          {/* Telegram Auto-Sync Action */}
           <div className="pt-2 border-t border-white/10 space-y-2">
             <button
               type="button"
-              onClick={handleQuickDemoLogin}
-              className="w-full py-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/15 text-slate-300 hover:text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
+              onClick={handleAutoSyncTelegram}
+              className="w-full py-3 rounded-2xl bg-[#229ed9] hover:bg-[#1e8bc0] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#229ed9]/25 active:scale-98 transition-all cursor-pointer"
             >
-              <Check size={14} className="text-emerald-400" />
-              <span>Instant Demo Access (@shiliaiwei_holder)</span>
+              <Check size={15} className="text-white" />
+              <span>Auto Sync Telegram Account (ភ្ជាប់គណនី Telegram)</span>
             </button>
 
             <a
               href="https://t.me/srievibot/app"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-2.5 rounded-2xl bg-[#229ed9]/15 hover:bg-[#229ed9]/25 border border-[#229ed9]/30 text-[#229ed9] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-98 transition-all text-center block"
+              className="w-full py-2.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-98 transition-all text-center block"
             >
-              <span>Open via Telegram (@srievibot)</span>
+              <span>Launch Mini App via @srievibot</span>
               <ArrowUpRight size={13} />
             </a>
           </div>

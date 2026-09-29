@@ -589,7 +589,7 @@ export const EarnTasksView: React.FC<EarnTasksViewProps> = React.memo(({
                 </span>
               </div>
 
-              {/* CARD GAME ARENA: FLIP CARDS DEMO */}
+              {/* CARD GAME ARENA: FLIP CARDS PREVIEW */}
               {selectedGame.isCardGame && (
                 <div className="p-4 rounded-2xl bg-black/25 border border-purple-300/20 space-y-3">
                   <div className="flex items-center justify-between text-xs font-bold text-purple-200">

@@ -31,13 +31,8 @@ const GameProfileView = dynamic(
   { ssr: false }
 );
 
-// Local demo test user: strictly enabled on localhost only; NEVER exposed in production
-const LOCAL_DEMO_USER: TelegramUser = {
-  id: 88888888,
-  first_name: "SHILIAIWEI Demo",
-  username: "demo_tester",
-  photo_url: "/api/player/avatar?telegram_id=88888888",
-};
+// NOTE: LOCAL_DEMO_USER is permanently disabled. Never display demo user per production security standards.
+const LOCAL_DEMO_USER: TelegramUser | null = null;
 
 function detectIsTelegramClient(): boolean {
   if (typeof window === "undefined") return false;
@@ -128,8 +123,7 @@ export default function MiniAppPage() {
     setIsTelegramClient(isTg);
 
     // 2. Resolve user:
-    // In local development: automatically initialize demo user for testing
-    // In real product: authentic Telegram authentication / sync is ALWAYS required
+    // In Telegram WebApp: auto-sync authentic Telegram user immediately
     const directUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
     if (directUser?.id) {
       const enrichedUser: TelegramUser = {
@@ -145,26 +139,32 @@ export default function MiniAppPage() {
       try {
         localStorage.setItem("shi_tg_user_cache", JSON.stringify(enrichedUser));
       } catch {}
-    } else if (isLocal) {
-      // Local development test only: initialize demo user
-      setUser(LOCAL_DEMO_USER);
-      setIsTelegramVerified(true);
-      isVerifiedRef.current = true;
     } else {
-      // Direct access: check for cached user or default to demo user
-      let resolvedUser = LOCAL_DEMO_USER;
+      // In web browser: check for authenticated cached user
+      // Strictly NEVER default to demo user: unauthenticated sessions must log in or auto-sync
       try {
         const cachedUserStr = localStorage.getItem("shi_tg_user_cache");
         if (cachedUserStr) {
           const cachedUser = JSON.parse(cachedUserStr);
-          if (cachedUser?.id && typeof cachedUser.id === "number" && cachedUser.id > 0) {
-            resolvedUser = cachedUser;
+          const isStaleDemo =
+            !cachedUser?.id ||
+            typeof cachedUser.id !== "number" ||
+            cachedUser.id <= 0 ||
+            String(cachedUser.username || "").toLowerCase().includes("demo") ||
+            String(cachedUser.first_name || "").toLowerCase().includes("demo") ||
+            cachedUser.username === "shiliaiwei_holder" ||
+            cachedUser.username === "demo_tester";
+
+          if (!isStaleDemo) {
+            setUser(cachedUser);
+            setIsTelegramVerified(true);
+            isVerifiedRef.current = true;
+          } else {
+            // Purge stale demo user from storage
+            localStorage.removeItem("shi_tg_user_cache");
           }
         }
       } catch {}
-      setUser(resolvedUser);
-      setIsTelegramVerified(true);
-      isVerifiedRef.current = true;
     }
 
     // 4. Resolve tab parameter from search params or Telegram Settings hash
@@ -450,7 +450,7 @@ export default function MiniAppPage() {
       }
 
       if (isLocalhostEnvironment(window.location.hostname)) {
-        // Local test: preserve demo user
+        // Local test: skip remote HMAC validation on localhost
         return;
       }
 
