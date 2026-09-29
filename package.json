@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "test": "tsx --test tests/*.test.ts",
-    "checkpoint": "tsx --test tests/*.test.ts && next build"
+    "checkpoint": "prisma generate && tsx --test tests/*.test.ts && next build",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@keyline-icons/react": "^1.2.0",
