@@ -1,0 +1,51 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Wallet {
+  id                    String        @id @default(cuid())
+  telegram_id           BigInt        @unique
+  address               String        @unique
+  public_key            String
+  encrypted_private_key String
+  nonce                 Int           @default(0)
+  created_at            DateTime      @default(now())
+  updated_at            DateTime      @updatedAt
+  ledger_entries        LedgerEntry[]
+
+  @@map("wallets")
+}
+
+model LedgerEntry {
+  id             String             @id @default(cuid())
+  wallet_id      String
+  amount         BigInt
+  entry_type     String
+  transaction_id String?
+  created_at     DateTime           @default(now())
+  wallet         Wallet             @relation(fields: [wallet_id], references: [id], onDelete: Cascade)
+  transaction    WalletTransaction? @relation(fields: [transaction_id], references: [id])
+
+  @@index([wallet_id])
+  @@map("ledger_entries")
+}
+
+model WalletTransaction {
+  id             String        @id @default(cuid())
+  from_address   String
+  to_address     String
+  amount         BigInt
+  nonce          Int
+  signature      String
+  status         String        @default("CONFIRMED")
+  tx_type        String        @default("TRANSFER")
+  created_at     DateTime      @default(now())
+  ledger_entries LedgerEntry[]
+
+  @@map("transactions")
+}

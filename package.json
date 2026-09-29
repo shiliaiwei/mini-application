@@ -13,6 +13,8 @@
   "dependencies": {
     "@keyline-icons/react": "^1.2.0",
     "@neondatabase/serverless": "^1.1.0",
+    "@noble/secp256k1": "^3.2.0",
+    "@prisma/client": "^6.19.3",
     "@telegram-apps/telegram-ui": "^2.1.13",
     "@uploadcare/cname-prefix": "^6.22.0",
     "@uploadcare/react-uploader": "^1.17.0",
@@ -30,6 +32,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
+    "prisma": "6.19.3",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5"

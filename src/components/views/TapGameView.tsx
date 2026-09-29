@@ -61,37 +61,132 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
     });
   };
 
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [isSending, setIsSending] = useState(false);
+
   // Conversion rates: 100 WEI COIN = $1.00 USD = 4,100 KHR
   const usdValue = (score / 100).toFixed(2);
   const khrValue = Math.floor(score * 41).toLocaleString();
 
-  const handleSendTransaction = (e: React.FormEvent) => {
+  const handleSendTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!sendRecipient || !sendAmount) return;
+    if (!sendRecipient || !sendAmount || isSending) return;
+
+    setSendError(null);
+    setIsSending(true);
 
     try {
-      tgApp?.HapticFeedback?.notificationOccurred("success");
-    } catch {}
+      const parsedAmount = parseFloat(sendAmount);
+      if (isNaN(parsedAmount) || parsedAmount <= 0) {
+        setSendError("Please enter a valid amount greater than 0");
+        setIsSending(false);
+        return;
+      }
 
-    // Record transfer audit
-    fetch("/api/audit/log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        telegram_id: user?.id || 0,
-        action: "TRANSFER",
-        details: `Sent ${sendCurrency === "USD" ? "$" : "៛"}${sendAmount} to ${sendRecipient}`,
-        platform: tgApp?.platform || "TELEGRAM_WEB",
-      }),
-    }).catch(() => {});
+      // Convert to whole WEI COIN integer
+      const weiAmount =
+        sendCurrency === "USD"
+          ? Math.round(parsedAmount * 100)
+          : Math.round(parsedAmount / 41);
 
-    setSendSuccess(true);
-    setTimeout(() => {
-      setSendSuccess(false);
-      setSubView("none");
-      setSendRecipient("");
-      setSendAmount("");
-    }, 1500);
+      if (weiAmount <= 0) {
+        setSendError("Amount too small. Minimum transfer is 1 WEI COIN");
+        setIsSending(false);
+        return;
+      }
+
+      if (weiAmount > score) {
+        setSendError(`Insufficient balance: available ${score} WEI COIN`);
+        setIsSending(false);
+        return;
+      }
+
+      const initData =
+        typeof window !== "undefined" && window.Telegram?.WebApp?.initData
+          ? window.Telegram.WebApp.initData
+          : "";
+
+      // 1. Resolve recipient to valid WC address
+      const resolveRes = await fetch(
+        `/api/wallet/resolve?target=${encodeURIComponent(sendRecipient.trim())}`
+      );
+      const resolveData = await resolveRes.json();
+      if (!resolveRes.ok || !resolveData.address) {
+        setSendError(resolveData.error || "Recipient not found in wallet registry");
+        setIsSending(false);
+        return;
+      }
+      const toAddress = resolveData.address;
+
+      // 2. Fetch current nonce
+      const nonceRes = await fetch(
+        `/api/wallet/nonce?initData=${encodeURIComponent(initData)}`
+      );
+      const nonceData = await nonceRes.json();
+      if (!nonceRes.ok || typeof nonceData.nonce !== "number") {
+        setSendError(nonceData.error || "Failed to retrieve transaction nonce");
+        setIsSending(false);
+        return;
+      }
+      const nonce = nonceData.nonce;
+
+      // 3. Cryptographically sign transfer payload
+      const signRes = await fetch("/api/wallet/sign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          initData,
+          to_address: toAddress,
+          amount: weiAmount,
+          nonce,
+        }),
+      });
+      const signData = await signRes.json();
+      if (!signRes.ok || !signData.signature) {
+        setSendError(signData.error || "Failed to sign transaction");
+        setIsSending(false);
+        return;
+      }
+      const signature = signData.signature;
+
+      // 4. Submit verified transfer to server
+      const transferRes = await fetch("/api/wallet/transfer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          initData,
+          to_address: toAddress,
+          amount: weiAmount,
+          nonce,
+          signature,
+        }),
+      });
+      const transferData = await transferRes.json();
+      if (!transferRes.ok || !transferData.success) {
+        setSendError(transferData.error || "Transfer failed");
+        setIsSending(false);
+        return;
+      }
+
+      // Success
+      try {
+        tgApp?.HapticFeedback?.notificationOccurred("success");
+      } catch {}
+
+      onAddScore?.(-weiAmount);
+      setSendSuccess(true);
+      setTimeout(() => {
+        setSendSuccess(false);
+        setSubView("none");
+        setSendRecipient("");
+        setSendAmount("");
+        setIsSending(false);
+      }, 2000);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Network error during transfer";
+      setSendError(msg);
+      setIsSending(false);
+    }
   };
 
   // ==============================================================
@@ -190,12 +285,19 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
                 />
               </div>
 
+              {sendError && (
+                <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+                  {sendError}
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white font-bold text-xs uppercase tracking-wider shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-colors duration-300 ease-out"
+                disabled={isSending}
+                className="w-full py-3.5 rounded-full bg-[#0098ea] hover:bg-[#0088cc] text-white font-bold text-xs uppercase tracking-wider shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-colors duration-300 ease-out disabled:opacity-50"
               >
                 <Send size={18} />
-                <span>Confirm Transfer</span>
+                <span>{isSending ? "Verifying & Transferring..." : "Confirm Transfer"}</span>
               </button>
             </form>
           )}
