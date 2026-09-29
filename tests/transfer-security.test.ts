@@ -35,6 +35,15 @@ test("Keypair & AES-256-GCM: Encrypts and decrypts private keys losslessly", () 
 
   const decrypted = decryptPrivateKey(encrypted);
   assert.equal(decrypted, keypair.privateKey, "Decrypted key must match original private key");
+
+  // Invalid tag length (e.g. truncated tag) must throw
+  const [ivHex, , dataHex] = encrypted.split(":");
+  const shortTag = "aabbcc";
+  assert.throws(
+    () => decryptPrivateKey(`${ivHex}:${shortTag}:${dataHex}`),
+    /Invalid authentication tag length/,
+    "Truncated tag must be rejected"
+  );
 });
 
 test("secp256k1 Signatures: Validates authentic signatures and rejects forged payloads", () => {

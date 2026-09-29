@@ -71,7 +71,7 @@ function getEncryptionKey(): Buffer {
 export function encryptPrivateKey(privateKeyHex: string): string {
   const key = getEncryptionKey();
   const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+  const cipher = crypto.createCipheriv("aes-256-gcm", key, iv, { authTagLength: 16 });
 
   let encrypted = cipher.update(privateKeyHex, "utf8", "hex");
   encrypted += cipher.final("hex");
@@ -90,9 +90,16 @@ export function decryptPrivateKey(encryptedPayload: string): string {
   }
 
   const [ivHex, tagHex, dataHex] = parts;
+  const authTag = Buffer.from(tagHex, "hex");
+  if (authTag.length !== 16) {
+    throw new Error("Invalid authentication tag length");
+  }
+
   const key = getEncryptionKey();
-  const decipher = crypto.createDecipheriv("aes-256-gcm", key, Buffer.from(ivHex, "hex"));
-  decipher.setAuthTag(Buffer.from(tagHex, "hex"));
+  const decipher = crypto.createDecipheriv("aes-256-gcm", key, Buffer.from(ivHex, "hex"), {
+    authTagLength: 16,
+  });
+  decipher.setAuthTag(authTag);
 
   let decrypted = decipher.update(dataHex, "hex", "utf8");
   decrypted += decipher.final("utf8");
