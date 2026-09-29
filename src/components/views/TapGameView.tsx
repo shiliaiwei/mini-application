@@ -11,6 +11,7 @@ import {
 } from "@/components/icons/KeylineIcons";
 import { BrandFooter } from "@/components/brand/BrandFooter";
 import { BanknoteCreditCards } from "@/components/cards/BanknoteCreditCards";
+import { BrandStatsQuadGrid } from "@/components/cards/BrandStatsQuadGrid";
 import { SecureTransferLedgerProduct } from "@/components/cards/SecureTransferLedgerProduct";
 import { NavCategory } from "@/components/navigation/CategoryBar";
 
@@ -19,6 +20,7 @@ type TapSubView = "none" | "send" | "scan";
 interface TapGameViewProps {
   score: number;
   spendSeconds?: number;
+  tapPower?: number;
   showBalances?: boolean;
   onToggleBalances?: () => void;
   onAddScore?: (amount: number) => void;
@@ -32,6 +34,8 @@ interface TapGameViewProps {
 
 export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
   score,
+  spendSeconds = 0,
+  tapPower = 1,
   onAddScore,
   onGoToSwap,
   onGoToEarn,
@@ -355,7 +359,15 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
           onOpenScan={() => setSubView("scan")}
         />
 
-        {/* 2. SECURE TRANSFER & DOUBLE-ENTRY LEDGER PRODUCT */}
+        {/* 2. STATS 4-BLOCK BRAND CARDS (WEI COIN, US DOLLAR, TAP POWER, PLAY TIME) */}
+        <BrandStatsQuadGrid
+          score={score}
+          spendSeconds={spendSeconds}
+          tapPower={tapPower}
+          showBalance={showBalances !== undefined ? showBalances : showLocalBalances}
+        />
+
+        {/* 3. SECURE TRANSFER & DOUBLE-ENTRY LEDGER PRODUCT */}
         <SecureTransferLedgerProduct
           score={score}
           user={user}

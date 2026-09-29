@@ -656,6 +656,7 @@ export default function MiniAppPage() {
               <TapGameView
                 score={score}
                 spendSeconds={spendSeconds}
+                tapPower={tapPower}
                 showBalances={showBalances}
                 onToggleBalances={() => setShowBalances(!showBalances)}
                 onAddScore={handleAddScore}

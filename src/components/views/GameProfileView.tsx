@@ -23,6 +23,7 @@ import {
 } from "@/components/icons/KeylineIcons";
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import { BrandFooter } from "@/components/brand/BrandFooter";
+import { BrandStatsQuadGrid } from "@/components/cards/BrandStatsQuadGrid";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
 import { UserSettingsView } from "./UserSettingsView";
 
@@ -859,44 +860,13 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
           </div>
         </div>
 
-        {/* 2. STATS 4-BLOCK GRID (RICH SKEUOMORPHIC HOMEPAGE CARDS) */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <div
-            className="relative rounded-2xl p-3 overflow-hidden bg-gradient-to-b from-[#0284c7] to-[#0369a1] text-white border border-sky-400/30 flex flex-col justify-between shadow-xs"
-          >
-            <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-200">WEI COIN</span>
-            <span className="text-base font-black text-white mt-0.5 truncate">{score.toLocaleString()}</span>
-            <span className="text-[9px] font-semibold text-sky-100 mt-0.5">Asset Balance</span>
-          </div>
-
-          <div
-            className="relative rounded-2xl p-3 overflow-hidden bg-gradient-to-b from-[#059669] to-[#047857] text-white border border-emerald-400/30 flex flex-col justify-between shadow-xs"
-          >
-            <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-200">US Dollar</span>
-            <span className="text-base font-black text-white mt-0.5 truncate">${usdValue}</span>
-            <span className="text-[9px] font-semibold text-emerald-100 mt-0.5">Estimated</span>
-          </div>
-
-          <div
-            className="relative rounded-2xl p-3 overflow-hidden bg-gradient-to-b from-[#d97706] to-[#b45309] text-white border border-amber-400/30 flex flex-col justify-between shadow-xs"
-          >
-            <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-200">Tap Power</span>
-            <span className="text-base font-black text-white mt-0.5 truncate">{tapPower}x</span>
-            <span className="text-[9px] font-semibold text-amber-100 mt-0.5">Multiplier</span>
-          </div>
-
-          <div
-            className="relative rounded-2xl p-3 overflow-hidden bg-gradient-to-b from-[#7c3aed] to-[#6d28d9] text-white border border-purple-400/30 flex flex-col justify-between shadow-xs"
-          >
-            <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-200">Play Time</span>
-            <span className="text-base font-black text-white mt-0.5 truncate">{fmtTime(spendSeconds)}</span>
-            <span className="text-[9px] font-semibold text-purple-100 mt-0.5">Engaged</span>
-          </div>
-        </div>
+        {/* 2. STATS 4-BLOCK BRAND CARDS (EXACT MATCH HOMEPAGE CARDS) */}
+        <BrandStatsQuadGrid
+          score={score}
+          spendSeconds={spendSeconds}
+          tapPower={tapPower}
+          showBalance={true}
+        />
 
         {/* 10. BRAND FOOTER (HOMEPAGE CONSISTENCY) */}
         <BrandFooter height={16} className="mt-3 pb-2" />
