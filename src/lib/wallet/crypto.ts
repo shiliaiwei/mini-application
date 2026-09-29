@@ -1,12 +1,14 @@
 import * as secp from "@noble/secp256k1";
+import { sha256 } from "@noble/hashes/sha2.js";
+import { hmac } from "@noble/hashes/hmac.js";
 import crypto from "crypto";
 
-// Configure hashes for @noble/secp256k1 v3
-secp.hashes.sha256 = (msg: Uint8Array) => crypto.createHash("sha256").update(msg).digest();
+// Configure @noble/secp256k1 v3 using audited @noble/hashes implementations
+secp.hashes.sha256 = (msg: Uint8Array) => sha256(msg);
 secp.hashes.hmacSha256 = (key: Uint8Array, ...msgs: Uint8Array[]) => {
-  const hmac = crypto.createHmac("sha256", key);
-  for (const m of msgs) hmac.update(m);
-  return hmac.digest();
+  const h = hmac.create(sha256, key);
+  for (const m of msgs) h.update(m);
+  return h.digest();
 };
 
 export interface KeypairResult {
@@ -23,12 +25,12 @@ export interface TransactionPayload {
 }
 
 /**
- * Derives a deterministic WC... address from a secp256k1 public key.
+ * Derives a deterministic WC... address from a secp256k1 public key using SHA-256.
  * Format: WC + 40 lowercase hexadecimal characters.
  */
 export function deriveAddress(publicKeyHex: string): string {
   const cleanPub = publicKeyHex.replace(/^0x/, "");
-  const hash = crypto.createHash("sha256").update(Buffer.from(cleanPub, "hex")).digest("hex");
+  const hash = Buffer.from(sha256(Buffer.from(cleanPub, "hex"))).toString("hex");
   return `WC${hash.slice(0, 40)}`;
 }
 
@@ -62,11 +64,12 @@ function getEncryptionKey(): Buffer {
     process.env.WALLET_MASTER_KEY ||
     process.env.TELEGRAM_BOT_TOKEN ||
     "SHILIAIWEI_SECURE_VAULT_KEY_2026";
-  return crypto.createHash("sha256").update(secret).digest();
+  return Buffer.from(sha256(Buffer.from(secret, "utf8")));
 }
 
 /**
  * Encrypts private key using AES-256-GCM before database storage.
+ * Enforces strict 16-byte authentication tag length.
  */
 export function encryptPrivateKey(privateKeyHex: string): string {
   const key = getEncryptionKey();
@@ -82,6 +85,7 @@ export function encryptPrivateKey(privateKeyHex: string): string {
 
 /**
  * Decrypts AES-256-GCM encrypted private key.
+ * Enforces strict 16-byte authentication tag validation.
  */
 export function decryptPrivateKey(encryptedPayload: string): string {
   const parts = encryptedPayload.split(":");
@@ -111,7 +115,21 @@ export function decryptPrivateKey(encryptedPayload: string): string {
  */
 export function createTransactionHash(payload: TransactionPayload): Buffer {
   const canonicalString = `${payload.fromAddress}:${payload.toAddress}:${payload.amount.toString()}:${payload.nonce}`;
-  return crypto.createHash("sha256").update(canonicalString, "utf8").digest();
+  return Buffer.from(sha256(Buffer.from(canonicalString, "utf8")));
+}
+
+/**
+ * Computes deterministic unique transaction hash for database storage.
+ */
+export function calculateTxHash(
+  fromAddress: string,
+  toAddress: string,
+  amount: number | bigint,
+  nonce: number,
+  signature: string
+): string {
+  const raw = `${fromAddress}:${toAddress}:${amount.toString()}:${nonce}:${signature}`;
+  return Buffer.from(sha256(Buffer.from(raw, "utf8"))).toString("hex");
 }
 
 /**

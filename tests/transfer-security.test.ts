@@ -121,4 +121,128 @@ test("Transfer API Route Exports: POST handler is defined", async () => {
 
   const resolveModule = await import("../src/app/api/wallet/resolve/route");
   assert.equal(typeof resolveModule.GET, "function", "GET resolve handler must exist");
+
+  const authModule = await import("../src/app/api/auth/telegram/route");
+  assert.equal(typeof authModule.POST, "function", "POST telegram auth handler must exist");
+
+  const exchangeModule = await import("../src/app/api/wallet/exchange/route");
+  assert.equal(typeof exchangeModule.POST, "function", "POST exchange handler must exist");
+
+  const rewardModule = await import("../src/app/api/wallet/reward/route");
+  assert.equal(typeof rewardModule.POST, "function", "POST reward handler must exist");
+
+  const streamModule = await import("../src/app/api/wallet/stream/route");
+  assert.equal(typeof streamModule.GET, "function", "GET stream handler must exist");
+});
+
+test("Zod Validation: TransferRequestSchema strictly enforces rules", async () => {
+  const { TransferRequestSchema } = await import("../src/lib/wallet/validation");
+
+  const validPayload = {
+    fromAddress: "WC0123456789abcdef0123456789abcdef01234567",
+    toAddress: "WCabcdef0123456789abcdef0123456789abcdef01",
+    amount: 150,
+    nonce: 0,
+    signature: "a".repeat(128),
+    initData: "auth=test",
+  };
+
+  // Valid passes
+  const validRes = TransferRequestSchema.safeParse(validPayload);
+  assert.equal(validRes.success, true);
+
+  // Self-transfer fails
+  const selfRes = TransferRequestSchema.safeParse({
+    ...validPayload,
+    toAddress: validPayload.fromAddress,
+  });
+  assert.equal(selfRes.success, false);
+
+  // Float amount fails
+  const floatRes = TransferRequestSchema.safeParse({
+    ...validPayload,
+    amount: 15.5,
+  });
+  assert.equal(floatRes.success, false);
+
+  // Negative amount fails
+  const negRes = TransferRequestSchema.safeParse({
+    ...validPayload,
+    amount: -10,
+  });
+  assert.equal(negRes.success, false);
+
+  // Zero amount fails
+  const zeroRes = TransferRequestSchema.safeParse({
+    ...validPayload,
+    amount: 0,
+  });
+  assert.equal(zeroRes.success, false);
+
+  // Invalid address fails
+  const badAddrRes = TransferRequestSchema.safeParse({
+    ...validPayload,
+    toAddress: "0x123",
+  });
+  assert.equal(badAddrRes.success, false);
+});
+
+test("Zod Validation: ExchangeRequestSchema strictly allows WEI_USD and WEI_KHR", async () => {
+  const { ExchangeRequestSchema } = await import("../src/lib/wallet/validation");
+
+  const validUSD = ExchangeRequestSchema.safeParse({
+    fromAddress: "WC0123456789abcdef0123456789abcdef01234567",
+    pair: "WEI_USD",
+    amount: 100,
+    initData: "test",
+  });
+  assert.equal(validUSD.success, true);
+
+  const validKHR = ExchangeRequestSchema.safeParse({
+    fromAddress: "WC0123456789abcdef0123456789abcdef01234567",
+    pair: "WEI_KHR",
+    amount: 500,
+    initData: "test",
+  });
+  assert.equal(validKHR.success, true);
+
+  const invalidPair = ExchangeRequestSchema.safeParse({
+    fromAddress: "WC0123456789abcdef0123456789abcdef01234567",
+    pair: "WEI_EUR",
+    amount: 100,
+    initData: "test",
+  });
+  assert.equal(invalidPair.success, false);
+});
+
+test("Security & Anti-Abuse: checkRateLimit blocks flood attacks", async () => {
+  const { checkRateLimit, resetRateLimits } = await import("../src/lib/wallet/security");
+  resetRateLimits();
+
+  const ip = "192.168.1.100";
+  // 5 allowed requests
+  for (let i = 0; i < 5; i++) {
+    const res = checkRateLimit(ip, 5, 1000);
+    assert.equal(res.allowed, true, `Request ${i + 1} should be allowed`);
+  }
+
+  // 6th request blocked
+  const blocked = checkRateLimit(ip, 5, 1000);
+  assert.equal(blocked.allowed, false, "Request exceeding limit must be blocked");
+  assert.ok(blocked.retryAfterMs > 0, "retryAfterMs must be returned");
+});
+
+test("Realtime Balance Events: Emits and receives balance updates", async () => {
+  const { balanceEvents } = await import("../src/lib/wallet/realtime");
+
+  let received = false;
+  const testAddress = "WCtest1234567890abcdef1234567890abcdef12";
+  balanceEvents.once(`balance:${testAddress}`, (data) => {
+    assert.equal(data.address, testAddress);
+    assert.equal(data.balance, 5000);
+    received = true;
+  });
+
+  balanceEvents.notifyBalanceUpdate(testAddress, 5000, "tx_123");
+  assert.equal(received, true, "Listener must receive realtime balance event");
 });

@@ -5,68 +5,73 @@ description: Comprehensive architecture standard for SHILIAIWEI secure transfer 
 
 # SHILIAIWEI SECURE TRANSFER API & DOUBLE-ENTRY LEDGER SPECIFICATION
 
-This specification defines the authoritative implementation standard for the SHILIAIWEI secure transfer API, secp256k1 cryptographic engine, double-entry ledger, and atomic Prisma transactions on PostgreSQL.
+This specification defines the authoritative implementation standard for the SHILIAIWEI secure transfer API, secp256k1 cryptographic engine (@noble/secp256k1 + @noble/hashes), double-entry ledger, Zod validation, and atomic Prisma transactions on PostgreSQL.
 
 ---
 
 ## 1. System Architecture Overview
 
-The transfer system operates across five core layers:
+The backend operates across six core layers:
 
 ```
-[ Telegram WebApp Client (TapGameView) ]
+[ Telegram WebApp Client (TapGameView / Wallet / QR Scanner) ]
                    │
                    ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 1. SESSION AUTHENTICATION & INPUT VALIDATION                │
+│ 1. SESSION AUTHENTICATION & ZOD VALIDATION                  │
 │ • Validates Telegram initData HMAC via bot token secret     │
-│ • Validates to_address format: /^WC[a-fA-F0-9]{40}$/        │
-│ • Resolves @username handles via game_players registry      │
-│ • Rejects amount <= 0, NaN, or non-integer WEI COIN values  │
+│ • Never trusts client-supplied balance or identities        │
+│ • Zod schemas: TransferRequestSchema, ExchangeRequestSchema │
+│ • Validates WC address format: /^WC[a-fA-F0-9]{40}$/        │
+│ • Rejects amount <= 0, float, NaN, or non-integer WEI COIN  │
+│ • Sliding-window rate limiter per client IP / address       │
 └─────────────────────────────────────────────────────────────┘
                    │
                    ▼
 ┌─────────────────────────────────────────────────────────────┐
 │ 2. CRYPTOGRAPHIC ENGINE & ANTI-REPLAY (crypto.ts)           │
-│ • Curve: secp256k1 (@noble/secp256k1 v3.2+)                 │
-│ • Address Derivation: WC + sha256(pubKey)[12..32].hex       │
+│ • Curve: secp256k1 (@noble/secp256k1 + @noble/hashes)       │
+│ • Address Derivation: WC + sha256(pubKey)[0..40].hex        │
 │ • Key Storage: AES-256-GCM encrypted private keys at rest   │
-│ • Canonical Message Hash: sha256(to_address:amount:nonce)   │
-│ • Anti-Replay: Sequential integer nonce per wallet          │
+│ • Strict 16-byte authTagLength verification                 │
+│ • Canonical Message Hash: sha256(from:to:amount:nonce)      │
+│ • Anti-Replay: Strictly sequential nonce in nonces table    │
 └─────────────────────────────────────────────────────────────┘
                    │
                    ▼
 ┌─────────────────────────────────────────────────────────────┐
 │ 3. DOUBLE-ENTRY LEDGER & ATOMIC PRISMA TRANSACTIONS         │
-│ • Balance Authority: SUM(amount) FROM ledger_entries        │
-│ • Zero trust for client-supplied balance values             │
+│ • Balance Authority: SUM(amount) FROM ledger_entries only   │
+│ • Append-only: DB trigger blocks all UPDATE & DELETE        │
 │ • Isolated prisma.$transaction execution:                   │
-│   a. Verify sender balance >= transfer amount               │
-│   b. Verify nonce matches current wallet.nonce              │
+│   a. Verify sender balance >= transfer amount inside tx     │
+│   b. Verify nonce matches current nonces.current_nonce      │
 │   c. Verify secp256k1 signature against sender public key   │
 │   d. Insert DEBIT ledger_entry (-amount) for sender         │
 │   e. Insert CREDIT ledger_entry (+amount) for recipient     │
-│   f. Increment sender wallet.nonce (+1)                     │
-│   g. Insert CONFIRMED transaction record in transactions    │
+│   f. Increment nonces.current_nonce (+1)                    │
+│   g. Insert CONFIRMED transaction record with tx_hash       │
 └─────────────────────────────────────────────────────────────┘
                    │
                    ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 4. REST API ROUTES (src/app/api/wallet/*)                   │
-│ • GET  /api/wallet/nonce   - Fetches current nonce & address│
-│ • POST /api/wallet/sign    - Delegated signing for auth user│
-│ • POST /api/wallet/transfer - Atomic execution endpoint     │
-│ • GET  /api/wallet/balance - Real-time ledger balance check │
-│ • GET  /api/wallet/resolve - Username to WC address mapping │
+│ 4. REST API & REALTIME STREAMING ROUTES                     │
+│ • POST /api/auth/telegram   - Server-side auth & wallet init│
+│ • GET  /api/wallet/nonce    - Expected nonce & public key   │
+│ • POST /api/wallet/transfer - Atomic QR/transfer execution  │
+│ • POST /api/wallet/exchange - Database-controlled exchange  │
+│ • POST /api/wallet/reward   - Server-validated game reward  │
+│ • GET  /api/wallet/balance  - Real-time ledger balance check│
+│ • GET  /api/wallet/stream   - SSE real-time balance push    │
 └─────────────────────────────────────────────────────────────┘
                    │
                    ▼
 ┌─────────────────────────────────────────────────────────────┐
 │ 5. BRAND COMPLIANCE & SAFETY PROTOCOLS                      │
 │ • Currency: Strictly WEI COIN (Zero PTS, points, TON, SAR)  │
+│ • Conversion Standard: 100 WEI COIN = $1.00 USD = 4,100 KHR │
 │ • Emojis: Strictly ZERO emojis across code, logs, and UI    │
-│ • Database Safety: Zero destructive prisma db push; use     │
-│   targeted DDL + prisma generate on shared databases        │
+│ • Database Safety: Append-only ledger; zero data mutation   │
 └─────────────────────────────────────────────────────────────┘
 ```
 

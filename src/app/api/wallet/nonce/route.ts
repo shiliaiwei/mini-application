@@ -1,13 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyTelegramWebAppData } from "@/lib/telegramCrypto";
-import { getOrCreateWallet } from "@/lib/wallet/ledger";
+import { getOrCreateWallet, getWalletByAddress } from "@/lib/wallet/ledger";
+import { isValidAddress } from "@/lib/wallet/crypto";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
+    const address = searchParams.get("address");
     const initData = searchParams.get("initData") || req.headers.get("x-telegram-init-data");
 
-    // Localhost test bypass
+    // 1. Direct address lookup for QR scan or withdrawal preparation
+    if (address && isValidAddress(address)) {
+      const wallet = await getWalletByAddress(address);
+      if (!wallet) {
+        return NextResponse.json(
+          { success: false, error: "Wallet not found" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        address: wallet.address,
+        nonce: wallet.nonce_record?.current_nonce ?? wallet.nonce,
+        publicKey: wallet.public_key,
+      });
+    }
+
+    // 2. Telegram session authentication lookup
     const host = req.headers.get("host") || "";
     const isLocal = host.includes("localhost") || host.includes("127.0.0.1");
 
@@ -40,10 +60,9 @@ export async function GET(req: NextRequest) {
       balance: wallet.balance,
       publicKey: wallet.public_key,
     });
-  } catch (error: unknown) {
-    console.error("Nonce fetch error:", error);
+  } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: error?.message || "Internal server error" },
       { status: 500 }
     );
   }

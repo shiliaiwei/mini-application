@@ -7,8 +7,24 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model User {
+  id            String   @id @default(cuid())
+  telegram_id   BigInt   @unique
+  username      String?
+  first_name    String?
+  last_name     String?
+  language_code String?
+  is_premium    Boolean  @default(false)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  wallet        Wallet?
+
+  @@map("telegram_users")
+}
+
 model Wallet {
   id                    String        @id @default(cuid())
+  user_id               String?       @unique
   telegram_id           BigInt        @unique
   address               String        @unique
   public_key            String
@@ -16,36 +32,61 @@ model Wallet {
   nonce                 Int           @default(0)
   created_at            DateTime      @default(now())
   updated_at            DateTime      @updatedAt
+  user                  User?         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  nonce_record          Nonce?
   ledger_entries        LedgerEntry[]
 
   @@map("wallets")
 }
 
+model Nonce {
+  id            String   @id @default(cuid())
+  wallet_id     String   @unique
+  current_nonce Int      @default(0)
+  updated_at    DateTime @updatedAt
+  wallet        Wallet   @relation(fields: [wallet_id], references: [id], onDelete: Cascade)
+
+  @@map("nonces")
+}
+
+model Transaction {
+  id              String        @id @default(cuid())
+  tx_hash         String        @unique
+  from            String        @map("from_address")
+  to              String        @map("to_address")
+  amount          BigInt
+  nonce           Int
+  signature       String
+  status          String        @default("CONFIRMED")
+  tx_type         String        @default("TRANSFER")
+  rate            Float?
+  target_currency String?
+  metadata        Json?
+  created_at      DateTime      @default(now())
+  ledger_entries  LedgerEntry[]
+
+  @@map("transactions")
+}
+
 model LedgerEntry {
-  id             String             @id @default(cuid())
+  id             String       @id @default(cuid())
   wallet_id      String
   amount         BigInt
   entry_type     String
   transaction_id String?
-  created_at     DateTime           @default(now())
-  wallet         Wallet             @relation(fields: [wallet_id], references: [id], onDelete: Cascade)
-  transaction    WalletTransaction? @relation(fields: [transaction_id], references: [id])
+  created_at     DateTime     @default(now())
+  wallet         Wallet       @relation(fields: [wallet_id], references: [id], onDelete: Cascade)
+  transaction    Transaction? @relation(fields: [transaction_id], references: [id])
 
   @@index([wallet_id])
   @@map("ledger_entries")
 }
 
-model WalletTransaction {
-  id             String        @id @default(cuid())
-  from_address   String
-  to_address     String
-  amount         BigInt
-  nonce          Int
-  signature      String
-  status         String        @default("CONFIRMED")
-  tx_type        String        @default("TRANSFER")
-  created_at     DateTime      @default(now())
-  ledger_entries LedgerEntry[]
+model ExchangeRate {
+  id         String   @id @default(cuid())
+  pair       String   @unique
+  rate       Float
+  updated_at DateTime @updatedAt
 
-  @@map("transactions")
+  @@map("exchange_rates")
 }
