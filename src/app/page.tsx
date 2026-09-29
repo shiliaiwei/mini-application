@@ -676,7 +676,14 @@ export default function MiniAppPage() {
             )}
 
             {activeTab === "earn" && (
-              <EarnTasksView />
+              <EarnTasksView
+                score={score}
+                user={user}
+                tgApp={tgApp}
+                onAddScore={handleAddScore}
+                tapPower={tapPower}
+                passiveRate={passiveRate}
+              />
             )}
 
             {activeTab === "leaderboard" && (
