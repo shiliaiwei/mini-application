@@ -64,6 +64,7 @@ interface GameProfileViewProps {
   initialSubTab?: ProfileSubTab;
   onSetScore?: (newScore: number) => void;
   onBack?: () => void;
+  onLogout?: () => void;
 }
 
 /* ──────────────────────────────────────────────────────────── */
@@ -302,6 +303,7 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
   tapPower = 1,
   initialSubTab,
   onBack,
+  onLogout,
 }) => {
   const [view, setView] = useState<InnerView>(() => {
     if (initialSubTab === "settings") return "settings";
@@ -856,6 +858,20 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
               >
                 Edit Bio
               </button>
+              {onLogout && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    try {
+                      tgApp?.HapticFeedback?.notificationOccurred("warning");
+                    } catch {}
+                    onLogout();
+                  }}
+                  className="px-3 py-1 rounded-full bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/30 text-rose-200 text-[10px] font-bold cursor-pointer transition-all active:scale-95"
+                >
+                  Log Out
+                </button>
+              )}
             </div>
           </div>
         </div>

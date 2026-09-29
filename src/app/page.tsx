@@ -15,6 +15,7 @@ import {
   DollarSign,
   ChevronLeft,
 } from "@/components/icons/KeylineIcons";
+import { AccountAuthView } from "@/components/auth/AccountAuthView";
 
 // Lazy load non-landing tab views to reduce initial bundle and speed up load to <1s
 const EarnTasksView = dynamic(
@@ -580,6 +581,24 @@ export default function MiniAppPage() {
     return <main className="min-h-screen bg-white" />;
   }
 
+  // Account / Login Gate: User must have an account or log in first to access the UI
+  if (!user) {
+    return (
+      <AccountAuthView
+        onLogin={(authenticatedUser) => {
+          setUser(authenticatedUser);
+          setIsTelegramVerified(true);
+          isVerifiedRef.current = true;
+          try {
+            localStorage.setItem("shi_tg_user_cache", JSON.stringify(authenticatedUser));
+          } catch {}
+          syncWithDatabase(scoreRef.current, spendRef.current, true);
+        }}
+        tgApp={tgApp}
+      />
+    );
+  }
+
 
 
   return (
@@ -732,6 +751,14 @@ export default function MiniAppPage() {
                 initialSubTab={profileSubTab}
                 onSetScore={(newScore) => setScore(newScore)}
                 onBack={() => handleTabChange("wallet")}
+                onLogout={() => {
+                  setUser(null);
+                  setIsTelegramVerified(false);
+                  isVerifiedRef.current = false;
+                  try {
+                    localStorage.removeItem("shi_tg_user_cache");
+                  } catch {}
+                }}
               />
             )}
           </>
