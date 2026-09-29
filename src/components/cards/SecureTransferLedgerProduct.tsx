@@ -10,9 +10,7 @@ import {
   ShieldCheck,
   RefreshCw,
   Coins,
-  QrCode,
   CircleCheck,
-  Sparkles,
 } from "@/components/icons/KeylineIcons";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
 
@@ -55,7 +53,7 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
   const [copiedHash, setCopiedHash] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<"ALL" | "DEBIT" | "CREDIT">("ALL");
 
-  // Sample DEMO recipients for 1-tap testing
+  // Sample quick recipients
   const QUICK_RECIPIENTS = [
     { label: "Treasury Vault", address: "WC8888000011112222333344445555666677778888" },
     { label: "Liquidity Pool", address: "WCaabbccddeeff00112233445566778899aabbccdd" },
@@ -255,39 +253,90 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
   });
 
   return (
-    <div className="w-full space-y-4 select-none my-3">
-      {/* 1. MAIN INTERACTIVE SECURE TRANSFER CARD */}
-      <div className="relative w-full rounded-[26px] p-5 sm:p-6 overflow-hidden bg-white border border-slate-200/90 shadow-[0_12px_32px_-8px_rgba(15,23,42,0.08)]">
-        {/* Top Header & Security Badges */}
-        <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-slate-100">
+    <div className="w-full space-y-4 select-none my-2 font-sans">
+      {/* ============================================================== */}
+      {/* 1. SKEUOMORPHIC PURPLE LEATHER SECURE TRANSFER CARD             */}
+      {/* ============================================================== */}
+      <div
+        className="relative w-full rounded-[26px] p-5 sm:p-6 overflow-hidden bg-gradient-to-b from-[#6420a7] via-[#4e1688] to-[#340b5c] text-white"
+        style={{
+          boxShadow:
+            "0 20px 42px -10px rgba(45, 10, 80, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.35), inset 0 -3px 8px rgba(0, 0, 0, 0.5)",
+        }}
+      >
+        {/* Guilloche Banknote Security Background */}
+        <div
+          className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-25"
+          style={{
+            backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center center",
+            backgroundSize: "cover",
+            filter: "contrast(1.35) brightness(1.1)",
+          }}
+        />
+
+        {/* Simulated Thread Perimeter Stitching */}
+        <svg
+          className="absolute inset-0 w-full h-full pointer-events-none z-10"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            x="6"
+            y="6"
+            width="calc(100% - 12px)"
+            height="calc(100% - 12px)"
+            rx="20"
+            ry="20"
+            fill="none"
+            stroke="#e9d5ff"
+            strokeWidth="1.2"
+            strokeDasharray="4 4"
+            strokeLinecap="round"
+            opacity="0.45"
+            style={{ filter: "drop-shadow(0px 1px 1px rgba(0,0,0,0.6))" }}
+          />
+        </svg>
+
+        {/* Top Specular Rim */}
+        <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none" />
+
+        {/* Header: Title and Nonce Security Shield */}
+        <div className="relative z-10 flex items-center justify-between pb-3.5 mb-3.5 border-b border-white/15">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0098ea] to-[#0077c2] flex items-center justify-center text-white shadow-sm">
-              <Send size={20} className="text-white" />
+            <div
+              className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0098ea] via-[#0088cc] to-[#005f99] border border-cyan-300/40 flex items-center justify-center text-white"
+              style={{
+                boxShadow:
+                  "0 4px 12px rgba(0, 152, 234, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.5)",
+              }}
+            >
+              <Send size={19} className="text-white" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900 leading-tight">
+              <h3 className="text-base font-bold text-white leading-tight drop-shadow-sm">
                 Secure Transfer (ផ្ទេរប្រាក់សុវត្ថិភាព)
               </h3>
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-xs text-purple-200/80 font-medium">
                 secp256k1 Cryptographic Signatures • Double-Entry Ledger
               </p>
             </div>
           </div>
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold">
-            <ShieldCheck size={14} className="text-emerald-600" />
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/35 text-emerald-200 text-[11px] font-bold shadow-xs">
+            <ShieldCheck size={14} className="text-emerald-300" />
             <span>Nonce #{currentNonce} Protected</span>
           </div>
         </div>
 
-        {/* Sender Vault Address Banner */}
-        <div className="mb-4 p-3 rounded-2xl bg-slate-50/90 border border-slate-200/70 flex items-center justify-between gap-2">
+        {/* Sender Vault Address Leather Inset */}
+        <div className="relative z-10 mb-4 p-3 rounded-2xl bg-black/25 border border-purple-300/20 flex items-center justify-between gap-2 backdrop-blur-xs">
           <div className="flex items-center gap-2 min-w-0">
-            <Coins size={16} className="text-[#0098ea] shrink-0" />
+            <Coins size={16} className="text-cyan-300 shrink-0" />
             <div className="min-w-0">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+              <div className="text-[10px] uppercase font-bold text-purple-200/70 tracking-wider">
                 My Vault Address (Sender)
               </div>
-              <div className="text-xs font-mono font-bold text-slate-800 truncate">
+              <div className="text-xs font-mono font-bold text-white truncate">
                 {myAddress || "Loading address..."}
               </div>
             </div>
@@ -295,16 +344,16 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
           <button
             type="button"
             onClick={handleCopyMyAddress}
-            className="shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 active:scale-95 transition-all text-xs font-bold cursor-pointer"
+            className="shrink-0 flex items-center gap-1 px-3 py-1 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white active:scale-95 transition-all text-xs font-bold cursor-pointer shadow-xs"
           >
             {copiedAddress ? (
               <>
-                <Check size={13} className="text-emerald-600" />
-                <span className="text-emerald-700">Copied</span>
+                <Check size={13} className="text-emerald-300" />
+                <span className="text-emerald-300">Copied</span>
               </>
             ) : (
               <>
-                <Copy size={13} className="text-slate-500" />
+                <Copy size={13} className="text-purple-200" />
                 <span>Copy</span>
               </>
             )}
@@ -312,15 +361,15 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
         </div>
 
         {/* Form Container */}
-        <form onSubmit={handleExecuteTransfer} className="space-y-3.5">
+        <form onSubmit={handleExecuteTransfer} className="relative z-10 space-y-3.5">
           {/* Recipient Input */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+              <label className="text-xs font-bold text-purple-100 uppercase tracking-wide">
                 Recipient Address (អាសយដ្ឋានទទួល)
               </label>
               {recipient.trim() && (
-                <span className={`text-[11px] font-bold ${isValidRecipient ? "text-emerald-600" : "text-amber-600"}`}>
+                <span className={`text-[11px] font-bold ${isValidRecipient ? "text-emerald-300" : "text-amber-300"}`}>
                   {isValidRecipient ? "Valid WC Standard" : "Invalid Format"}
                 </span>
               )}
@@ -331,19 +380,19 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
                 placeholder="WC..."
-                className="w-full h-11 px-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0098ea]/20 focus:border-[#0098ea] transition-all"
+                className="w-full h-11 px-3.5 rounded-xl bg-black/30 border border-purple-300/30 text-white placeholder-purple-300/40 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-purple-400/40 focus:border-purple-300 transition-all"
                 disabled={isProcessing}
               />
             </div>
             {/* Quick Demo Recipient Buttons */}
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              <span className="text-[10px] text-slate-400 font-bold uppercase">Quick Fill:</span>
+              <span className="text-[10px] text-purple-200/70 font-bold uppercase">Quick Fill:</span>
               {QUICK_RECIPIENTS.map((rec) => (
                 <button
                   key={rec.label}
                   type="button"
                   onClick={() => setRecipient(rec.address)}
-                  className="px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200/80 text-[11px] font-medium text-slate-700 active:scale-95 transition-all cursor-pointer"
+                  className="px-2.5 py-0.5 rounded-lg bg-white/15 hover:bg-white/25 border border-white/20 text-[11px] font-medium text-purple-100 active:scale-95 transition-all cursor-pointer"
                 >
                   {rec.label}
                 </button>
@@ -354,11 +403,11 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
           {/* Amount Input */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+              <label className="text-xs font-bold text-purple-100 uppercase tracking-wide">
                 Transfer Amount (ចំនួនទឹកប្រាក់)
               </label>
-              <span className="text-[11px] font-bold text-slate-500">
-                Available: <strong className="text-slate-900 font-mono">{score}</strong> WEI COIN
+              <span className="text-[11px] font-bold text-purple-200/80">
+                Available: <strong className="text-white font-mono">{score}</strong> WEI COIN
               </span>
             </div>
             <div className="relative">
@@ -369,23 +418,23 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Enter amount in WEI COIN"
-                className="w-full h-11 px-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0098ea]/20 focus:border-[#0098ea] transition-all"
+                className="w-full h-11 px-3.5 rounded-xl bg-black/30 border border-purple-300/30 text-white placeholder-purple-300/40 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-purple-400/40 focus:border-purple-300 transition-all"
                 disabled={isProcessing}
               />
-              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-black text-[#0098ea]">
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-black text-cyan-300">
                 WEI COIN
               </span>
             </div>
 
             {/* Quick Amount Chips & Conversion */}
             <div className="flex items-center justify-between pt-1">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 {[100, 500, 1000].map((val) => (
                   <button
                     key={val}
                     type="button"
                     onClick={() => setAmount(String(val))}
-                    className="px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-bold text-slate-700 active:scale-95 transition-all cursor-pointer"
+                    className="px-2.5 py-0.5 rounded-lg bg-white/15 hover:bg-white/25 border border-white/20 text-[11px] font-bold text-white active:scale-95 transition-all cursor-pointer"
                   >
                     +{val}
                   </button>
@@ -393,12 +442,12 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
                 <button
                   type="button"
                   onClick={() => setAmount(String(score))}
-                  className="px-2 py-0.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-[11px] font-bold text-purple-700 active:scale-95 transition-all cursor-pointer"
+                  className="px-2.5 py-0.5 rounded-lg bg-purple-400/30 hover:bg-purple-400/40 border border-purple-300/40 text-[11px] font-bold text-purple-100 active:scale-95 transition-all cursor-pointer"
                 >
                   Max
                 </button>
               </div>
-              <div className="text-[11px] text-slate-500 font-medium">
+              <div className="text-[11px] text-purple-200/80 font-medium">
                 ≈ ${usdValue} USD • {khrValue} KHR
               </div>
             </div>
@@ -406,13 +455,13 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
 
           {/* Feedback Alerts */}
           {transferError && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-800 animate-fadeIn">
+            <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-400/40 text-xs font-semibold text-rose-200 animate-fadeIn">
               {transferError}
             </div>
           )}
           {transferSuccess && (
-            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 flex items-center gap-2 animate-fadeIn">
-              <CircleCheck size={16} className="text-emerald-600 shrink-0" />
+            <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-xs font-semibold text-emerald-200 flex items-center gap-2 animate-fadeIn">
+              <CircleCheck size={16} className="text-emerald-300 shrink-0" />
               <span>{transferSuccess}</span>
             </div>
           )}
@@ -423,8 +472,8 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
             disabled={isProcessing || !isValidAmount || !isValidRecipient}
             className={`w-full h-12 rounded-2xl flex items-center justify-center gap-2 font-bold text-sm shadow-md transition-all cursor-pointer ${
               isProcessing || !isValidAmount || !isValidRecipient
-                ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
-                : "bg-gradient-to-r from-[#0098ea] via-[#0087d1] to-[#0070ad] text-white hover:brightness-105 active:scale-[0.99] shadow-[#0098ea]/20"
+                ? "bg-white/10 border border-white/15 text-white/40 cursor-not-allowed shadow-none"
+                : "bg-gradient-to-r from-[#0098ea] via-[#0088cc] to-[#0066aa] text-white hover:brightness-110 active:scale-[0.99] border border-cyan-300/40 shadow-[0_8px_20px_-3px_rgba(0,152,234,0.5)]"
             }`}
           >
             {isProcessing ? (
@@ -442,16 +491,62 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
         </form>
       </div>
 
-      {/* 2. REALTIME DOUBLE-ENTRY LEDGER TRANSACTIONS CARD */}
-      <div className="relative w-full rounded-[26px] p-5 sm:p-6 overflow-hidden bg-white border border-slate-200/90 shadow-[0_12px_32px_-8px_rgba(15,23,42,0.08)]">
-        <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-slate-100">
+      {/* ============================================================== */}
+      {/* 2. SKEUOMORPHIC PURPLE LEATHER DOUBLE-ENTRY LEDGER CARD        */}
+      {/* ============================================================== */}
+      <div
+        className="relative w-full rounded-[26px] p-5 sm:p-6 overflow-hidden bg-gradient-to-b from-[#6420a7] via-[#4e1688] to-[#340b5c] text-white"
+        style={{
+          boxShadow:
+            "0 20px 42px -10px rgba(45, 10, 80, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.35), inset 0 -3px 8px rgba(0, 0, 0, 0.5)",
+        }}
+      >
+        {/* Guilloche Banknote Security Background */}
+        <div
+          className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-25"
+          style={{
+            backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center center",
+            backgroundSize: "cover",
+            filter: "contrast(1.35) brightness(1.1)",
+          }}
+        />
+
+        {/* Simulated Thread Perimeter Stitching */}
+        <svg
+          className="absolute inset-0 w-full h-full pointer-events-none z-10"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            x="6"
+            y="6"
+            width="calc(100% - 12px)"
+            height="calc(100% - 12px)"
+            rx="20"
+            ry="20"
+            fill="none"
+            stroke="#e9d5ff"
+            strokeWidth="1.2"
+            strokeDasharray="4 4"
+            strokeLinecap="round"
+            opacity="0.45"
+            style={{ filter: "drop-shadow(0px 1px 1px rgba(0,0,0,0.6))" }}
+          />
+        </svg>
+
+        {/* Top Specular Rim */}
+        <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none" />
+
+        {/* Header & Filter Tabs */}
+        <div className="relative z-10 flex items-center justify-between pb-3.5 mb-3.5 border-b border-white/15">
           <div className="flex items-center gap-2">
-            <Coins size={18} className="text-slate-700" />
-            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
+            <Coins size={18} className="text-cyan-300" />
+            <h3 className="text-sm font-bold text-white uppercase tracking-wide drop-shadow-sm">
               Double-Entry Ledger (កំណត់ត្រាប្រតិបត្តិការ)
             </h3>
           </div>
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+          <div className="flex items-center gap-1 bg-black/30 p-1 rounded-xl border border-purple-300/20">
             {(["ALL", "DEBIT", "CREDIT"] as const).map((mode) => (
               <button
                 key={mode}
@@ -459,8 +554,8 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
                 onClick={() => setFilterType(mode)}
                 className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                   filterType === mode
-                    ? "bg-white text-slate-900 shadow-2xs"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-white text-purple-950 shadow-xs"
+                    : "text-purple-200/80 hover:text-white"
                 }`}
               >
                 {mode === "ALL" ? "All" : mode === "DEBIT" ? "Debits" : "Credits"}
@@ -470,23 +565,23 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
         </div>
 
         {/* Ledger Entries List */}
-        <div className="space-y-2.5">
+        <div className="relative z-10 space-y-2.5">
           {filteredHistory.length === 0 ? (
-            <div className="text-center py-6 text-xs text-slate-400 font-medium">
+            <div className="text-center py-6 text-xs text-purple-200/70 font-medium">
               No ledger transactions recorded in this view.
             </div>
           ) : (
             filteredHistory.map((item) => (
               <div
                 key={item.id}
-                className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/60 hover:bg-slate-50 transition-all flex items-center justify-between gap-3"
+                className="p-3.5 rounded-2xl bg-black/25 border border-purple-300/20 hover:bg-black/35 transition-all flex items-center justify-between gap-3 backdrop-blur-xs"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
                       item.type === "DEBIT"
-                        ? "bg-rose-100 text-rose-700"
-                        : "bg-emerald-100 text-emerald-700"
+                        ? "bg-rose-500/20 border-rose-400/30 text-rose-300"
+                        : "bg-emerald-500/20 border-emerald-400/30 text-emerald-300"
                     }`}
                   >
                     {item.type === "DEBIT" ? (
@@ -497,14 +592,14 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-900">
+                      <span className="text-xs font-bold text-white">
                         {item.entryType}
                       </span>
-                      <span className="text-[10px] font-mono text-slate-400">
+                      <span className="text-[10px] font-mono text-purple-200/70">
                         Nonce #{item.nonce}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-mono truncate">
+                    <div className="flex items-center gap-1.5 text-[11px] text-purple-200/70 font-mono truncate">
                       <span>Counterparty:</span>
                       <span className="truncate">{item.counterparty.slice(0, 10)}...{item.counterparty.slice(-6)}</span>
                     </div>
@@ -514,7 +609,7 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
                 <div className="text-right shrink-0">
                   <div
                     className={`text-sm font-black font-mono ${
-                      item.type === "DEBIT" ? "text-rose-600" : "text-emerald-600"
+                      item.type === "DEBIT" ? "text-rose-400" : "text-emerald-400"
                     }`}
                   >
                     {item.type === "DEBIT" ? "-" : "+"}
@@ -523,11 +618,11 @@ export const SecureTransferLedgerProduct: React.FC<SecureTransferLedgerProductPr
                   <button
                     type="button"
                     onClick={() => handleCopyHash(item.txHash)}
-                    className="text-[10px] text-slate-400 hover:text-slate-700 font-mono transition-colors cursor-pointer"
+                    className="text-[10px] text-purple-200/70 hover:text-white font-mono transition-colors cursor-pointer"
                     title="Copy full transaction hash"
                   >
                     {copiedHash === item.txHash ? (
-                      <span className="text-emerald-600 font-bold">Copied TX</span>
+                      <span className="text-emerald-300 font-bold">Copied TX</span>
                     ) : (
                       <span>TX: {item.txHash.slice(0, 8)}...</span>
                     )}
