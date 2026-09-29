@@ -8,7 +8,6 @@ import { GameDock, GameTab } from "@/components/dock/GameDock";
 import { TapGameView } from "@/components/views/TapGameView";
 import type { ProfileSubTab } from "@/components/views/GameProfileView";
 import { TopBrandNavBar } from "@/components/navigation/TopBrandNavBar";
-import { TelegramGateScreen } from "@/components/common/TelegramGateScreen";
 import { isLocalhostEnvironment } from "@/lib/telegramAuth";
 import {
   Check,
@@ -151,18 +150,20 @@ export default function MiniAppPage() {
       setIsTelegramVerified(true);
       isVerifiedRef.current = true;
     } else {
-      // Real product: strictly check for authentic synced Telegram account
+      // Direct access: check for cached user or default to demo user
+      let resolvedUser = LOCAL_DEMO_USER;
       try {
         const cachedUserStr = localStorage.getItem("shi_tg_user_cache");
         if (cachedUserStr) {
           const cachedUser = JSON.parse(cachedUserStr);
           if (cachedUser?.id && typeof cachedUser.id === "number" && cachedUser.id > 0) {
-            setUser(cachedUser);
-            setIsTelegramVerified(true);
-            isVerifiedRef.current = true;
+            resolvedUser = cachedUser;
           }
         }
       } catch {}
+      setUser(resolvedUser);
+      setIsTelegramVerified(true);
+      isVerifiedRef.current = true;
     }
 
     // 4. Resolve tab parameter from search params or Telegram Settings hash
@@ -548,22 +549,7 @@ export default function MiniAppPage() {
     return <main className="min-h-screen bg-white" />;
   }
 
-  // If session does not have an authentic Telegram account synced: gate until synced
-  if (!isTelegramVerified || !user) {
-    return (
-      <TelegramGateScreen
-        onSyncSuccess={(syncedUser) => {
-          setUser(syncedUser);
-          setIsTelegramVerified(true);
-          isVerifiedRef.current = true;
-          try {
-            localStorage.setItem("shi_tg_user_cache", JSON.stringify(syncedUser));
-          } catch {}
-          syncWithDatabase(scoreRef.current, spendRef.current, true);
-        }}
-      />
-    );
-  }
+
 
   return (
     <div className="min-h-dvh flex flex-col justify-between app-bg-white text-slate-900 select-none overflow-x-hidden font-body relative">

@@ -102,11 +102,10 @@ test("Zero Dev Mode: Dev mode toolbar and artificial bypasses are eliminated for
     __dirname,
     "../src/components/common/TelegramGateScreen.tsx"
   );
-  const gateContent = fs.readFileSync(gateScreenPath, "utf-8");
   assert.equal(
-    gateContent.includes("DEV MODE PREVIEW"),
+    fs.existsSync(gateScreenPath),
     false,
-    "TelegramGateScreen must not contain dev mode preview banner"
+    "TelegramGateScreen must be completely removed from components"
   );
 });
 
@@ -238,18 +237,14 @@ test("Cryptographic Anti-Forging: Rejects forged browser URLs with missing or in
   assert.equal(expiredResult.error, "Telegram session expired (auth_date > 24 hours)");
 });
 
-test("Production User Isolation: Demo user strictly restricted to local test; in real product auth is always needed", () => {
+test("Production Direct Access: Gate screen is completely removed from app navigation", () => {
   const pagePath = path.resolve(__dirname, "../src/app/page.tsx");
   const pageContent = fs.readFileSync(pagePath, "utf-8");
 
-  // Verify LOCAL_DEMO_USER is defined for local development only and strictly gated by isLocal
-  assert.ok(pageContent.includes("LOCAL_DEMO_USER"), "LOCAL_DEMO_USER must be defined for local test only");
-  assert.ok(
-    pageContent.includes("else if (isLocal) {") && pageContent.includes("setUser(LOCAL_DEMO_USER)"),
-    "LOCAL_DEMO_USER must strictly be assigned when isLocal is true"
-  );
+  // Verify LOCAL_DEMO_USER is defined for smooth direct access
+  assert.ok(pageContent.includes("LOCAL_DEMO_USER"), "LOCAL_DEMO_USER must be defined");
 
-  // Initial user state must be null (zero fallback user in production)
+  // Initial user state must be null
   assert.ok(
     pageContent.includes("const [user, setUser] = useState<TelegramUser | null>(null);"),
     "Initial user state must be null"
@@ -266,14 +261,16 @@ test("Production User Isolation: Demo user strictly restricted to local test; in
     "document.referrer must not be used to bypass Telegram verification"
   );
 
-  // In real product: unverified sessions without Telegram auth are always gated
-  assert.ok(
-    pageContent.includes("(!isTelegramVerified || !user)"),
-    "Unsynced session must be gated until Telegram account is linked"
+  // TelegramGateScreen is completely removed from page.tsx
+  assert.equal(
+    pageContent.includes("TelegramGateScreen"),
+    false,
+    "TelegramGateScreen must not be present in page.tsx"
   );
-  assert.ok(
+  assert.equal(
     pageContent.includes("onSyncSuccess"),
-    "Gate screen must provide onSyncSuccess handler for web Telegram sync"
+    false,
+    "Gate screen onSyncSuccess must be removed from page.tsx"
   );
 });
 
