@@ -150,7 +150,7 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
       const signature = signData.signature;
 
       // 4. Submit verified transfer to server
-      const transferRes = await fetch("/api/wallet/transfer", {
+      const transferRes = await fetch("/api/transfer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
