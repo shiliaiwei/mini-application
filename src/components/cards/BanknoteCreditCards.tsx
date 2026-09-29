@@ -4,9 +4,6 @@ import {
   ScanLine,
   ArrowDownLeft,
   ArrowUpRight,
-  Check,
-  Copy,
-  X,
 } from "@/components/icons/KeylineIcons";
 
 interface BanknoteCreditCardsProps {
@@ -50,8 +47,6 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
   const [currency, setCurrency] = useState<CurrencyMode>("USD");
   const [switchDirection, setSwitchDirection] = useState<"left" | "right">("right");
   const [isHangingSwitch, setIsHangingSwitch] = useState(false);
-  const [showReceiveModal, setShowReceiveModal] = useState(false);
-  const [copiedReceiveAddress, setCopiedReceiveAddress] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -61,10 +56,10 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
       }
       const params = new URLSearchParams(window.location.search);
       if (params.get("receive") === "true") {
-        setShowReceiveModal(true);
+        onOpenReceive?.();
       }
     }
-  }, []);
+  }, [onOpenReceive]);
 
   const telegramUsername = user?.username
     ? `@${user.username}`
@@ -118,26 +113,12 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
       if (onOpenScan) onOpenScan();
       else if (onOpenDeposit) onOpenDeposit();
     } else if (action === "receive") {
-      if (onOpenReceive) {
-        onOpenReceive();
-      } else {
-        setShowReceiveModal(true);
-      }
+      if (onOpenReceive) onOpenReceive();
+      else if (onOpenDeposit) onOpenDeposit();
     } else if (action === "withdraw") {
       if (onOpenSend) onOpenSend();
       else if (onOpenDeposit) onOpenDeposit();
     }
-  };
-
-  const handleCopyReceiveAddress = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      if (typeof navigator !== "undefined" && navigator.clipboard) {
-        navigator.clipboard.writeText(walletAddress);
-      }
-      setCopiedReceiveAddress(true);
-      setTimeout(() => setCopiedReceiveAddress(false), 2000);
-    } catch {}
   };
 
   const handleToggleClick = (e?: React.MouseEvent) => {
@@ -416,155 +397,6 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
           </div>
         </div>
       </div>
-
-      {/* SKEUOMORPHIC RECEIVE QR & ADDRESS MODAL */}
-      {showReceiveModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md animate-fadeIn"
-          onClick={() => setShowReceiveModal(false)}
-        >
-          <div
-            className="relative w-full max-w-sm rounded-[32px] overflow-hidden bg-gradient-to-b from-[#064e3b] via-[#043328] to-[#021f18] text-white p-5 sm:p-6 border border-emerald-400/35 shadow-[0_24px_60px_-12px_rgba(4,120,87,0.6)]"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              boxShadow:
-                "0 24px 60px -12px rgba(4, 120, 87, 0.6), inset 0 2px 3px rgba(255, 255, 255, 0.35), inset 0 -3px 6px rgba(0, 0, 0, 0.5)",
-            }}
-          >
-            {/* Guilloche Overlay */}
-            <div
-              className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-25"
-              style={{
-                backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
-                backgroundPosition: "center center",
-                backgroundSize: "cover",
-                filter: "contrast(1.3) brightness(1.1)",
-              }}
-            />
-            {/* Specular Rim */}
-            <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-emerald-300/60 to-transparent pointer-events-none" />
-
-            {/* Header */}
-            <div className="relative z-10 flex items-center justify-between pb-3 border-b border-white/15">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-400/30 text-emerald-200">
-                  Receive Tokens
-                </span>
-                <h3 className="text-base font-bold text-white drop-shadow-sm mt-1">
-                  SHILIAIWEI Vault Deposit
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowReceiveModal(false)}
-                className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 flex items-center justify-center text-white cursor-pointer active:scale-95 transition-all"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            {/* QR Code Container */}
-            <div className="relative z-10 my-4 p-4 rounded-2xl bg-white flex flex-col items-center justify-center shadow-inner mx-auto w-48 h-48 sm:w-52 sm:h-52">
-              <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
-                {/* Corner 1 */}
-                <rect x="5" y="5" width="26" height="26" rx="4" fill="#0f172a" />
-                <rect x="9" y="9" width="18" height="18" rx="2" fill="#ffffff" />
-                <rect x="13" y="13" width="10" height="10" rx="1" fill="#0098ea" />
-                {/* Corner 2 */}
-                <rect x="69" y="5" width="26" height="26" rx="4" fill="#0f172a" />
-                <rect x="73" y="9" width="18" height="18" rx="2" fill="#ffffff" />
-                <rect x="77" y="13" width="10" height="10" rx="1" fill="#0098ea" />
-                {/* Corner 3 */}
-                <rect x="5" y="69" width="26" height="26" rx="4" fill="#0f172a" />
-                <rect x="9" y="73" width="18" height="18" rx="2" fill="#ffffff" />
-                <rect x="13" y="77" width="10" height="10" rx="1" fill="#0098ea" />
-                {/* QR Data Pattern Dots */}
-                <rect x="36" y="8" width="5" height="5" rx="1" fill="#0f172a" />
-                <rect x="46" y="8" width="5" height="5" rx="1" fill="#0f172a" />
-                <rect x="56" y="8" width="5" height="5" rx="1" fill="#0f172a" />
-                <rect x="36" y="18" width="5" height="5" rx="1" fill="#0f172a" />
-                <rect x="46" y="24" width="8" height="5" rx="1" fill="#0f172a" />
-                <rect x="58" y="18" width="5" height="8" rx="1" fill="#0f172a" />
-                <rect x="8" y="36" width="5" height="5" rx="1" fill="#0f172a" />
-                <rect x="18" y="36" width="5" height="8" rx="1" fill="#0f172a" />
-                <rect x="28" y="36" width="5" height="5" rx="1" fill="#0f172a" />
-                <rect x="38" y="36" width="8" height="5" rx="1" fill="#0f172a" />
-                <rect x="50" y="36" width="5" height="5" rx="1" fill="#0f172a" />
-                <rect x="60" y="36" width="8" height="5" rx="1" fill="#0f172a" />
-                <rect x="72" y="36" width="5" height="5" rx="1" fill="#0f172a" />
-                <rect x="82" y="36" width="8" height="5" rx="1" fill="#0f172a" />
-                <rect x="36" y="46" width="5" height="8" rx="1" fill="#0f172a" />
-                <rect x="58" y="46" width="5" height="8" rx="1" fill="#0f172a" />
-                <rect x="36" y="58" width="8" height="5" rx="1" fill="#0f172a" />
-                <rect x="48" y="58" width="5" height="5" rx="1" fill="#0f172a" />
-                <rect x="58" y="58" width="5" height="8" rx="1" fill="#0f172a" />
-                <rect x="36" y="70" width="5" height="5" rx="1" fill="#0f172a" />
-                <rect x="46" y="70" width="8" height="5" rx="1" fill="#0f172a" />
-                <rect x="58" y="70" width="5" height="8" rx="1" fill="#0f172a" />
-                <rect x="70" y="70" width="8" height="8" rx="1" fill="#0f172a" />
-                <rect x="82" y="70" width="5" height="5" rx="1" fill="#0f172a" />
-                <rect x="36" y="82" width="8" height="5" rx="1" fill="#0f172a" />
-                <rect x="48" y="82" width="5" height="8" rx="1" fill="#0f172a" />
-                <rect x="58" y="82" width="8" height="5" rx="1" fill="#0f172a" />
-                <rect x="72" y="82" width="5" height="8" rx="1" fill="#0f172a" />
-                <rect x="82" y="82" width="8" height="5" rx="1" fill="#0f172a" />
-                {/* Center Brand Badge */}
-                <circle cx="50" cy="50" r="10" fill="#0098ea" stroke="#ffffff" strokeWidth="2" />
-                <text x="50" y="53" textAnchor="middle" fontSize="6" fontWeight="900" fill="#ffffff" fontFamily="sans-serif">
-                  WEI
-                </text>
-              </svg>
-            </div>
-
-            {/* Address Pill Box */}
-            <div className="relative z-10 mb-3 p-3 rounded-2xl bg-black/40 border border-white/15 flex items-center justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                <span className="text-[9px] uppercase font-bold text-emerald-300 block mb-0.5">
-                  Destination Address
-                </span>
-                <span className="text-xs font-mono font-bold text-white truncate block">
-                  {walletAddress}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={handleCopyReceiveAddress}
-                className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all ${
-                  copiedReceiveAddress
-                    ? "bg-emerald-500 border-emerald-400 text-white font-black"
-                    : "bg-white/15 hover:bg-white/25 border-white/20 text-white"
-                }`}
-              >
-                {copiedReceiveAddress ? (
-                  <>
-                    <Check size={13} />
-                    <span>COPIED</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={13} />
-                    <span>Copy</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Network Info */}
-            <div className="relative z-10 text-[10px] text-emerald-100/70 text-center mb-4">
-              Network: SHILIAIWEI L2 Vault Network (Zero Fee)
-            </div>
-
-            {/* Dismiss Button */}
-            <button
-              type="button"
-              onClick={() => setShowReceiveModal(false)}
-              className="relative z-10 w-full py-3.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider shadow-lg active:scale-98 transition-all cursor-pointer"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 });
