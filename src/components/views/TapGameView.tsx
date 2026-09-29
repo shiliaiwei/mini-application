@@ -11,8 +11,7 @@ import {
 } from "@/components/icons/KeylineIcons";
 import { BrandFooter } from "@/components/brand/BrandFooter";
 import { BanknoteCreditCards } from "@/components/cards/BanknoteCreditCards";
-import { AsymmetricGemBanner } from "@/components/cards/AsymmetricGemBanner";
-import { ShiliaiweiMascot, MascotPose } from "@/components/brand/ShiliaiweiMascot";
+import { SecureTransferLedgerProduct } from "@/components/cards/SecureTransferLedgerProduct";
 import { NavCategory } from "@/components/navigation/CategoryBar";
 
 type TapSubView = "none" | "send" | "scan";
@@ -47,20 +46,6 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
   const [sendAmount, setSendAmount] = useState("");
   const [sendCurrency, setSendCurrency] = useState<"USD" | "KHR">("USD");
   const [sendSuccess, setSendSuccess] = useState(false);
-  const [mascotPose, setMascotPose] = useState<MascotPose>("idle");
-
-  const handleCycleMascotPose = () => {
-    try {
-      tgApp?.HapticFeedback?.impactOccurred?.("light");
-    } catch {}
-    setMascotPose((prev) => {
-      if (prev === "idle") return "wave";
-      if (prev === "wave") return "announce";
-      if (prev === "announce") return "cheer";
-      return "idle";
-    });
-  };
-
   const [sendError, setSendError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
 
@@ -370,78 +355,16 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
           onOpenScan={() => setSubView("scan")}
         />
 
-        {/* 2. SKEUOMORPHIC BRAND MASCOT COMPANION CARD */}
-        <div
-          onClick={handleCycleMascotPose}
-          className="relative w-full rounded-[26px] p-4 overflow-hidden bg-gradient-to-b from-[#6420a7] via-[#4e1688] to-[#340b5c] text-white cursor-pointer active:scale-[0.99] transition-all group"
-          style={{
-            boxShadow:
-              "0 14px 30px -8px rgba(45, 10, 80, 0.5), inset 0 2px 3px rgba(255, 255, 255, 0.3), inset 0 -2px 6px rgba(0, 0, 0, 0.45)",
+        {/* 2. SECURE TRANSFER & DOUBLE-ENTRY LEDGER PRODUCT */}
+        <SecureTransferLedgerProduct
+          score={score}
+          user={user}
+          tgApp={tgApp}
+          onTransferSuccess={(amount) => {
+            onAddScore?.(-amount);
           }}
-          title="Tap Weibot to change pose!"
-        >
-          {/* Guilloche Banknote Background Style with Suitable Contrast */}
-          <div
-            className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-25"
-            style={{
-              backgroundImage: `url("/backgrounds/cardbanknote.svg")`,
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center center",
-              backgroundSize: "cover",
-              filter: "contrast(1.35) brightness(1.1)",
-            }}
-          />
-          {/* Simulated Thread Stitching */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" xmlns="http://www.w3.org/2000/svg">
-            <rect
-              x="6"
-              y="6"
-              width="calc(100% - 12px)"
-              height="calc(100% - 12px)"
-              rx="20"
-              ry="20"
-              fill="none"
-              stroke="#e9d5ff"
-              strokeWidth="1.2"
-              strokeDasharray="4 4"
-              strokeLinecap="round"
-              opacity="0.45"
-              style={{ filter: "drop-shadow(0px 1px 1px rgba(0,0,0,0.6))" }}
-            />
-          </svg>
-
-          {/* Top Specular Rim */}
-          <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none" />
-
-          <div className="relative z-10 flex items-center justify-between gap-3">
-            <div className="flex-1 space-y-1 pr-2">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-white/15 border border-white/20 text-purple-100">
-                  Vault Companion
-                </span>
-                <span className="text-[10px] text-purple-200/70">
-                  Tap to interact
-                </span>
-              </div>
-              <h4 className="text-base font-bold text-white drop-shadow-sm">
-                {mascotPose === "idle" && "Weibot is watching your vault"}
-                {mascotPose === "wave" && "Weibot waves hello!"}
-                {mascotPose === "announce" && "Weibot: Daily rewards live!"}
-                {mascotPose === "cheer" && "Weibot cheers your success!"}
-              </h4>
-              <p className="text-xs text-purple-100/80 leading-snug">
-                Official SHILIAIWEI companion mascot with auto-updating reactive poses.
-              </p>
-            </div>
-
-            <div className="shrink-0 transition-transform duration-300 group-hover:scale-105">
-              <ShiliaiweiMascot size={74} pose={mascotPose} />
-            </div>
-          </div>
-        </div>
-
-        {/* 3. ASYMMETRIC ROUNDED GEM BANNERS (3 COLOR SHOWCASE) */}
-        <AsymmetricGemBanner />
+          onOpenScan={() => setSubView("scan")}
+        />
 
         {/* 4. Brand Footer for screen consistency */}
         <BrandFooter height={16} className="mt-4 pb-2" />
