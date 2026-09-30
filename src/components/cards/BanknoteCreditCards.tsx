@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge";
+import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import {
   ScanLine,
   ArrowDownLeft,
@@ -8,6 +9,8 @@ import {
 
 interface BanknoteCreditCardsProps {
   score: number;
+  usdBalance?: number;
+  khrBalance?: number;
   showBalance?: boolean;
   onToggleBalance?: () => void;
   user?: {
@@ -31,10 +34,12 @@ interface BanknoteCreditCardsProps {
   onOpenReceive?: () => void;
 }
 
-type CurrencyMode = "USD" | "KHR";
+type CurrencyMode = "WEI" | "USD" | "KHR";
 
 export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.memo(({
   score,
+  usdBalance,
+  khrBalance,
   showBalance = true,
   onToggleBalance,
   user,
@@ -44,14 +49,14 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
   onOpenScan,
   onOpenReceive,
 }) => {
-  const [currency, setCurrency] = useState<CurrencyMode>("USD");
+  const [currency, setCurrency] = useState<CurrencyMode>("WEI");
   const [switchDirection, setSwitchDirection] = useState<"left" | "right">("right");
   const [isHangingSwitch, setIsHangingSwitch] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("shi_wallet_currency");
-      if (saved === "USD" || saved === "KHR") {
+      if (saved === "WEI" || saved === "USD" || saved === "KHR") {
         setCurrency(saved as CurrencyMode);
       }
       const params = new URLSearchParams(window.location.search);
@@ -77,12 +82,14 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
     ? `0x${Number(user.id).toString(16).padStart(4, "0")}••••••••${String(user.id).slice(-4)}`
     : "0x78a1••••••••82f1";
 
-  const usdFormatted = (score / 100).toLocaleString("en-US", {
+  const weiFormatted = score.toLocaleString("en-US");
+
+  const usdFormatted = (usdBalance !== undefined ? usdBalance : 0).toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 
-  const khrFormatted = Math.floor(score * 41).toLocaleString("en-US");
+  const khrFormatted = Math.floor(khrBalance !== undefined ? khrBalance : 0).toLocaleString("en-US");
 
   const handleCycleCurrency = () => {
     setSwitchDirection((prev) => (prev === "right" ? "left" : "right"));
@@ -94,7 +101,10 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
     } catch {}
 
     setCurrency((prev) => {
-      const next: CurrencyMode = prev === "USD" ? "KHR" : "USD";
+      let next: CurrencyMode = "USD";
+      if (prev === "WEI") next = "USD";
+      else if (prev === "USD") next = "KHR";
+      else if (prev === "KHR") next = "WEI";
       if (typeof window !== "undefined") {
         localStorage.setItem("shi_wallet_currency", next);
       }
@@ -113,13 +123,10 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
 
     if (action === "scan") {
       if (onOpenScan) onOpenScan();
-      else if (onOpenDeposit) onOpenDeposit();
     } else if (action === "receive") {
       if (onOpenReceive) onOpenReceive();
-      else if (onOpenDeposit) onOpenDeposit();
     } else if (action === "withdraw") {
       if (onOpenSend) onOpenSend();
-      else if (onOpenDeposit) onOpenDeposit();
     }
   };
 
@@ -208,9 +215,11 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
               className="relative w-[95%] mx-auto rounded-t-[26px] overflow-hidden px-5 pt-4 pb-14 text-white select-none transition-all duration-300"
               style={{
                 background:
-                  currency === "USD"
-                    ? "linear-gradient(135deg, #c084fc 0%, #a855f7 35%, #7e22ce 70%, #4c1d95 100%)"
-                    : "linear-gradient(135deg, #d8b4fe 0%, #9333ea 30%, #6b21a8 65%, #3b0764 100%)",
+                  currency === "WEI"
+                    ? "linear-gradient(135deg, #0284c7 0%, #0098ea 35%, #0369a1 70%, #0c4a6e 100%)"
+                    : currency === "USD"
+                    ? "linear-gradient(135deg, #059669 0%, #047857 35%, #065f46 70%, #064e3b 100%)"
+                    : "linear-gradient(135deg, #c084fc 0%, #a855f7 35%, #7e22ce 70%, #4c1d95 100%)",
                 filter: "contrast(1.25) saturate(1.15)",
                 boxShadow:
                   "0 -4px 16px rgba(0, 0, 0, 0.3), inset 0 1.5px 2px rgba(255, 255, 255, 0.65), inset 0 -2px 4px rgba(0, 0, 0, 0.2)",
@@ -240,29 +249,43 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
               />
 
               {/* Card Content Plate (Zero Animation on Currency Switch) */}
-              <div className="relative z-10">
-                {/* Top Row: Telegram Owner @username */}
+              <div className="relative z-10 space-y-2">
+                {/* Top Row: Telegram Owner @username & Wei Coin Brand Logo */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="text-base sm:text-lg font-bold text-white tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] truncate max-w-[200px] sm:max-w-[240px]">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <h3 className="text-base sm:text-lg font-bold text-white tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] truncate max-w-[170px] sm:max-w-[210px]">
                       {telegramUsername}
                     </h3>
                     <TelegramVerifiedBadge size={16} className="inline-flex drop-shadow-sm flex-shrink-0" />
                   </div>
+                  <ShiliaiweiBrand colorScheme="white" height={16} className="opacity-95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] flex-shrink-0" />
+                </div>
+
+                {/* Middle Row: Transparent Monospace Encrypted Address */}
+                <div className="flex items-center text-[11px] font-mono text-white/60 tracking-wider">
+                  <span>{encryptedAddress}</span>
                 </div>
 
                 {/* Bottom Row: Currency Sign on LEFT in Big Brand Font & Total Balance Number starting from RIGHT */}
                 <div className="flex items-baseline justify-between mt-2.5 text-white">
-                  {/* Big Currency Sign (Dollar & Khmer Riel in brand font) on LEFT, tap to switch */}
-                  <span
+                  {/* Big Currency Sign (WEI Badge, Dollar, or Khmer Riel in brand font) on LEFT, tap to switch */}
+                  <div
                     onClick={(e) => {
                       e.stopPropagation();
                       handleCycleCurrency();
                     }}
-                    className="text-3xl sm:text-4xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)] leading-none select-none cursor-pointer active:scale-95 transition-transform"
+                    className="cursor-pointer active:scale-95 transition-transform flex items-center"
                   >
-                    {currency === "USD" ? "$" : "៛"}
-                  </span>
+                    {currency === "WEI" ? (
+                      <span className="px-2 py-0.5 rounded-md bg-white text-[#0098ea] font-black text-sm tracking-tight shadow-sm">
+                        WEI
+                      </span>
+                    ) : (
+                      <span className="text-3xl sm:text-4xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)] leading-none select-none">
+                        {currency === "USD" ? "$" : "៛"}
+                      </span>
+                    )}
+                  </div>
 
                   {/* Display Number Balance starting from RIGHT - tap on number to hide/show balance */}
                   <span
@@ -271,6 +294,8 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                   >
                     {!showBalance
                       ? "••••••••"
+                      : currency === "WEI"
+                      ? weiFormatted
                       : currency === "USD"
                       ? usdFormatted
                       : khrFormatted}
@@ -327,49 +352,52 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
 
             {/* QUICK ACTION BUTTONS (MATCHING LEATHER POCKET FLAP - ZERO DARK BACKGROUND) */}
             <div className="relative z-20 mt-2 pt-1 pb-1">
-              {/* 3 Floating 3D Coin Buttons */}
+              {/* 3 Floating 3D Premium Coin Buttons */}
               <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {/* 1. SCAN */}
                 <button
                   type="button"
                   onClick={() => handleActionClick("scan")}
-                  className="flex flex-col items-center gap-1.5 py-1 px-2 active:scale-95 transition-transform cursor-pointer group select-none outline-none focus:outline-none"
+                  className="flex flex-col items-center gap-1.5 py-1 px-2 active:scale-90 active:translate-y-0.5 transition-all duration-200 cursor-pointer group select-none outline-none focus:outline-none"
                 >
                   <div
-                    className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#0098ea] via-[#0088cc] to-[#005f99] border-2 border-cyan-300/50 flex items-center justify-center text-white"
+                    className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#00b4d8] via-[#0098ea] to-[#006097] border-2 border-cyan-200/60 flex items-center justify-center text-white"
                     style={{
                       boxShadow:
-                        "0 8px 20px -3px rgba(0, 152, 234, 0.6), inset 0 2px 3px rgba(255, 255, 255, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.4)",
+                        "0 10px 24px -4px rgba(0, 152, 234, 0.7), inset 0 2px 3px rgba(255, 255, 255, 0.6), inset 0 -3px 5px rgba(0, 0, 0, 0.5)",
                     }}
                   >
                     {/* 3D Coin Milled Rim */}
-                    <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
-                    <ScanLine size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
+                    <div className="absolute inset-1 rounded-full border border-white/40 pointer-events-none" />
+                    <ScanLine size={21} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
                   </div>
                   <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
                     SCAN
                   </span>
                 </button>
 
-                {/* 2. RECEIVE */}
+                {/* 2. WEI COIN (OFFICIAL WEI LOGO BADGE - PREVIOUSLY RECEIVE) */}
                 <button
                   type="button"
                   onClick={() => handleActionClick("receive")}
-                  className="flex flex-col items-center gap-1.5 py-1 px-2 active:scale-95 transition-transform cursor-pointer group select-none outline-none focus:outline-none"
+                  className="flex flex-col items-center gap-1.5 py-1 px-2 active:scale-90 active:translate-y-0.5 transition-all duration-200 cursor-pointer group select-none outline-none focus:outline-none"
                 >
                   <div
-                    className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#10b981] via-[#059669] to-[#047857] border-2 border-emerald-300/50 flex items-center justify-center text-white"
+                    className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#0098ea] via-[#0077b5] to-[#004e7c] border-2 border-sky-200/70 flex items-center justify-center text-white"
                     style={{
                       boxShadow:
-                        "0 8px 20px -3px rgba(16, 185, 129, 0.6), inset 0 2px 3px rgba(255, 255, 255, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.4)",
+                        "0 10px 24px -4px rgba(0, 152, 234, 0.75), inset 0 2px 3px rgba(255, 255, 255, 0.65), inset 0 -3px 5px rgba(0, 0, 0, 0.5)",
                     }}
                   >
                     {/* 3D Coin Milled Rim */}
-                    <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
-                    <ArrowDownLeft size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
+                    <div className="absolute inset-1 rounded-full border border-white/40 pointer-events-none" />
+                    {/* Official WEI Badge */}
+                    <div className="px-1.5 py-0.5 rounded bg-white text-[#0098ea] font-black text-[11px] sm:text-xs tracking-tight shadow-xs group-hover:scale-110 transition-transform">
+                      WEI
+                    </div>
                   </div>
                   <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-                    RECEIVE
+                    WEI COIN
                   </span>
                 </button>
 
@@ -377,23 +405,98 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
                 <button
                   type="button"
                   onClick={() => handleActionClick("withdraw")}
-                  className="flex flex-col items-center gap-1.5 py-1 px-2 active:scale-95 transition-transform cursor-pointer group select-none outline-none focus:outline-none"
+                  className="flex flex-col items-center gap-1.5 py-1 px-2 active:scale-90 active:translate-y-0.5 transition-all duration-200 cursor-pointer group select-none outline-none focus:outline-none"
                 >
                   <div
-                    className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#f59e0b] via-[#d97706] to-[#b45309] border-2 border-amber-300/50 flex items-center justify-center text-white"
+                    className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-b from-[#fbbf24] via-[#f59e0b] to-[#b45309] border-2 border-amber-200/60 flex items-center justify-center text-white"
                     style={{
                       boxShadow:
-                        "0 8px 20px -3px rgba(245, 158, 11, 0.6), inset 0 2px 3px rgba(255, 255, 255, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.4)",
+                        "0 10px 24px -4px rgba(245, 158, 11, 0.7), inset 0 2px 3px rgba(255, 255, 255, 0.6), inset 0 -3px 5px rgba(0, 0, 0, 0.5)",
                     }}
                   >
                     {/* 3D Coin Milled Rim */}
-                    <div className="absolute inset-1 rounded-full border border-white/30 pointer-events-none" />
-                    <ArrowUpRight size={22} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
+                    <div className="absolute inset-1 rounded-full border border-white/40 pointer-events-none" />
+                    <ArrowUpRight size={21} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
                   </div>
                   <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
                     WITHDRAW
                   </span>
                 </button>
+              </div>
+
+              {/* 3 DISTINCT CURRENCY BLOCK STORES DISPLAY */}
+              <div className="mt-3 pt-2.5 border-t border-white/15 grid grid-cols-3 gap-1.5 text-center">
+                <div
+                  onClick={() => {
+                    setCurrency("WEI");
+                    try {
+                      tgApp?.HapticFeedback?.selectionChanged?.();
+                    } catch {}
+                  }}
+                  className={`p-1.5 rounded-xl border cursor-pointer active:scale-95 transition-all ${
+                    currency === "WEI"
+                      ? "bg-cyan-500/25 border-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.35)]"
+                      : "bg-black/25 border-cyan-400/20 hover:border-cyan-400/40"
+                  }`}
+                >
+                  <span className="text-[8px] uppercase tracking-wider text-cyan-200/80 font-bold block font-mono">
+                    WEI STORE
+                  </span>
+                  <span className="text-xs font-black text-white font-mono block">
+                    {score.toLocaleString()}
+                  </span>
+                  <span className="text-[7.5px] font-mono text-cyan-300/80 block mt-0.5">
+                    Mining Tap
+                  </span>
+                </div>
+
+                <div
+                  onClick={() => {
+                    setCurrency("USD");
+                    try {
+                      tgApp?.HapticFeedback?.selectionChanged?.();
+                    } catch {}
+                  }}
+                  className={`p-1.5 rounded-xl border cursor-pointer active:scale-95 transition-all ${
+                    currency === "USD"
+                      ? "bg-emerald-500/25 border-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.35)]"
+                      : "bg-black/25 border-emerald-400/20 hover:border-emerald-400/40"
+                  }`}
+                >
+                  <span className="text-[8px] uppercase tracking-wider text-emerald-200/80 font-bold block font-mono">
+                    USD STORE
+                  </span>
+                  <span className="text-xs font-black text-emerald-300 font-mono block">
+                    ${(usdBalance !== undefined ? usdBalance : 0).toFixed(2)}
+                  </span>
+                  <span className="text-[7.5px] font-mono text-emerald-300/80 block mt-0.5">
+                    Fiat Vault
+                  </span>
+                </div>
+
+                <div
+                  onClick={() => {
+                    setCurrency("KHR");
+                    try {
+                      tgApp?.HapticFeedback?.selectionChanged?.();
+                    } catch {}
+                  }}
+                  className={`p-1.5 rounded-xl border cursor-pointer active:scale-95 transition-all ${
+                    currency === "KHR"
+                      ? "bg-purple-500/25 border-purple-300 shadow-[0_0_10px_rgba(168,85,247,0.35)]"
+                      : "bg-black/25 border-purple-400/20 hover:border-purple-400/40"
+                  }`}
+                >
+                  <span className="text-[8px] uppercase tracking-wider text-purple-200/80 font-bold block font-mono">
+                    KHR STORE
+                  </span>
+                  <span className="text-xs font-black text-purple-300 font-mono block">
+                    {Math.floor(khrBalance !== undefined ? khrBalance : 0).toLocaleString()} ៛
+                  </span>
+                  <span className="text-[7.5px] font-mono text-purple-300/80 block mt-0.5">
+                    Bakong Grant
+                  </span>
+                </div>
               </div>
             </div>
           </div>

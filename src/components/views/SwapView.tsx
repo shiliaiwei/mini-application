@@ -13,14 +13,20 @@ export type CurrencyType = "WEI" | "USD" | "KHR";
 
 interface SwapViewProps {
   score: number;
+  usdBalance?: number;
+  khrBalance?: number;
   onSetScore: (newScore: number) => void;
+  onUpdateBalances?: (wei: number, usd: number, khr: number) => void;
   user: TelegramUser | null;
   tgApp: TelegramWebApp | null;
 }
 
 export const SwapView: React.FC<SwapViewProps> = ({
   score,
+  usdBalance,
+  khrBalance,
   onSetScore,
+  onUpdateBalances,
   user,
   tgApp,
 }) => {
@@ -41,15 +47,15 @@ export const SwapView: React.FC<SwapViewProps> = ({
 
     // Convert WEI to target
     if (to === "WEI") return wei;
-    if (to === "USD") return wei / 100;
-    if (to === "KHR") return wei * 41;
+    if (to === "USD") return Number((wei / 100).toFixed(2));
+    if (to === "KHR") return Math.floor(wei * 41);
     return 0;
   };
 
   const getAvailableBalance = (curr: CurrencyType): number => {
     if (curr === "WEI") return score;
-    if (curr === "USD") return score / 100;
-    if (curr === "KHR") return Math.floor(score * 41);
+    if (curr === "USD") return usdBalance !== undefined ? usdBalance : 0;
+    if (curr === "KHR") return khrBalance !== undefined ? khrBalance : 0;
     return 0;
   };
 
@@ -79,19 +85,23 @@ export const SwapView: React.FC<SwapViewProps> = ({
   const handleExecuteSwap = async () => {
     if (parsedInput <= 0 || parsedInput > currentAvailable) return;
 
-    // Calculate score impact
-    let weiSpent = 0;
-    if (fromCurrency === "WEI") weiSpent = parsedInput;
-    else if (fromCurrency === "USD") weiSpent = parsedInput * 100;
-    else if (fromCurrency === "KHR") weiSpent = parsedInput / 41;
+    // Calculate score impact on all three distinct currency stores
+    let nextWei = score;
+    let nextUsd = usdBalance !== undefined ? usdBalance : 0;
+    let nextKhr = khrBalance !== undefined ? khrBalance : 0;
 
-    let weiGained = 0;
-    if (toCurrency === "WEI") weiGained = calculatedOutput;
-    else if (toCurrency === "USD") weiGained = calculatedOutput * 100;
-    else if (toCurrency === "KHR") weiGained = calculatedOutput / 41;
+    // 1. Deduct from source store
+    if (fromCurrency === "WEI") nextWei = Math.max(0, Math.round(nextWei - parsedInput));
+    else if (fromCurrency === "USD") nextUsd = Math.max(0, Number((nextUsd - parsedInput).toFixed(2)));
+    else if (fromCurrency === "KHR") nextKhr = Math.max(0, Math.floor(nextKhr - parsedInput));
 
-    const newScore = Math.max(0, Math.round(score - weiSpent + weiGained));
-    onSetScore(newScore);
+    // 2. Credit to target store
+    if (toCurrency === "WEI") nextWei = Math.round(nextWei + calculatedOutput);
+    else if (toCurrency === "USD") nextUsd = Number((nextUsd + calculatedOutput).toFixed(2));
+    else if (toCurrency === "KHR") nextKhr = Math.floor(nextKhr + calculatedOutput);
+
+    onSetScore(nextWei);
+    onUpdateBalances?.(nextWei, nextUsd, nextKhr);
 
     const outputText =
       toCurrency === "KHR"

@@ -112,3 +112,9 @@
 - **Zero Redundant Navigation**: Never render `(Exit to Home View)` buttons; rely exclusively on top header Back navigation (`ChevronLeft`).
 - **Official Gate Screen Phrasing**: Gate screen Khmer copy strictly uses `តើមានអ្វីកើតឡើង?` and `តើខ្ញុំត្រូវធ្វើដូចម្តេច?` with verified session explanations.
 
+## Never Write Guide Example Labels or Style Descriptors Rule - MANDATORY
+- **Strict Prohibition of Meta Labels & Guide Descriptors**:
+  - NEVER write, render, or display labels showing a guide example, design descriptor, theme name, or place/style name (e.g. `SKEUOMORPHIC CARD`, `Skeuomorphic Card Suite`, `Skeuomorphic Controls`, theme names, or place names) on UI elements, cards, badges, or headers.
+  - The interface must remain purely functional, realistic, and unpolluted by internal design jargon, meta-labels, or tutorial style guide descriptors.
+
+

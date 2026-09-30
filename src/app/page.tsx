@@ -17,19 +17,9 @@ import {
 } from "@/components/icons/KeylineIcons";
 import { AccountAuthView } from "@/components/auth/AccountAuthView";
 
-// Lazy load non-landing tab views to reduce initial bundle and speed up load to <1s
-const EarnTasksView = dynamic(
-  () => import("@/components/views/EarnTasksView").then((mod) => mod.EarnTasksView),
-  { ssr: false }
-);
-const LeaderboardView = dynamic(
-  () => import("@/components/views/LeaderboardView").then((mod) => mod.LeaderboardView),
-  { ssr: false }
-);
-const GameProfileView = dynamic(
-  () => import("@/components/views/GameProfileView").then((mod) => mod.GameProfileView),
-  { ssr: false }
-);
+import { EarnTasksView } from "@/components/views/EarnTasksView";
+import { LeaderboardView } from "@/components/views/LeaderboardView";
+import { GameProfileView } from "@/components/views/GameProfileView";
 
 // NOTE: LOCAL_DEMO_USER is permanently disabled. Never display demo user per production security standards.
 const LOCAL_DEMO_USER: TelegramUser | null = null;
@@ -89,8 +79,10 @@ export default function MiniAppPage() {
   const [topUpAmount, setTopUpAmount] = useState(0);
   const [topUpSuccess, setTopUpSuccess] = useState(false);
 
-  // Game Mechanics State (Reset to 0)
-  const [score, setScore] = useState(0);
+  // Distinct Currency Block Stores with separate default initial amounts
+  const [score, setScore] = useState(100); // Store 1: WEI Coin Block Store (100 WEI)
+  const [usdBalance, setUsdBalance] = useState(5.0); // Store 2: US Dollar Block Store ($5.00 USD)
+  const [khrBalance, setKhrBalance] = useState(20500); // Store 3: Khmer Riel Block Store (20,500 KHR)
   const [spendSeconds, setSpendSeconds] = useState(0);
 
   // Crypto Upgrades & Mining Power
@@ -107,6 +99,25 @@ export default function MiniAppPage() {
     scoreRef.current = score;
     spendRef.current = spendSeconds;
   }, [score, spendSeconds]);
+
+  // Persist distinct currency block stores
+  useEffect(() => {
+    try {
+      localStorage.setItem("shi_store_wei", String(score));
+    } catch {}
+  }, [score]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("shi_store_usd", String(usdBalance));
+    } catch {}
+  }, [usdBalance]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("shi_store_khr", String(khrBalance));
+    } catch {}
+  }, [khrBalance]);
 
   // Dynamic Dock Visibility on Scroll
   const [isDockVisible, setIsDockVisible] = useState(true);
@@ -167,15 +178,43 @@ export default function MiniAppPage() {
       } catch {}
     }
 
+    // 3. Load independent currency block store balances
+    try {
+      const savedWei = localStorage.getItem("shi_store_wei");
+      const savedUsd = localStorage.getItem("shi_store_usd");
+      const savedKhr = localStorage.getItem("shi_store_khr");
+      if (savedWei !== null) {
+        setScore(Math.max(0, parseInt(savedWei, 10) || 0));
+      } else {
+        setScore(100);
+      }
+      if (savedUsd !== null) {
+        setUsdBalance(Math.max(0, parseFloat(savedUsd) || 0));
+      } else {
+        setUsdBalance(5.0);
+      }
+      if (savedKhr !== null) {
+        setKhrBalance(Math.max(0, parseInt(savedKhr, 10) || 0));
+      } else {
+        setKhrBalance(20500);
+      }
+    } catch {}
+
     // 4. Resolve tab parameter from search params or Telegram Settings hash
     const params = new URLSearchParams(window.location.search);
-    const tabParam = params.get("tab") as GameTab;
-    if (tabParam && ["wallet", "tasks", "leaderboard", "profile"].includes(tabParam)) {
-      setActiveTab(tabParam);
+    const rawTab = (params.get("tab") || "").toLowerCase();
+    if (rawTab === "tasks" || rawTab === "earn" || rawTab === "missions") {
+      setActiveTab("earn");
+    } else if (rawTab === "rank" || rawTab === "leaderboard") {
+      setActiveTab("leaderboard");
+    } else if (rawTab === "wallet" || rawTab === "home") {
+      setActiveTab("wallet");
+    } else if (rawTab === "profile") {
+      setActiveTab("profile");
     }
     if (
       params.get("subtab") === "settings" ||
-      (tabParam as string) === "settings" ||
+      rawTab === "settings" ||
       window.location.hash.includes("tgWebAppShowSettings=1")
     ) {
       setProfileSubTab("settings");
@@ -339,7 +378,7 @@ export default function MiniAppPage() {
         const res = await fetch(`/api/wallet/balance?initData=${encodeURIComponent(initData)}&telegram_id=${user.id}`);
         if (res.ok) {
           const data = await res.json();
-          if (typeof data.balance === "number" && data.balance > scoreRef.current) {
+          if (typeof data.balance === "number") {
             setScore(data.balance);
             lastSyncedScoreRef.current = data.balance;
             try {
@@ -549,6 +588,14 @@ export default function MiniAppPage() {
     setScore((prev) => prev + amount);
   }, []);
 
+  const handleAddUsd = useCallback((amount: number) => {
+    setUsdBalance((prev) => Number((prev + amount).toFixed(2)));
+  }, []);
+
+  const handleAddKhr = useCallback((amount: number) => {
+    setKhrBalance((prev) => Math.max(0, Math.floor(prev + amount)));
+  }, []);
+
   const handleTabChange = (tab: GameTab) => {
     try {
       tgApp?.HapticFeedback?.impactOccurred("light");
@@ -565,7 +612,7 @@ export default function MiniAppPage() {
   };
 
   const handleExecuteTopUp = () => {
-    setScore((prev) => prev + topUpAmount);
+    setUsdBalance((prev) => Number((prev + topUpAmount).toFixed(2)));
     setTopUpSuccess(true);
     try {
       tgApp?.HapticFeedback?.notificationOccurred("success");
@@ -702,14 +749,18 @@ export default function MiniAppPage() {
           </div>
         ) : (
           <>
-            {activeTab === "wallet" && (
+            {(activeTab === "wallet" || !["earn", "tasks", "leaderboard", "rank", "profile"].includes(activeTab)) && (
               <TapGameView
                 score={score}
+                usdBalance={usdBalance}
+                khrBalance={khrBalance}
                 spendSeconds={spendSeconds}
                 tapPower={tapPower}
                 showBalances={showBalances}
                 onToggleBalances={() => setShowBalances(!showBalances)}
                 onAddScore={handleAddScore}
+                onAddUsd={handleAddUsd}
+                onAddKhr={handleAddKhr}
                 onSelectCategory={handleCategorySelect}
                 onGoToSwap={() => {
                   setProfileSubTab("swap");
@@ -725,7 +776,7 @@ export default function MiniAppPage() {
               />
             )}
 
-            {activeTab === "earn" && (
+            {(activeTab === "earn" || (activeTab as string) === "tasks") && (
               <EarnTasksView
                 score={score}
                 user={user}
@@ -736,8 +787,12 @@ export default function MiniAppPage() {
               />
             )}
 
-            {activeTab === "leaderboard" && (
-              <LeaderboardView />
+            {(activeTab === "leaderboard" || (activeTab as string) === "rank") && (
+              <LeaderboardView
+                userScore={score}
+                userSpendSeconds={spendSeconds}
+                user={user}
+              />
             )}
 
             {activeTab === "profile" && (
@@ -745,11 +800,18 @@ export default function MiniAppPage() {
                 user={user}
                 tgApp={tgApp}
                 score={score}
+                usdBalance={usdBalance}
+                khrBalance={khrBalance}
                 spendSeconds={spendSeconds}
                 tapPower={tapPower}
                 passiveRate={passiveRate}
                 initialSubTab={profileSubTab}
                 onSetScore={(newScore) => setScore(newScore)}
+                onUpdateBalances={(newWei, newUsd, newKhr) => {
+                  setScore(newWei);
+                  setUsdBalance(newUsd);
+                  setKhrBalance(newKhr);
+                }}
                 onBack={() => handleTabChange("wallet")}
                 onLogout={() => {
                   setUser(null);

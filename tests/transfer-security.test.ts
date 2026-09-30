@@ -133,6 +133,9 @@ test("Transfer API Route Exports: POST handler is defined", async () => {
 
   const streamModule = await import("../src/app/api/wallet/stream/route");
   assert.equal(typeof streamModule.GET, "function", "GET stream handler must exist");
+
+  const resetModule = await import("../src/app/api/wallet/reset/route");
+  assert.equal(typeof resetModule.POST, "function", "POST reset handler must exist");
 });
 
 test("Zod Validation: TransferRequestSchema strictly enforces rules", async () => {
@@ -206,13 +209,29 @@ test("Zod Validation: ExchangeRequestSchema strictly allows WEI_USD and WEI_KHR"
   });
   assert.equal(validKHR.success, true);
 
-  const invalidPair = ExchangeRequestSchema.safeParse({
+  const belowMin = ExchangeRequestSchema.safeParse({
     fromAddress: "WC0123456789abcdef0123456789abcdef01234567",
-    pair: "WEI_EUR",
-    amount: 100,
+    pair: "WEI_USD",
+    amount: 99,
     initData: "test",
   });
-  assert.equal(invalidPair.success, false);
+  assert.equal(belowMin.success, false, "Must reject exchange amounts below rare minimum (100 WEI)");
+
+  const aboveMax = ExchangeRequestSchema.safeParse({
+    fromAddress: "WC0123456789abcdef0123456789abcdef01234567",
+    pair: "WEI_USD",
+    amount: 25_001,
+    initData: "test",
+  });
+  assert.equal(aboveMax.success, false, "Must reject exchange amounts above rare maximum (25,000 WEI)");
+
+  const maxValid = ExchangeRequestSchema.safeParse({
+    fromAddress: "WC0123456789abcdef0123456789abcdef01234567",
+    pair: "WEI_USD",
+    amount: 25_000,
+    initData: "test",
+  });
+  assert.equal(maxValid.success, true, "Must accept exchange amount at rare maximum boundary (25,000 WEI)");
 });
 
 test("Security & Anti-Abuse: checkRateLimit blocks flood attacks", async () => {

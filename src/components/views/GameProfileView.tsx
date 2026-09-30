@@ -58,11 +58,14 @@ interface GameProfileViewProps {
   user: TelegramUser | null;
   tgApp: TelegramWebApp | null;
   score: number;
+  usdBalance?: number;
+  khrBalance?: number;
   spendSeconds: number;
   tapPower?: number;
   passiveRate?: number;
   initialSubTab?: ProfileSubTab;
   onSetScore?: (newScore: number) => void;
+  onUpdateBalances?: (wei: number, usd: number, khr: number) => void;
   onBack?: () => void;
   onLogout?: () => void;
 }
@@ -299,9 +302,13 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
   user,
   tgApp,
   score,
+  usdBalance,
+  khrBalance,
   spendSeconds,
   tapPower = 1,
   initialSubTab,
+  onSetScore,
+  onUpdateBalances,
   onBack,
   onLogout,
 }) => {
@@ -381,8 +388,8 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
     ? `0x${Number(user.id).toString(16).padStart(4, "0")}••••••••${String(user.id).slice(-4)}`
     : "0x78a1••••••••82f1";
 
-  const usdValue = (score / 100).toFixed(2);
-  const khrValue = Math.floor(score * 41).toLocaleString();
+  const usdValue = (usdBalance !== undefined ? usdBalance : 0).toFixed(2);
+  const khrValue = Math.floor(khrBalance !== undefined ? khrBalance : 0).toLocaleString();
 
   // Auto-lock timer for unmasked PII
   useEffect(() => {
@@ -493,6 +500,31 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
 
   const handleSwapConfirm = () => {
     const out = swapConvertedAmount();
+    const amt = parseFloat(inputAmount) || 0;
+    if (amt > 0) {
+      let nextWei = score;
+      let nextUsd = usdBalance !== undefined ? usdBalance : 0;
+      let nextKhr = khrBalance !== undefined ? khrBalance : 0;
+
+      if (fromCurrency === "WEI") nextWei = Math.max(0, Math.round(nextWei - amt));
+      else if (fromCurrency === "USD") nextUsd = Math.max(0, Number((nextUsd - amt).toFixed(2)));
+      else if (fromCurrency === "KHR") nextKhr = Math.max(0, Math.floor(nextKhr - amt));
+
+      let targetGained = 0;
+      if (fromCurrency === "KHR" && toCurrency === "USD") targetGained = Number((amt / 4100).toFixed(2));
+      else if (fromCurrency === "KHR" && toCurrency === "WEI") targetGained = Math.floor(amt / 41);
+      else if (fromCurrency === "USD" && toCurrency === "KHR") targetGained = Math.floor(amt * 4100);
+      else if (fromCurrency === "USD" && toCurrency === "WEI") targetGained = Math.floor(amt * 100);
+      else if (fromCurrency === "WEI" && toCurrency === "USD") targetGained = Number((amt / 100).toFixed(2));
+      else if (fromCurrency === "WEI" && toCurrency === "KHR") targetGained = Math.floor(amt * 41);
+
+      if (toCurrency === "WEI") nextWei = Math.round(nextWei + targetGained);
+      else if (toCurrency === "USD") nextUsd = Number((nextUsd + targetGained).toFixed(2));
+      else if (toCurrency === "KHR") nextKhr = Math.floor(nextKhr + targetGained);
+
+      onSetScore?.(nextWei);
+      onUpdateBalances?.(nextWei, nextUsd, nextKhr);
+    }
     setSwapSuccess(out);
     setTimeout(() => setSwapSuccess(null), 3000);
     try {
@@ -879,6 +911,8 @@ export const GameProfileView: React.FC<GameProfileViewProps> = ({
         {/* 2. STATS 4-BLOCK BRAND CARDS (EXACT MATCH HOMEPAGE CARDS) */}
         <BrandStatsQuadGrid
           score={score}
+          usdBalance={usdBalance}
+          khrBalance={khrBalance}
           spendSeconds={spendSeconds}
           tapPower={tapPower}
           showBalance={true}

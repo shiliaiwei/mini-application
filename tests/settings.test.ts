@@ -100,9 +100,9 @@ test("User Settings View: UserSettingsView.tsx exists and implements Telegram We
   assert.ok(code.includes("CloudStorage"), "Must integrate Telegram CloudStorage");
   assert.ok(code.includes("HapticFeedback"), "Must integrate Telegram HapticFeedback");
   assert.ok(code.includes("requestContact"), "Must integrate requestContact for phone");
-  assert.ok(code.includes("home_address"), "Must include home address editor");
-  assert.ok(code.includes("work_address"), "Must include work address editor");
-  assert.ok(code.includes("security_question"), "Must include security question editor");
+  assert.equal(code.includes("Google Account Standard"), false, "Google Account Standard block must be removed");
+  assert.equal(code.includes("Security & Recovery"), false, "Security & Recovery block must be removed");
+  assert.equal(code.includes("Physical & Work Pin"), false, "Address section must be removed");
   assert.ok(code.includes("ThreadStitching"), "Must include 3D perimeter thread stitching");
   assert.ok(code.includes("GuillocheBackground"), "Must include Guilloche banknote styling");
   assert.ok(code.includes("LeatherGrain"), "Must include purple leather texture overlay");
@@ -271,15 +271,23 @@ test("Physical Geocoding Endpoint: api/geocode/locate/route.ts exists and handle
   assert.equal(emojiRegex.test(routeCode), false, "geocode route must contain NO emojis");
 });
 
-test("UserSettingsView: Renders interactive map actions and incomplete placeholder alerts", () => {
+test("UserSettingsView: Settings sections use Telegram Bot & WebApp controls in Skeuomorphic Purple Leather Wallet style", () => {
   const viewPath = path.resolve(__dirname, "../src/components/views/UserSettingsView.tsx");
   const code = fs.readFileSync(viewPath, "utf-8");
 
-  assert.ok(code.includes("WorkingAddressMapModal"), "UserSettingsView must mount WorkingAddressMapModal");
-  assert.ok(code.includes("Pin on Working Map"), "Must render working map pin CTA buttons");
-  assert.ok(code.includes("Action Required"), "Must render Action Required alert badges");
-  assert.ok(code.includes("Profile Readiness:"), "Must render Profile Readiness Banner");
-  assert.ok(code.includes("Saved Physical Address"), "Must render saved physical address badge when filled");
+  assert.equal(code.includes("WorkingAddressMapModal"), false, "UserSettingsView must remove WorkingAddressMapModal");
+  assert.equal(code.includes("Google Account Standard"), false, "Must remove Google Account Standard block");
+  assert.equal(code.includes("Security & Recovery"), false, "Must remove Security & Recovery block");
+  assert.equal(code.includes("Physical & Work Pin"), false, "Must remove Address section block");
+  assert.equal(code.includes("Profile Readiness:"), false, "Profile Readiness banner must be removed");
+  assert.equal(code.includes("Cloud Storage & Diagnostics"), false, "Cloud Storage & Diagnostics card must be removed");
+  assert.equal(code.includes("TELEGRAM WEBAPP RUNTIME"), false, "TELEGRAM WEBAPP RUNTIME card must be removed");
+  assert.equal(code.includes("All Settings"), false, "Category tab bar must be removed");
+  assert.ok(code.includes("from-[#6b22a8]"), "Must use skill #L4-21 royal purple gradient");
+  assert.ok(code.includes("from-[#5c1c99]"), "Must use purple leather wallet gradient");
+  assert.ok(code.includes("Royal Purple Obsidian"), "Must display Royal Purple Obsidian Dark theme badge");
+  assert.ok(code.includes("ThreadStitching"), "Must include 3D perimeter thread stitching");
+  assert.ok(code.includes("Telegram Bot API Profile"), "Must render Telegram Bot API Profile");
 });
 
 test("Telegram Profile Photo Sync: createInitialSettings auto-assigns avatar proxy when photo_url is missing", () => {

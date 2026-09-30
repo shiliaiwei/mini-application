@@ -4,6 +4,8 @@ import React from "react";
 
 export interface BrandStatsQuadGridProps {
   score: number;
+  usdBalance?: number;
+  khrBalance?: number;
   spendSeconds?: number;
   tapPower?: number;
   showBalance?: boolean;
@@ -21,12 +23,14 @@ export const formatSpendSeconds = (s: number = 0): string => {
 
 export const BrandStatsQuadGrid: React.FC<BrandStatsQuadGridProps> = React.memo(({
   score,
+  usdBalance,
+  khrBalance,
   spendSeconds = 0,
   tapPower = 1,
   showBalance = true,
   className = "",
 }) => {
-  const usdValue = (score / 100).toFixed(2);
+  const usdValue = usdBalance !== undefined ? usdBalance.toFixed(2) : (score / 100).toFixed(2);
   const formattedTime = formatSpendSeconds(spendSeconds);
 
   return (

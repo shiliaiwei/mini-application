@@ -317,6 +317,14 @@ export async function executeExchange(
     throw new Error("Wallet not found for address");
   }
 
+  // Enforce standard rare coin scarcity thresholds
+  if (weiAmount < 100) {
+    throw new Error("Exchange amount is below minimum rare threshold (100 WEI)");
+  }
+  if (weiAmount > 25000) {
+    throw new Error("Exchange amount exceeds maximum rare batch limit (25,000 WEI)");
+  }
+
   const amountBigInt = BigInt(weiAmount);
   const currentNonce = wallet.nonce_record?.current_nonce ?? wallet.nonce;
 
@@ -411,6 +419,7 @@ export async function executeExchange(
 
 /**
  * Awards validated game rewards with server-side proof and append-only ledger credit.
+ * Calculates block rewards atomically in one block with strict anti-cheat and rare coin rules.
  */
 export async function executeGameReward(
   toAddress: string,
@@ -421,17 +430,21 @@ export async function executeGameReward(
   txHash: string;
   rewardAmount: number;
   newBalance: number;
+  blockHeight: number;
 }> {
-  // Anti-cheat: Validate gameplay duration vs score feasibility
-  if (spendSeconds < 3 && score > 100) {
+  // Anti-cheat: Validate gameplay duration vs score feasibility (fair gameplay rules)
+  if (spendSeconds < 3 && score > 0) {
     throw new Error("Invalid gameplay duration for reported score");
   }
   if (score > spendSeconds * 60) {
     throw new Error("Anomalous gameplay score rejected by anti-cheat rules");
   }
+  if (score < 10) {
+    throw new Error("Score must be at least 10 to earn cryptographic block reward");
+  }
 
-  // Server-controlled reward formula: 10 WEI per 100 score, capped at 2,500 WEI
-  const calculatedReward = Math.min(2500, Math.max(10, Math.floor(score / 10)));
+  // Server-controlled rare block reward formula: 10 WEI per 100 score (1 WEI per 10 score), capped at rare limit 2,500 WEI
+  const calculatedReward = Math.min(2500, Math.max(1, Math.floor(score / 10)));
   const rewardBigInt = BigInt(calculatedReward);
 
   const wallet = await prisma.wallet.findUnique({
@@ -450,9 +463,10 @@ export async function executeGameReward(
 
   const txHash = crypto
     .createHash("sha256")
-    .update(`REWARD:${gameId}:${toAddress}:${calculatedReward}:${Date.now()}`)
+    .update(`REWARD:${gameId}:${toAddress}:${calculatedReward}:${currentNonce}:${Date.now()}`)
     .digest("hex");
 
+  // All calculations performed in one atomic block transaction
   const newBalance = await prisma.$transaction(async (tx) => {
     const transaction = await tx.transaction.create({
       data: {
@@ -464,7 +478,14 @@ export async function executeGameReward(
         signature: rewardSignature,
         status: "CONFIRMED",
         tx_type: "GAME_REWARD",
-        metadata: { gameId, score, spendSeconds },
+        metadata: {
+          gameId,
+          score,
+          spendSeconds,
+          block_height: currentNonce,
+          rarity_tier: "RARE_BLOCK",
+          timestamp: Date.now(),
+        },
       },
     });
 
@@ -475,6 +496,17 @@ export async function executeGameReward(
         entry_type: "GAME_REWARD",
         transaction_id: transaction.id,
       },
+    });
+
+    // Advance block sequence / nonce in the exact same block
+    await tx.nonce.upsert({
+      where: { wallet_id: wallet.id },
+      update: { current_nonce: currentNonce + 1 },
+      create: { wallet_id: wallet.id, current_nonce: currentNonce + 1 },
+    });
+    await tx.wallet.update({
+      where: { id: wallet.id },
+      data: { nonce: currentNonce + 1 },
     });
 
     const newSum = await tx.ledgerEntry.aggregate({
@@ -491,5 +523,64 @@ export async function executeGameReward(
     txHash,
     rewardAmount: calculatedReward,
     newBalance,
+    blockHeight: currentNonce,
+  };
+}
+
+/**
+ * Resets all currency stores, game scores, and earnings in the database to Block 0 (Genesis state).
+ * Sets all dollar, Khmer coin, and time course earnings to 0 so all users start from zero.
+ */
+export async function resetAllCurrencyStoresToGenesis(): Promise<{
+  success: boolean;
+  resetWalletsCount: number;
+  resetPlayersCount: number;
+  timestamp: number;
+}> {
+  const wallets = await prisma.wallet.findMany();
+  for (const wallet of wallets) {
+    const balanceSum = await prisma.ledgerEntry.aggregate({
+      where: { wallet_id: wallet.id },
+      _sum: { amount: true },
+    });
+    const currentBal = balanceSum._sum.amount ?? BigInt(0);
+    if (currentBal !== BigInt(0)) {
+      await prisma.ledgerEntry.create({
+        data: {
+          wallet_id: wallet.id,
+          amount: -currentBal,
+          entry_type: "ADMIN_ZERO_RESET",
+        },
+      });
+    }
+  }
+
+  await prisma.nonce.updateMany({
+    data: { current_nonce: 0 },
+  });
+  await prisma.wallet.updateMany({
+    data: { nonce: 0 },
+  });
+
+  const dbUrl = process.env.DATABASE_URL;
+  let resetPlayersCount = 0;
+  if (dbUrl) {
+    try {
+      const { neon } = await import("@neondatabase/serverless");
+      const sql = neon(dbUrl);
+      await sql`UPDATE game_players SET score = 0, spend_seconds = 0`;
+      await sql`UPDATE game_scores SET score = 0, time_taken = 0`;
+      const countRes = await sql`SELECT count(*) FROM game_players`;
+      resetPlayersCount = Number(countRes[0]?.count || 0);
+    } catch (e) {
+      console.warn("Neon SQL reset warning:", e);
+    }
+  }
+
+  return {
+    success: true,
+    resetWalletsCount: wallets.length,
+    resetPlayersCount,
+    timestamp: Date.now(),
   };
 }

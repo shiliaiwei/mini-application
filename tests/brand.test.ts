@@ -24,6 +24,10 @@ test("Brand Rules: workspace-rules.md includes mandatory mutual exclusivity rule
     content.includes("mutually exclusive"),
     "Rules must declare logo mark and brand name as mutually exclusive"
   );
+  assert.ok(
+    content.includes("Never Write Guide Example Labels or Style Descriptors Rule"),
+    "Rules must include Never Write Guide Example Labels or Style Descriptors Rule"
+  );
 });
 
 test("Brand Component: ShiliaiweiBrand file structure and variants definition", () => {
@@ -80,6 +84,7 @@ test("Card Component: BanknoteCreditCards includes crypto address, hanging anima
   assert.ok(code.includes("isHangingSwitch"), "Must have hanging switch state");
   assert.ok(code.includes("switchDirection"), "Must track left/right switch direction");
   assert.equal(code.includes("ShiliaiweiMascot"), false, "Wallet card must NOT include mascot");
+  assert.equal(code.includes("Skeuomorphic Card"), false, "Wallet card must NOT include 'Skeuomorphic Card' guide label");
 });
 
 test("Navbar Component: TopBrandNavBar excludes eye button", () => {
@@ -117,4 +122,24 @@ test("App & Card Backgrounds: background.svg for app, cardbanknote.svg for card 
   const cssPath = path.resolve(__dirname, "../src/app/globals.css");
   const cssCode = fs.readFileSync(cssPath, "utf-8");
   assert.ok(cssCode.includes('background-image: url("/backgrounds/background.svg")'), "globals.css must define background.svg");
+});
+
+test("3D Bitcoin-Style WEI Coin: code design, center WEI text, 360 degree drag rotation, and TapGameView integration", () => {
+  const coinPath = path.resolve(__dirname, "../src/components/brand/WeiBitcoin3DCoin.tsx");
+  assert.equal(fs.existsSync(coinPath), true, "WeiBitcoin3DCoin.tsx must exist");
+
+  const coinCode = fs.readFileSync(coinPath, "utf-8");
+  assert.ok(coinCode.includes("WeiBitcoin3DCoin"), "Must export WeiBitcoin3DCoin component");
+  assert.ok(coinCode.includes("360"), "Must support 360 degree rotation");
+  assert.ok(coinCode.includes("rotY"), "Must track Y-axis rotation");
+  assert.ok(coinCode.includes("rotateY"), "Must apply CSS 3D rotateY transform");
+  assert.ok(coinCode.includes("reedingNotches"), "Must feature Bitcoin-style milled reeding notches");
+  assert.ok(coinCode.includes("WEI"), "Must feature center WEI text");
+  assert.ok(coinCode.includes("Genesis"), "Must feature reverse Genesis block seal");
+  assert.equal(coinCode.includes("SKEUOMORPHIC CARD"), false, "Must NOT include guide example label");
+
+  // Verify TapGameView integrates WeiBitcoin3DCoin
+  const tapViewPath = path.resolve(__dirname, "../src/components/views/TapGameView.tsx");
+  const tapViewCode = fs.readFileSync(tapViewPath, "utf-8");
+  assert.ok(tapViewCode.includes("WeiBitcoin3DCoin"), "TapGameView must integrate WeiBitcoin3DCoin");
 });

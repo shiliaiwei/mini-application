@@ -42,8 +42,14 @@ export const TransferRequestSchema = z
     path: ["toAddress"],
   });
 
+export const RARE_COIN_EXCHANGE_LIMITS = {
+  MIN_EXCHANGE: 100, // Rare coin entry threshold (100 WEI = $1.00 USD / 4,100 KHR)
+  MAX_EXCHANGE: 25_000, // Rare scarcity cap per transaction (25,000 WEI = $250.00 USD / 1,025,000 KHR)
+} as const;
+
 /**
  * Validates Currency Exchange requests (WEI COIN to USD or KHR).
+ * Enforces rare coin scarcity rules with standard Min and Max limits.
  */
 export const ExchangeRequestSchema = z.object({
   fromAddress: z.string().regex(wcAddressRegex, "Invalid sender WC address format"),
@@ -52,8 +58,14 @@ export const ExchangeRequestSchema = z.object({
     .number()
     .positive("Amount must be greater than zero")
     .int("Amount must be an integer number of WEI COIN")
-    .min(100, "Minimum exchange amount is 100 WEI COIN")
-    .max(10_000_000, "Amount exceeds exchange batch limit"),
+    .min(
+      RARE_COIN_EXCHANGE_LIMITS.MIN_EXCHANGE,
+      `Minimum exchange amount is ${RARE_COIN_EXCHANGE_LIMITS.MIN_EXCHANGE} WEI COIN to preserve rarity`
+    )
+    .max(
+      RARE_COIN_EXCHANGE_LIMITS.MAX_EXCHANGE,
+      `Amount exceeds rare coin batch limit of ${RARE_COIN_EXCHANGE_LIMITS.MAX_EXCHANGE} WEI COIN`
+    ),
   initData: z.string().min(1, "Telegram initData required for verification"),
 });
 

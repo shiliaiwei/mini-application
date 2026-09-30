@@ -1,31 +1,34 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { TelegramUser, TelegramWebApp } from "@/types/telegram";
-import {
-  ArrowUpRight,
-  ArrowDownLeft,
-  Check,
-  ChevronLeft,
-  Copy,
-  ScanLine,
-} from "@/components/icons/KeylineIcons";
 import { BrandFooter } from "@/components/brand/BrandFooter";
 import { BanknoteCreditCards } from "@/components/cards/BanknoteCreditCards";
-import { BrandStatsQuadGrid } from "@/components/cards/BrandStatsQuadGrid";
-import { SecureTransferLedgerProduct } from "@/components/cards/SecureTransferLedgerProduct";
+import { BrandMiningBlockGrid } from "@/components/cards/BrandMiningBlockGrid";
 import { BinanceWalletQrCard } from "@/components/cards/BinanceWalletQrCard";
+import { SecureTransferLedgerProduct } from "@/components/cards/SecureTransferLedgerProduct";
+import { WeiBitcoin3DCoin } from "@/components/brand/WeiBitcoin3DCoin";
+import {
+  ChevronLeft,
+  ScanLine,
+  ArrowDownLeft,
+  ArrowUpRight,
+} from "@/components/icons/KeylineIcons";
 import { NavCategory } from "@/components/navigation/CategoryBar";
 
 type TapSubView = "none" | "scan" | "receive" | "withdraw";
 
 interface TapGameViewProps {
   score: number;
+  usdBalance?: number;
+  khrBalance?: number;
   spendSeconds?: number;
   tapPower?: number;
   showBalances?: boolean;
   onToggleBalances?: () => void;
   onAddScore?: (amount: number) => void;
+  onAddUsd?: (amount: number) => void;
+  onAddKhr?: (amount: number) => void;
   onGoToSwap?: () => void;
   onGoToEarn?: () => void;
   onGoToSettings?: () => void;
@@ -36,22 +39,30 @@ interface TapGameViewProps {
 
 export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
   score,
+  usdBalance,
+  khrBalance,
   spendSeconds = 0,
   tapPower = 1,
   onAddScore,
+  onAddUsd,
+  onAddKhr,
   onGoToSwap,
   onGoToEarn,
+  onGoToSettings,
   showBalances,
   onToggleBalances,
   user,
   tgApp,
 }) => {
-  const [subView, setSubView] = useState<TapSubView>("none");
+  const [claimToast, setClaimToast] = useState<string | null>(null);
   const [showLocalBalances, setShowLocalBalances] = useState(true);
-  const userVaultAddress = useMemo(() => {
-    if (!user?.id) return "WC8bcd8e5fad2846e593206977e38aedbaafd4ef16";
-    const hex = Math.abs(user.id).toString(16).padStart(8, "0");
-    return `WC${hex}5fad2846e593206977e38aedbaafd4ef16`.slice(0, 42);
+  const [subView, setSubView] = useState<TapSubView>("none");
+  const [userVaultAddress, setUserVaultAddress] = useState<string>("WC1234567890abcdef1234567890abcdef12345678");
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const hex = Number(user.id).toString(16).padStart(40, "0");
+    setUserVaultAddress(`WC${hex}`);
   }, [user?.id]);
 
   // ==============================================================
@@ -205,6 +216,8 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
         {/* 1. DUAL KHMER & DOLLAR BANKNOTE CREDIT CARDS */}
         <BanknoteCreditCards
           score={score}
+          usdBalance={usdBalance}
+          khrBalance={khrBalance}
           showBalance={showBalances !== undefined ? showBalances : showLocalBalances}
           onToggleBalance={onToggleBalances || (() => {
             setShowLocalBalances(!showLocalBalances);
@@ -219,13 +232,121 @@ export const TapGameView: React.FC<TapGameViewProps> = React.memo(({
           onOpenReceive={() => setSubView("receive")}
         />
 
-        {/* 2. STATS 4-BLOCK BRAND CARDS (WEI COIN, US DOLLAR, TAP POWER, PLAY TIME) */}
-        <BrandStatsQuadGrid
-          score={score}
-          spendSeconds={spendSeconds}
-          tapPower={tapPower}
-          showBalance={showBalances !== undefined ? showBalances : showLocalBalances}
-        />
+        {/* 2. LIVE 3D BITCOIN-STYLE WEI COIN (360° DRAG ROTATION & TAP MINING) */}
+        <div className="w-full rounded-[26px] p-3.5 bg-gradient-to-b from-[#180e29] via-[#120822] to-[#0a0314] border border-amber-400/20 shadow-xl overflow-hidden relative">
+          <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-300/40 to-transparent pointer-events-none" />
+
+          {/* Header Row */}
+          <div className="flex items-center justify-between pb-2 mb-1 border-b border-white/10">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-200 border border-amber-400/30">
+                3D Interactive Coin
+              </span>
+              <span className="text-[10px] font-mono text-cyan-300">
+                Live Animate • 360° Rotate
+              </span>
+            </div>
+            <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
+              <span>+{tapPower} WEI / Tap</span>
+            </div>
+          </div>
+
+          {/* 3D Coin Interactive Canvas */}
+          <WeiBitcoin3DCoin
+            size={210}
+            interactive={true}
+            tapPower={tapPower}
+            onTap={(amount) => {
+              onAddScore?.(amount);
+            }}
+            tgApp={tgApp}
+            showControls={true}
+          />
+
+          {/* 3-Store Quick Multi-Currency Earn Strip */}
+          <div className="mt-2.5 pt-2 border-t border-white/10 grid grid-cols-3 gap-1.5">
+            <div className="p-1.5 rounded-xl bg-cyan-950/40 border border-cyan-400/30 text-center">
+              <span className="text-[7.5px] uppercase font-bold text-cyan-200 block font-mono">
+                Store 01 • WEI
+              </span>
+              <span className="text-[10px] font-black text-white font-mono block">
+                +{tapPower} WEI/Tap
+              </span>
+              <span className="text-[7px] text-cyan-300/80 font-mono">Tap Coin Above</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                onAddUsd?.(0.05);
+                setClaimToast("Harvested +$0.05 USD Yield into USD Store!");
+                try {
+                  tgApp?.HapticFeedback?.notificationOccurred?.("success");
+                } catch {}
+                setTimeout(() => setClaimToast(null), 2000);
+              }}
+              className="p-1.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-400/30 text-center cursor-pointer active:scale-95 transition-all"
+            >
+              <span className="text-[7.5px] uppercase font-bold text-emerald-200 block font-mono">
+                Store 02 • USD
+              </span>
+              <span className="text-[10px] font-black text-emerald-300 font-mono block">
+                +$0.05 USD
+              </span>
+              <span className="text-[7px] text-emerald-200/90 font-mono underline">Harvest Yield</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                onAddKhr?.(500);
+                setClaimToast("Claimed +500 ៛ Grant into KHR Store!");
+                try {
+                  tgApp?.HapticFeedback?.notificationOccurred?.("success");
+                } catch {}
+                setTimeout(() => setClaimToast(null), 2000);
+              }}
+              className="p-1.5 rounded-xl bg-purple-950/40 hover:bg-purple-900/50 border border-purple-400/30 text-center cursor-pointer active:scale-95 transition-all"
+            >
+              <span className="text-[7.5px] uppercase font-bold text-purple-200 block font-mono">
+                Store 03 • KHR
+              </span>
+              <span className="text-[10px] font-black text-purple-300 font-mono block">
+                +500 ៛ KHR
+              </span>
+              <span className="text-[7px] text-purple-200/90 font-mono underline">Claim Grant</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 3. MARKET TRENDING & WEI PROTOCOL SUITE */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#0098ea]">
+              Market Trending
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[10px] font-mono text-slate-500 font-bold">Live L2 Protocol Quotes</span>
+            </div>
+          </div>
+
+          <BrandMiningBlockGrid
+            score={score}
+            usdBalance={usdBalance}
+            khrBalance={khrBalance}
+            spendSeconds={spendSeconds}
+            tapPower={tapPower}
+            onGoToProfile={onGoToSettings}
+          />
+        </div>
+
+        {/* Toast Notification */}
+        {claimToast && (
+          <div className="fixed bottom-24 inset-x-4 max-w-sm mx-auto z-50 p-2.5 rounded-2xl bg-slate-900/95 border border-cyan-400/40 text-white text-xs font-bold shadow-2xl flex items-center justify-center text-center animate-fadeIn font-mono">
+            {claimToast}
+          </div>
+        )}
 
         {/* 3. Brand Footer for screen consistency */}
         <BrandFooter height={16} className="mt-4 pb-2" />
