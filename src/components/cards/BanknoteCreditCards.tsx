@@ -3,7 +3,6 @@ import { TelegramVerifiedBadge } from "@/components/common/TelegramVerifiedBadge
 import { ShiliaiweiBrand } from "@/components/brand/ShiliaiweiBrand";
 import {
   ScanLine,
-  ArrowDownLeft,
   ArrowUpRight,
 } from "@/components/icons/KeylineIcons";
 
@@ -345,10 +344,6 @@ export const BanknoteCreditCards: React.FC<BanknoteCreditCardsProps> = React.mem
             {/* Front Pocket Lip 3D Specular Highlight Edge */}
             <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
 
-            {/* Hidden test-compatible encrypted address reference */}
-            <span className="hidden text-white/60 font-mono" aria-hidden="true">
-              {encryptedAddress}
-            </span>
 
             {/* QUICK ACTION BUTTONS (MATCHING LEATHER POCKET FLAP - ZERO DARK BACKGROUND) */}
             <div className="relative z-20 mt-2 pt-1 pb-1">

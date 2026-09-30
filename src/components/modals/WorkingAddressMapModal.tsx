@@ -485,5 +485,3 @@ export const WorkingAddressMapModal: React.FC<WorkingAddressMapModalProps> = ({
   );
 };
 
-// Export DeliveryMapPickerModal as alias for backward compatibility
-export const DeliveryMapPickerModal = WorkingAddressMapModal;
