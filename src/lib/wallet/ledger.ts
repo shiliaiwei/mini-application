@@ -8,6 +8,18 @@ import {
 } from "./crypto";
 import { TransferRequestInput } from "./validation";
 import { balanceEvents } from "./realtime";
+import {
+  validateGameplay,
+  calculateRewardAmount,
+  isCooldownActive,
+  cooldownRemainingMs,
+  recordClaim,
+  getCurrentBlockReward,
+  MAX_SUPPLY_WEI,
+  HALVING_THRESHOLD,
+  INITIAL_BLOCK_REWARD,
+  signGameRewardOffChain,
+} from "./gameSigner";
 
 export interface WalletInfo {
   id: string;
@@ -431,22 +443,24 @@ export async function executeGameReward(
   rewardAmount: number;
   newBalance: number;
   blockHeight: number;
+  halvingCount: number;
+  blockReward: number;
 }> {
-  // Anti-cheat: Validate gameplay duration vs score feasibility (fair gameplay rules)
-  if (spendSeconds < 3 && score > 0) {
-    throw new Error("Invalid gameplay duration for reported score");
-  }
-  if (score > spendSeconds * 60) {
-    throw new Error("Anomalous gameplay score rejected by anti-cheat rules");
-  }
-  if (score < 10) {
-    throw new Error("Score must be at least 10 to earn cryptographic block reward");
+  // 1. Anti-cheat validation via gameSigner engine
+  const check = validateGameplay(score, spendSeconds);
+  if (!check.valid) {
+    throw new Error(check.error ?? "Anti-cheat validation failed");
   }
 
-  // Server-controlled rare block reward formula: 10 WEI per 100 score (1 WEI per 10 score), capped at rare limit 2,500 WEI
-  const calculatedReward = Math.min(2500, Math.max(1, Math.floor(score / 10)));
-  const rewardBigInt = BigInt(calculatedReward);
+  // 2. 24-hour daily cooldown enforcement per wallet address
+  if (isCooldownActive(toAddress)) {
+    const rem = cooldownRemainingMs(toAddress);
+    const h = Math.floor(rem / 3600000);
+    const m = Math.ceil((rem % 3600000) / 60000);
+    throw new Error(`Daily reward cooldown active. Retry in ${h}h ${m}m`);
+  }
 
+  // 3. Resolve wallet & existing global distributed supply (estimated from wallet nonce history)
   const wallet = await prisma.wallet.findUnique({
     where: { address: toAddress },
     include: { nonce_record: true },
@@ -455,18 +469,42 @@ export async function executeGameReward(
     throw new Error("Wallet not found for recipient address");
   }
 
+  // 4. Get total ecosystem-distributed supply (sum of all positive ledger entries)
+  const globalSum = await prisma.ledgerEntry.aggregate({
+    where: { amount: { gt: BigInt(0) } },
+    _sum: { amount: true },
+  });
+  const totalDistributed = Number(globalSum._sum.amount ?? BigInt(0));
+
+  // 5. Hard cap enforcement — 21,000,000 WEI maximum ever
+  if (totalDistributed >= MAX_SUPPLY_WEI) {
+    throw new Error("Maximum WEI supply of 21,000,000 has been reached");
+  }
+
+  // 6. Halving-adjusted reward calculation
+  const halvingCount = Math.floor(totalDistributed / HALVING_THRESHOLD);
+  const blockReward = getCurrentBlockReward(totalDistributed);
+  const calculatedReward = calculateRewardAmount(score, totalDistributed);
+  if (calculatedReward <= 0) {
+    throw new Error("Reward amount calculated as zero — supply exhausted");
+  }
+
+  // 7. Clamp to remaining supply if needed
+  const remaining = MAX_SUPPLY_WEI - totalDistributed;
+  const finalReward = Math.min(calculatedReward, remaining);
+  const rewardBigInt = BigInt(finalReward);
+
   const currentNonce = wallet.nonce_record?.current_nonce ?? wallet.nonce;
-  const rewardSignature = crypto
-    .createHmac("sha256", "GAME_REWARD_AUTHORITY")
-    .update(`${toAddress}:${gameId}:${calculatedReward}:${currentNonce}`)
-    .digest("hex");
+
+  // 8. HMAC-signed reward authority signature (upgraded from plain string constant)
+  const rewardSignature = signGameRewardOffChain(toAddress, gameId, finalReward, currentNonce);
 
   const txHash = crypto
     .createHash("sha256")
-    .update(`REWARD:${gameId}:${toAddress}:${calculatedReward}:${currentNonce}:${Date.now()}`)
+    .update(`REWARD:${gameId}:${toAddress}:${finalReward}:${currentNonce}:${Date.now()}`)
     .digest("hex");
 
-  // All calculations performed in one atomic block transaction
+  // 9. Atomic ledger write
   const newBalance = await prisma.$transaction(async (tx) => {
     const transaction = await tx.transaction.create({
       data: {
@@ -483,7 +521,10 @@ export async function executeGameReward(
           score,
           spendSeconds,
           block_height: currentNonce,
-          rarity_tier: "RARE_BLOCK",
+          halving_count: halvingCount,
+          block_reward: blockReward,
+          total_distributed: totalDistributed,
+          rarity_tier: halvingCount >= 4 ? "ULTRA_RARE" : halvingCount >= 2 ? "RARE" : "COMMON",
           timestamp: Date.now(),
         },
       },
@@ -498,7 +539,6 @@ export async function executeGameReward(
       },
     });
 
-    // Advance block sequence / nonce in the exact same block
     await tx.nonce.upsert({
       where: { wallet_id: wallet.id },
       update: { current_nonce: currentNonce + 1 },
@@ -517,13 +557,18 @@ export async function executeGameReward(
     return Number(newSum._sum.amount ?? BigInt(0));
   });
 
+  // 10. Record cooldown only after successful DB write
+  recordClaim(toAddress);
+
   balanceEvents.notifyBalanceUpdate(toAddress, newBalance, txHash);
 
   return {
     txHash,
-    rewardAmount: calculatedReward,
+    rewardAmount: finalReward,
     newBalance,
     blockHeight: currentNonce,
+    halvingCount,
+    blockReward,
   };
 }
 
