@@ -1,0 +1,4 @@
+# osv-scanner.toml
+[[IgnoredVulns]]
+id = "CVE-2026-93687"
+reason = "Transitive devDependency from eslint-config-next with no upstream patch available yet"
