@@ -54,3 +54,11 @@ next-env.d.ts
 *.aac
 *.db
 public/screenshots/
+
+# Cloudflare & OpenNext
+.open-next/
+.wrangler/
+.wrangler-local/
+*.secret
+credentials.json
+

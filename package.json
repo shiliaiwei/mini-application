@@ -9,6 +9,8 @@
     "lint": "eslint",
     "test": "tsx --test tests/*.test.ts",
     "checkpoint": "prisma generate && tsx --test tests/*.test.ts && next build",
+    "build:worker": "prisma generate && opennextjs-cloudflare build",
+    "deploy:worker": "prisma generate && opennextjs-cloudflare build && wrangler deploy",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -32,6 +34,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.12",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -41,7 +44,8 @@
     "prisma": "6.19.3",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.151.2"
   },
   "packageManager": "pnpm@9.15.9",
   "pnpm": {
