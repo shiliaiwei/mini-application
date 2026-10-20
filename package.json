@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "node ./scripts/build.js",
     "start": "next start",
     "lint": "eslint",
     "test": "tsx --test tests/*.test.ts",
     "checkpoint": "prisma generate && tsx --test tests/*.test.ts && next build",
-    "build:worker": "prisma generate && opennextjs-cloudflare build",
+    "build:worker": "node ./scripts/build.js",
     "deploy:worker": "prisma generate && opennextjs-cloudflare build && wrangler deploy",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "build:next": "prisma generate && next build"
   },
   "dependencies": {
     "@keyline-icons/react": "^1.2.0",
