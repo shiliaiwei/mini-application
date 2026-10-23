@@ -22,7 +22,7 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next();
   response.headers.set("X-Telegram-Client", isTelegramClient ? "true" : "false");
   response.headers.set("X-Platform-Access", "Unrestricted-Telegram-Sync");
-  response.headers.set("X-Site-Status", isTelegramClient ? "Online-Telegram" : "Site-Offline-Web");
+  response.headers.set("X-Site-Status", "Offline-Mode-All");
 
   return response;
 }

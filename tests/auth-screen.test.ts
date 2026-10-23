@@ -97,3 +97,45 @@ test("Web Offline Mode: No authorization required on external web and entire web
   const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u;
   assert.equal(emojiRegex.test(content), false, "page.tsx must not contain emojis");
 });
+
+test("Unbypassable CRT Glitch Offline Screen: page.tsx and not-found.tsx directly render GlitchOfflineScreen", () => {
+  const offlinePath = path.resolve(
+    __dirname,
+    "../src/components/common/GlitchOfflineScreen.tsx"
+  );
+  assert.equal(fs.existsSync(offlinePath), true, "GlitchOfflineScreen.tsx must exist");
+
+  const offlineContent = fs.readFileSync(offlinePath, "utf-8");
+  assert.ok(
+    offlineContent.includes("offline-glitch.png"),
+    "GlitchOfflineScreen must render offline-glitch.png"
+  );
+  assert.ok(
+    offlineContent.includes("SYSTEM OFFLINE"),
+    "GlitchOfflineScreen must display SYSTEM OFFLINE status"
+  );
+  assert.ok(
+    offlineContent.includes("crt-scanlines"),
+    "GlitchOfflineScreen must include crt-scanlines overlay"
+  );
+
+  // Verify page.tsx directly renders GlitchOfflineScreen
+  const pagePath = path.resolve(__dirname, "../src/app/page.tsx");
+  const pageContent = fs.readFileSync(pagePath, "utf-8");
+  assert.ok(
+    pageContent.includes("<GlitchOfflineScreen"),
+    "page.tsx must directly render GlitchOfflineScreen"
+  );
+
+  // Verify not-found.tsx directly renders GlitchOfflineScreen
+  const notFoundPath = path.resolve(__dirname, "../src/app/not-found.tsx");
+  const notFoundContent = fs.readFileSync(notFoundPath, "utf-8");
+  assert.ok(
+    notFoundContent.includes("<GlitchOfflineScreen"),
+    "not-found.tsx must directly render GlitchOfflineScreen"
+  );
+
+  // Zero Emoji check
+  const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u;
+  assert.equal(emojiRegex.test(offlineContent), false, "GlitchOfflineScreen must not contain emojis");
+});

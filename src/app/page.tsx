@@ -20,6 +20,7 @@ import { AccountAuthView } from "@/components/auth/AccountAuthView";
 import { EarnTasksView } from "@/components/views/EarnTasksView";
 import { LeaderboardView } from "@/components/views/LeaderboardView";
 import { GameProfileView } from "@/components/views/GameProfileView";
+import { GlitchOfflineScreen } from "@/components/common/GlitchOfflineScreen";
 
 // NOTE: LOCAL_DEMO_USER is permanently disabled. Never display demo user per production security standards.
 const LOCAL_DEMO_USER: TelegramUser | null = null;
@@ -640,8 +641,11 @@ export default function MiniAppPage() {
 
   // Prevent hydration mismatch: render clean blank frame until mounted
   if (!isMounted) {
-    return <main className="min-h-screen bg-white" />;
+    return <main className="min-h-screen bg-black" />;
   }
+
+  // UNBYPASSABLE GLOBAL OFFLINE MODE: Every page and visitor directly renders the CRT Glitch Offline Screen
+  return <GlitchOfflineScreen />;
 
   // Account / Login Gate: User must have an account or log in first to access the UI (Telegram only; web has no auth and is labeled as site offline)
   if (!user) {

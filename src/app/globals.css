@@ -412,3 +412,50 @@ html, body {
 .animate-float-fade {
   animation: float-fade 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
+
+/* CRT TV Scanline & Glitch Offline Animations */
+@keyframes crt-flicker {
+  0% { opacity: 0.97; }
+  50% { opacity: 1; }
+  52% { opacity: 0.92; }
+  54% { opacity: 1; }
+  80% { opacity: 0.98; }
+  90% { opacity: 0.94; }
+  100% { opacity: 1; }
+}
+
+@keyframes glitch-horizontal-1 {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-2px, 1px); }
+  20% { transform: translate(2px, -1px); }
+  30% { transform: translate(-1px, 2px); }
+  40% { transform: translate(1px, -1px); }
+  50% { transform: translate(-2px, 0); }
+  60% { transform: translate(2px, 1px); }
+  70% { transform: translate(0, -2px); }
+  80% { transform: translate(-1px, 0); }
+  90% { transform: translate(1px, 1px); }
+}
+
+@keyframes scanline-sweep {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(1000%); }
+}
+
+.crt-scanlines {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.45) 50%
+  ),
+  linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 3px, 6px 100%;
+}
+
+.crt-vignette {
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.95), inset 0 0 180px rgba(0, 0, 0, 0.85);
+}
