@@ -98,7 +98,7 @@ test("Web Offline Mode: No authorization required on external web and entire web
   assert.equal(emojiRegex.test(content), false, "page.tsx must not contain emojis");
 });
 
-test("Unbypassable CRT Glitch Offline Screen: page.tsx and not-found.tsx directly render GlitchOfflineScreen", () => {
+test("Unbypassable CRT Glitch Offline Screen: page.tsx and not-found.tsx directly render GlitchOfflineScreen in pure code", () => {
   const offlinePath = path.resolve(
     __dirname,
     "../src/components/common/GlitchOfflineScreen.tsx"
@@ -106,17 +106,23 @@ test("Unbypassable CRT Glitch Offline Screen: page.tsx and not-found.tsx directl
   assert.equal(fs.existsSync(offlinePath), true, "GlitchOfflineScreen.tsx must exist");
 
   const offlineContent = fs.readFileSync(offlinePath, "utf-8");
+  // Pure Vector in-code check: must use SVG vector paths, zero Image tags
   assert.ok(
-    offlineContent.includes("offline-glitch.png"),
-    "GlitchOfflineScreen must render offline-glitch.png"
+    offlineContent.includes("<svg") && offlineContent.includes("LETTERS_PATH"),
+    "GlitchOfflineScreen must render in pure vector code (SVG) without image dependencies"
+  );
+  assert.equal(
+    offlineContent.includes("<Image") || offlineContent.includes("<img"),
+    false,
+    "GlitchOfflineScreen must not contain image tags"
   );
   assert.ok(
     offlineContent.includes("SYSTEM OFFLINE"),
     "GlitchOfflineScreen must display SYSTEM OFFLINE status"
   );
   assert.ok(
-    offlineContent.includes("crt-scanlines"),
-    "GlitchOfflineScreen must include crt-scanlines overlay"
+    offlineContent.includes("crt-scanlines-stationary"),
+    "GlitchOfflineScreen must include stationary crt-scanlines overlay"
   );
 
   // Verify page.tsx directly renders GlitchOfflineScreen

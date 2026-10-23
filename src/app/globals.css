@@ -413,49 +413,164 @@ html, body {
   animation: float-fade 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-/* CRT TV Scanline & Glitch Offline Animations */
-@keyframes crt-flicker {
-  0% { opacity: 0.97; }
-  50% { opacity: 1; }
-  52% { opacity: 0.92; }
-  54% { opacity: 1; }
-  80% { opacity: 0.98; }
-  90% { opacity: 0.94; }
-  100% { opacity: 1; }
+/* CRT Cyber Glitch Offline System (Pure Vector & CSS, Zero Waving) */
+@keyframes crt-phosphor-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.7)) drop-shadow(0 0 28px rgba(0, 240, 255, 0.4));
+    opacity: 1;
+  }
+  50% {
+    filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.85)) drop-shadow(0 0 35px rgba(0, 240, 255, 0.5));
+    opacity: 0.98;
+  }
 }
 
-@keyframes glitch-horizontal-1 {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-2px, 1px); }
-  20% { transform: translate(2px, -1px); }
-  30% { transform: translate(-1px, 2px); }
-  40% { transform: translate(1px, -1px); }
-  50% { transform: translate(-2px, 0); }
-  60% { transform: translate(2px, 1px); }
-  70% { transform: translate(0, -2px); }
-  80% { transform: translate(-1px, 0); }
-  90% { transform: translate(1px, 1px); }
+/* Sharp, sudden digital glitch jitter (steps-based, non-waving) */
+@keyframes glitch-sharp-white {
+  0%, 14%, 16%, 42%, 44%, 71%, 73%, 89%, 91%, 100% {
+    transform: translate(0, 0);
+  }
+  15% {
+    transform: translate(-3px, 1px);
+  }
+  43% {
+    transform: translate(4px, -1px);
+  }
+  72% {
+    transform: translate(-5px, 0);
+  }
+  90% {
+    transform: translate(3px, 1px);
+  }
 }
 
-@keyframes scanline-sweep {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(1000%); }
+@keyframes glitch-sharp-cyan {
+  0%, 14%, 16%, 42%, 44%, 71%, 73%, 89%, 91%, 100% {
+    transform: translate(-3px, 0);
+    opacity: 0.7;
+  }
+  15% {
+    transform: translate(-9px, -1px);
+    opacity: 1;
+  }
+  43% {
+    transform: translate(7px, 2px);
+    opacity: 0.95;
+  }
+  72% {
+    transform: translate(-11px, 1px);
+    opacity: 1;
+  }
+  90% {
+    transform: translate(-6px, -1px);
+    opacity: 0.85;
+  }
 }
 
-.crt-scanlines {
-  background: linear-gradient(
-    rgba(18, 16, 16, 0) 50%,
-    rgba(0, 0, 0, 0.45) 50%
-  ),
-  linear-gradient(
-    90deg,
-    rgba(255, 0, 0, 0.03),
-    rgba(0, 255, 0, 0.01),
-    rgba(0, 0, 255, 0.03)
+@keyframes glitch-sharp-magenta {
+  0%, 14%, 16%, 42%, 44%, 71%, 73%, 89%, 91%, 100% {
+    transform: translate(3px, 0);
+    opacity: 0.7;
+  }
+  15% {
+    transform: translate(9px, 1px);
+    opacity: 1;
+  }
+  43% {
+    transform: translate(-7px, -2px);
+    opacity: 0.95;
+  }
+  72% {
+    transform: translate(10px, -1px);
+    opacity: 1;
+  }
+  90% {
+    transform: translate(6px, 1px);
+    opacity: 0.85;
+  }
+}
+
+/* Erratic floating artifact cluster glitches */
+@keyframes glitch-artifact-1 {
+  0%, 100% {
+    transform: translate(0, 0);
+    opacity: 0.75;
+  }
+  15% {
+    transform: translate(-14px, 0) scaleX(1.3);
+    opacity: 1;
+  }
+  16% {
+    transform: translate(8px, 0) scaleX(0.7);
+    opacity: 0.3;
+  }
+  43% {
+    transform: translate(16px, 1px) scaleX(1.25);
+    opacity: 1;
+  }
+  72% {
+    transform: translate(-10px, -1px) scaleX(1.15);
+    opacity: 0.95;
+  }
+}
+
+@keyframes glitch-artifact-2 {
+  0%, 100% {
+    transform: translate(0, 0);
+    opacity: 0.7;
+  }
+  22% {
+    transform: translate(12px, 0) scaleX(1.3);
+    opacity: 1;
+  }
+  23% {
+    transform: translate(-6px, 0) scaleX(0.8);
+    opacity: 0.25;
+  }
+  58% {
+    transform: translate(-14px, 1px) scaleX(1.2);
+    opacity: 0.95;
+  }
+  86% {
+    transform: translate(10px, -1px) scaleX(1.1);
+    opacity: 0.9;
+  }
+}
+
+/* Horizontal digital tear slices */
+@keyframes glitch-slice-cut {
+  0%, 93%, 100% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  94% {
+    opacity: 0.9;
+    transform: translate(-16px, 0);
+  }
+  95% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  96% {
+    opacity: 0.85;
+    transform: translate(14px, 0);
+  }
+  97% {
+    opacity: 0;
+  }
+}
+
+/* Stationary CRT scanlines (pure stationary raster mesh, zero waving) */
+.crt-scanlines-stationary {
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.7) 0px,
+    rgba(0, 0, 0, 0.7) 1.5px,
+    transparent 1.5px,
+    transparent 3px
   );
-  background-size: 100% 3px, 6px 100%;
 }
 
 .crt-vignette {
-  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.95), inset 0 0 180px rgba(0, 0, 0, 0.85);
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.95), inset 0 0 200px rgba(0, 0, 0, 0.85);
 }
