@@ -116,9 +116,15 @@ test("Unbypassable CRT Glitch Offline Screen: page.tsx and not-found.tsx directl
     false,
     "GlitchOfflineScreen must not contain image tags"
   );
-  assert.ok(
+  assert.equal(
     offlineContent.includes("SYSTEM OFFLINE"),
-    "GlitchOfflineScreen must display SYSTEM OFFLINE status"
+    false,
+    "GlitchOfflineScreen must not display SYSTEM OFFLINE status text"
+  );
+  assert.equal(
+    offlineContent.includes("STATUS: 503"),
+    false,
+    "GlitchOfflineScreen must not display STATUS 503 text"
   );
   assert.ok(
     offlineContent.includes("crt-scanlines-stationary"),

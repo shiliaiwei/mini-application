@@ -114,32 +114,6 @@ export const GlitchOfflineScreen: React.FC = () => {
             style={{ filter: "drop-shadow(0 0 8px #00f0ff)" }}
           />
         </div>
-
-        {/* 4. Minimalist Retro Telemetry Status HUD */}
-        <div className="mt-10 text-center space-y-3 select-none tracking-widest uppercase">
-          {/* Status Badge */}
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#030c14] border border-cyan-500/40 text-cyan-300 text-xs font-black shadow-[0_0_20px_rgba(0,240,255,0.25)]">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#00f0ff]" />
-            <span className="tracking-widest">SYSTEM OFFLINE</span>
-          </div>
-
-          {/* Diagnostic Lines */}
-          <p className="text-xs text-slate-400 font-mono tracking-wider pt-2">
-            STATUS: 503 SERVICE UNAVAILABLE • ACCESS SUSPENDED
-          </p>
-          <p className="text-[11px] text-slate-500 font-mono tracking-widest">
-            ALL NETWORK NODES DISCONNECTED
-          </p>
-        </div>
-      </div>
-
-      {/* 5. Minimalist Terminal Metrics Footer */}
-      <div className="absolute bottom-6 text-[10px] text-slate-600 tracking-widest font-mono z-10 flex items-center gap-3">
-        <span>CORE: LOCKED</span>
-        <span>•</span>
-        <span>PORT: 443 [OFFLINE]</span>
-        <span>•</span>
-        <span>ZERO BYPASS ENFORCED</span>
       </div>
     </main>
   );
