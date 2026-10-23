@@ -24,6 +24,14 @@ import { GameProfileView } from "@/components/views/GameProfileView";
 // NOTE: LOCAL_DEMO_USER is permanently disabled. Never display demo user per production security standards.
 const LOCAL_DEMO_USER: TelegramUser | null = null;
 
+// Web Offline Mode: for external web visitors, no authorization required and entire web is labeled as Site Offline
+const WEB_OFFLINE_USER: TelegramUser = {
+  id: 0,
+  first_name: "Web Visitor",
+  username: "site_offline",
+  photo_url: "",
+};
+
 function detectIsTelegramClient(): boolean {
   if (typeof window === "undefined") return false;
 
@@ -118,6 +126,13 @@ export default function MiniAppPage() {
       localStorage.setItem("shi_store_khr", String(khrBalance));
     } catch {}
   }, [khrBalance]);
+
+  // Set Site Offline document title for external web browser visitors
+  useEffect(() => {
+    if (!isTelegramClient && typeof document !== "undefined") {
+      document.title = "SHILIAIWEI - Site Offline (Web)";
+    }
+  }, [isTelegramClient]);
 
   // Dynamic Dock Visibility on Scroll
   const [isDockVisible, setIsDockVisible] = useState(true);
@@ -628,28 +643,59 @@ export default function MiniAppPage() {
     return <main className="min-h-screen bg-white" />;
   }
 
-  // Account / Login Gate: User must have an account or log in first to access the UI
+  // Account / Login Gate: User must have an account or log in first to access the UI (Telegram only; web has no auth and is labeled as site offline)
   if (!user) {
-    return (
-      <AccountAuthView
-        onLogin={(authenticatedUser) => {
-          setUser(authenticatedUser);
-          setIsTelegramVerified(true);
-          isVerifiedRef.current = true;
-          try {
-            localStorage.setItem("shi_tg_user_cache", JSON.stringify(authenticatedUser));
-          } catch {}
-          syncWithDatabase(scoreRef.current, spendRef.current, true);
-        }}
-        tgApp={tgApp}
-      />
-    );
+    if (isTelegramClient) {
+      return (
+        <AccountAuthView
+          onLogin={(authenticatedUser) => {
+            setUser(authenticatedUser);
+            setIsTelegramVerified(true);
+            isVerifiedRef.current = true;
+            try {
+              localStorage.setItem("shi_tg_user_cache", JSON.stringify(authenticatedUser));
+            } catch {}
+            syncWithDatabase(scoreRef.current, spendRef.current, true);
+          }}
+          tgApp={tgApp}
+        />
+      );
+    }
   }
 
-
+  // Active user for rendering: authentic user or web offline guest
+  const activeUser: TelegramUser = user || WEB_OFFLINE_USER;
 
   return (
     <div className="min-h-dvh flex flex-col justify-between app-bg-white text-slate-900 select-none overflow-x-hidden font-body relative">
+      {/* Site Offline Banner for Web (No Authorization) */}
+      {!isTelegramClient && (
+        <aside
+          role="status"
+          aria-label="Site Offline"
+          className="w-full bg-[#0d1217] text-white border-b border-rose-600/40 py-2 px-3 sticky top-0 z-50 flex items-center justify-between text-xs font-mono uppercase tracking-wider select-none shadow-sm"
+        >
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444] animate-pulse" />
+            <span className="font-black text-[#ef4444] tracking-widest">SITE OFFLINE</span>
+            <span className="text-slate-400 text-[10px] hidden sm:inline">• WEB ACCESS WITHOUT AUTHORIZATION</span>
+          </div>
+          <span className="text-[10px] font-bold bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/40 px-2.5 py-0.5 rounded-full">
+            OFFLINE
+          </span>
+        </aside>
+      )}
+
+      {/* Floating Global Site Offline Watermark Badge on Web */}
+      {!isTelegramClient && (
+        <div className="fixed bottom-20 right-3 z-50 pointer-events-none">
+          <div className="bg-[#0d1217]/90 backdrop-blur-md text-[#ef4444] border border-rose-600/50 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold tracking-widest uppercase shadow-md flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#ef4444]" />
+            <span>SITE OFFLINE</span>
+          </div>
+        </div>
+      )}
+
       {/* App Background on mobile: strictly background.svg, zero banknote background behind app */}
       <div className="fixed inset-0 bg-app-background opacity-[0.08] pointer-events-none z-0" />
 
@@ -666,7 +712,7 @@ export default function MiniAppPage() {
             tgApp?.HapticFeedback?.notificationOccurred("warning");
           } catch {}
         }}
-        user={user}
+        user={activeUser}
         tgApp={tgApp}
       />
 
@@ -771,7 +817,7 @@ export default function MiniAppPage() {
                   setProfileSubTab("settings");
                   handleTabChange("profile");
                 }}
-                user={user}
+                user={activeUser}
                 tgApp={tgApp}
               />
             )}
@@ -779,7 +825,7 @@ export default function MiniAppPage() {
             {(activeTab === "earn" || (activeTab as string) === "tasks") && (
               <EarnTasksView
                 score={score}
-                user={user}
+                user={activeUser}
                 tgApp={tgApp}
                 onAddScore={handleAddScore}
                 tapPower={tapPower}
@@ -791,13 +837,13 @@ export default function MiniAppPage() {
               <LeaderboardView
                 userScore={score}
                 userSpendSeconds={spendSeconds}
-                user={user}
+                user={activeUser}
               />
             )}
 
             {activeTab === "profile" && (
               <GameProfileView
-                user={user}
+                user={activeUser}
                 tgApp={tgApp}
                 score={score}
                 usdBalance={usdBalance}
@@ -831,7 +877,7 @@ export default function MiniAppPage() {
       <GameDock
         activeTab={activeTab}
         onChangeTab={handleTabChange}
-        user={user}
+        user={activeUser}
         isVisible={isDockVisible}
       />
     </div>

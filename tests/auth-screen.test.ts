@@ -68,3 +68,32 @@ test("App Navigation: UI access is strictly gated behind AccountAuthView when un
     "LOCAL_DEMO_USER must be set to null to prevent exposing demo user"
   );
 });
+
+test("Web Offline Mode: No authorization required on external web and entire web is labeled as Site Offline", () => {
+  const pagePath = path.resolve(__dirname, "../src/app/page.tsx");
+  const content = fs.readFileSync(pagePath, "utf-8");
+
+  // Verify web offline mode has no authorization gate
+  assert.ok(
+    content.includes("WEB_OFFLINE_USER"),
+    "page.tsx must define WEB_OFFLINE_USER for external web visitors"
+  );
+  assert.ok(
+    content.includes("isTelegramClient"),
+    "page.tsx must condition AccountAuthView gate on isTelegramClient"
+  );
+
+  // Verify entire web is labeled as Site Offline
+  assert.ok(
+    content.includes("SITE OFFLINE"),
+    "page.tsx must display SITE OFFLINE label on web"
+  );
+  assert.ok(
+    content.includes("Site Offline"),
+    "page.tsx must provide Site Offline accessible role/label"
+  );
+
+  // Zero Emoji check
+  const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u;
+  assert.equal(emojiRegex.test(content), false, "page.tsx must not contain emojis");
+});
